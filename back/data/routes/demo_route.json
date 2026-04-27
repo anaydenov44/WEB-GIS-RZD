@@ -1,0 +1,43 @@
+{
+  "source_system": "manual",
+  "train_number": "DEMO-001",
+  "route_name": "Москва — Анапа (демо)",
+  "snapshot_date": "2026-04-14",
+  "is_active": true,
+  "notes": "Тестовый маршрут для прототипа",
+  "stops": [
+    {
+      "stop_sequence": 1,
+      "station_name_raw": "Москва",
+      "station_id": null,
+      "departure_time": "10:00"
+    },
+    {
+      "stop_sequence": 2,
+      "station_name_raw": "Рязань",
+      "station_id": null,
+      "arrival_time": "12:00",
+      "departure_time": "12:10"
+    },
+    {
+      "stop_sequence": 3,
+      "station_name_raw": "Воронеж",
+      "station_id": null,
+      "arrival_time": "18:00",
+      "departure_time": "18:15"
+    },
+    {
+      "stop_sequence": 4,
+      "station_name_raw": "Ростов-на-Дону",
+      "station_id": null,
+      "arrival_time": "05:00",
+      "departure_time": "05:20"
+    },
+    {
+      "stop_sequence": 5,
+      "station_name_raw": "Анапа",
+      "station_id": null,
+      "arrival_time": "11:30"
+    }
+  ]
+}

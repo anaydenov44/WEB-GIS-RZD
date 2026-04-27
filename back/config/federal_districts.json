@@ -1,0 +1,52 @@
+{
+  "regions": [
+    {
+      "code": "central_fd",
+      "label": "Центральный федеральный округ",
+      "url": "https://download.geofabrik.de/russia/central-fed-district-latest.osm.pbf",
+      "md5_url": "https://download.geofabrik.de/russia/central-fed-district-latest.osm.pbf.md5"
+    },
+    {
+      "code": "northwestern_fd",
+      "label": "Северо-Западный федеральный округ",
+      "url": "https://download.geofabrik.de/russia/northwestern-fed-district-latest.osm.pbf",
+      "md5_url": "https://download.geofabrik.de/russia/northwestern-fed-district-latest.osm.pbf.md5"
+    },
+    {
+      "code": "south_fd",
+      "label": "Южный федеральный округ",
+      "url": "https://download.geofabrik.de/russia/south-fed-district-latest.osm.pbf",
+      "md5_url": "https://download.geofabrik.de/russia/south-fed-district-latest.osm.pbf.md5"
+    },
+    {
+      "code": "north_caucasus_fd",
+      "label": "Северо-Кавказский федеральный округ",
+      "url": "https://download.geofabrik.de/russia/north-caucasus-fed-district-latest.osm.pbf",
+      "md5_url": "https://download.geofabrik.de/russia/north-caucasus-fed-district-latest.osm.pbf.md5"
+    },
+    {
+      "code": "volga_fd",
+      "label": "Приволжский федеральный округ",
+      "url": "https://download.geofabrik.de/russia/volga-fed-district-latest.osm.pbf",
+      "md5_url": "https://download.geofabrik.de/russia/volga-fed-district-latest.osm.pbf.md5"
+    },
+    {
+      "code": "ural_fd",
+      "label": "Уральский федеральный округ",
+      "url": "https://download.geofabrik.de/russia/ural-fed-district-latest.osm.pbf",
+      "md5_url": "https://download.geofabrik.de/russia/ural-fed-district-latest.osm.pbf.md5"
+    },
+    {
+      "code": "siberian_fd",
+      "label": "Сибирский федеральный округ",
+      "url": "https://download.geofabrik.de/russia/siberian-fed-district-latest.osm.pbf",
+      "md5_url": "https://download.geofabrik.de/russia/siberian-fed-district-latest.osm.pbf.md5"
+    },
+    {
+      "code": "far_eastern_fd",
+      "label": "Дальневосточный федеральный округ",
+      "url": "https://download.geofabrik.de/russia/far-eastern-fed-district-latest.osm.pbf",
+      "md5_url": "https://download.geofabrik.de/russia/far-eastern-fed-district-latest.osm.pbf.md5"
+    }
+  ]
+}

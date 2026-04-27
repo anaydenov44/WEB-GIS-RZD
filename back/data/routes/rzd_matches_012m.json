@@ -1,0 +1,10 @@
+[
+  {
+    "station_code_rzd": "2000003",
+    "station_name_rzd": "МОСКВА КАЗ",
+    "station_id": 58014,
+    "match_method": "manual_confirmed",
+    "match_confidence": 1.0,
+    "notes": "Москва-Пассажирская-Казанская"
+  }
+]

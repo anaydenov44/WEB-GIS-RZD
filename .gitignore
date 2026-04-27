@@ -1,0 +1,35 @@
+# secrets
+.env
+*.env
+back/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+
+# logs/debug
+*.log
+logs/
+back/logs/
+debug_output/
+back/debug_output/
+
+# backups/temp
+*.bak
+*.bak_*
+*.backup
+
+# data / heavy generated files
+back/data/pbf/
+*.osm.pbf
+*.osm.pbf.md5
+back/data/audit/
+back/data/rzd_samples/
+back/data/routes/test_*.json
+
+# frontend
+front/node_modules/
+front/dist/
