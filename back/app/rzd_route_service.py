@@ -135,6 +135,99 @@ def normalize_time_value(value: Any) -> str | None:
     return text or None
 
 
+def extract_rzd_stop_name(stop: dict[str, Any]) -> str | None:
+    """
+    Достает название остановки из разных вариантов payload РЖД.
+
+    Важно: итоговый маршрут дальше строится только по таким официальным
+    остановкам РЖД. OSM-станции могут быть только match-привязкой,
+    но не самостоятельными остановками маршрута.
+    """
+    for key in (
+        "station_name",
+        "stationName",
+        "station",
+        "name",
+        "Name",
+    ):
+        value = stop.get(key)
+        if value is not None and str(value).strip():
+            return str(value).strip()
+
+    return None
+
+
+def extract_rzd_stop_code(stop: dict[str, Any]) -> str | None:
+    """Достает официальный код остановки из разных вариантов payload РЖД."""
+    for key in (
+        "station_code",
+        "stationCode",
+        "expressCode",
+        "ExpressCode",
+        "code",
+        "Code",
+    ):
+        value = stop.get(key)
+        normalized = normalize_station_code(value)
+        if normalized:
+            return normalized
+
+    return None
+
+
+def is_route_label_stop(stop: dict[str, Any]) -> bool:
+    """
+    Отсекает строки-заголовки вида "[АРХАНГЕЛ Г , МОСКВА ЯР]".
+
+    Такие записи описывают направление/сегмент, а не остановку.
+    Если у записи есть официальный код, оставляем ее: код сильнее
+    эвристики по названию.
+    """
+    name = extract_rzd_stop_name(stop) or ""
+    code = extract_rzd_stop_code(stop)
+    text = name.strip()
+
+    if code or not text:
+        return False
+
+    return (
+        text.startswith("[")
+        or text.endswith("]")
+        or "," in text
+        or " - " in text
+    )
+
+
+def normalize_official_rzd_stops(stops: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Финальная защита перед импортом: список route_stops должен состоять
+    только из официальных остановок РЖД.
+
+    Здесь мы не добавляем nearby OSM-станции в начало/конец маршрута.
+    Если OSM-match понадобится, он должен появиться позже как station_id
+    у существующей официальной остановки, а не как новая остановка.
+    """
+    result: list[dict[str, Any]] = []
+
+    for stop in stops:
+        raw_stop = {
+            "name": stop.get("station_name_raw") or stop.get("station_name_matched"),
+            "code": stop.get("station_code_rzd"),
+        }
+
+        if is_route_label_stop(raw_stop):
+            continue
+
+        result.append(
+            {
+                **stop,
+                "stop_sequence": len(result) + 1,
+            }
+        )
+
+    return result
+
+
 def search_rzd_station_codes(
     query: str,
     *,
@@ -247,7 +340,7 @@ def search_rzd_routes_calendar(
     origin_code: str,
     destination_code: str,
     start_date: date | str | None = None,
-    days_ahead: int = 5,
+    days_ahead: int = 2,
     check_seats: bool = False,
     include_transfers: bool = False,
     pause_seconds: float = 0.35,
@@ -1311,7 +1404,7 @@ def search_rzd_routes_calendar_by_stations(
     origin_station_id: int,
     destination_station_id: int,
     start_date: date | str | None = None,
-    days_ahead: int = 5,
+    days_ahead: int = 2,
     check_seats: bool = False,
     nearby_radius_km: float = RZD_NEARBY_STATION_RADIUS_KM,
     nearby_station_limit: int = RZD_NEARBY_STATION_LIMIT,
@@ -1589,8 +1682,14 @@ def get_rzd_train_stops(
     seen_keys: set[tuple[str, str | None, str | None, str | None]] = set()
 
     for item in payload.get("items", []):
-        station_name = item.get("station_name")
-        station_code = normalize_station_code(item.get("station_code"))
+        # В RZD payload иногда попадают не станции, а route labels
+        # вроде "[АРХАНГЕЛ Г , МОСКВА ЯР]". Не превращаем их
+        # в официальные остановки маршрута.
+        if is_route_label_stop(item):
+            continue
+
+        station_name = extract_rzd_stop_name(item)
+        station_code = extract_rzd_stop_code(item)
         arrival_time = normalize_time_value(item.get("arrival_time"))
         departure_time = normalize_time_value(item.get("departure_time"))
 
@@ -1641,8 +1740,13 @@ def build_import_payload_from_rzd_train(
     Превращает список остановок RZD API в payload,
     совместимый с import_route_payload.
     """
+    # Защита на финальном этапе импорта: route_payload строится
+    # только из официальных остановок РЖД. OSM-станции не добавляются
+    # как новые route_stops, а могут быть только match-привязкой позже.
+    stops = normalize_official_rzd_stops(stops)
+
     if len(stops) < 2:
-        raise ValueError("RZD API returned less than 2 stops for selected train")
+        raise ValueError("RZD API returned less than 2 official stops for selected train")
 
     first_stop = stops[0]
     last_stop = stops[-1]

@@ -11,6 +11,14 @@ from pipeline_utils import (
     get_region_meta,
 )
 
+# При запуске скрипта как `python scripts/run_region_pipeline.py`
+# Python кладёт в sys.path папку scripts, а не корень backend.
+# Добавляем BASE_DIR, чтобы были доступны импорты вида `from app...`.
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
+from app.station_cleanup_service import apply_city_station_cleanup
+
 
 def run_step(script_name: str, region_code: str):
     script_path = BASE_DIR / "scripts" / script_name
@@ -281,6 +289,15 @@ def main():
 
         print(f"[{region_code}] Шаг 4/4: normalize raw -> core")
         run_step("normalize_region_core.py", region_code)
+
+        cleanup_result = apply_city_station_cleanup(region_code)
+        print("Station cleanup result:", cleanup_result)
+
+        if cleanup_result:
+            append_dataset_run_note(
+                run_id,
+                "Station cleanup result:\n" + "\n".join(str(item) for item in cleanup_result),
+            )
 
         update_dataset_run_counts(run_id, region_code)
 

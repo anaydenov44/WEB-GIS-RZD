@@ -1819,7 +1819,10 @@ def search_stations(
             ST_Y(geom) AS lat
         FROM stations
         {where_sql}
-        ORDER BY name, id
+        ORDER BY
+            is_main_rail_station DESC,
+            name,
+            id
         LIMIT :limit;
     """)
 
