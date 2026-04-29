@@ -17,7 +17,7 @@ import { Style, Stroke, Fill, Circle as CircleStyle, Text } from 'ol/style.js';
 import { getCenter } from 'ol/extent.js';
 
 const BACKEND_URL = 'http://127.0.0.1:8000';
-const RZD_SEARCH_DAYS_AHEAD = 5;
+const RZD_SEARCH_DAYS_AHEAD = 2;
 const DEBUG_ROUTE_FLOW = true;
 
 function routeDebug(label, payload = null) {
@@ -1208,6 +1208,18 @@ function InfrastructureSidebar({
             <p><strong>Округ:</strong> {formatFieldValue(selectedStation.region_code)}</p>
             <p><strong>Название:</strong> {formatFieldValue(selectedStation.name)}</p>
             <p><strong>Тип:</strong> {formatFieldValue(selectedStation.station_type)}</p>
+            <p>
+              <strong>Главная станция:</strong>{' '}
+              {selectedStation.is_main_rail_station ? 'да' : 'нет'}
+            </p>
+            <p>
+              <strong>Видимость по умолчанию:</strong>{' '}
+              {selectedStation.is_visible_default === false ? 'скрыта' : 'показывается'}
+            </p>
+            <p>
+              <strong>Причина исключения:</strong>{' '}
+              {formatFieldValue(selectedStation.exclude_reason)}
+            </p>
             <p><strong>Регион:</strong> {formatFieldValue(selectedStation.region)}</p>
             <p><strong>Оператор:</strong> {formatFieldValue(selectedStation.operator_name)}</p>
             <p><strong>Филиал:</strong> {formatFieldValue(selectedStation.operator_branch)}</p>
@@ -1509,7 +1521,7 @@ function RzdRouteSearchCard({
           padding: 10,
         }}
       >
-        Система проверит ближайшие 5 дней и покажет даты, на которые найдены поезда.
+        Система проверит ближайшие 2 дня и покажет даты, на которые найдены поезда.
       </div>
 
       <ActionButton
@@ -1875,7 +1887,11 @@ function RoutesSidebar({
           Выбранный маршрут отображается на карте целиком, даже если выходит за пределы
           загруженных федеральных округов.
         </p>
-        <p>Маршрутов в текущем списке: {routes.length}</p>
+        <p>
+          Общий список сохранённых маршрутов скрыт из пользовательского интерфейса. БД
+          используется как внутренний cache; на карте показывается только выбранный или
+          только что импортированный маршрут.
+        </p>
       </section>
 
       <RzdRouteSearchCard
@@ -1912,17 +1928,6 @@ function RoutesSidebar({
         rzdSearchProgressMessage={rzdSearchProgressMessage}
       />
 
-      <RouteListCard
-        routes={routes}
-        routesLoading={routesLoading}
-        routesError={routesError}
-        routeSearchQuery={routeSearchQuery}
-        setRouteSearchQuery={setRouteSearchQuery}
-        onSearchRoutes={onSearchRoutes}
-        onResetRoutes={onResetRoutes}
-        selectedRoute={selectedRoute}
-        onSelectRoute={onSelectRoute}
-      />
 
       <RouteDetailsCard
         selectedRoute={selectedRoute}
@@ -1930,29 +1935,6 @@ function RoutesSidebar({
         onClearRoute={onClearRoute}
         onSelectStation={onSelectStation}
       />
-
-      <section className="card">
-        <h2>Маршруты через станцию</h2>
-        {selectedStation ? (
-          <>
-            <p>
-              <strong>Станция:</strong> {formatFieldValue(selectedStation.name)}
-            </p>
-            <p>
-              <strong>Округ:</strong> {formatFieldValue(selectedStation.region_code)}
-            </p>
-            <StationRoutesBlock
-              stationRoutes={stationRoutes}
-              onSelectRoute={onSelectRoute}
-            />
-          </>
-        ) : (
-          <p>
-            Выбери станцию на карте или нажми на смэтченную остановку в карточке маршрута,
-            чтобы увидеть маршруты, проходящие через неё.
-          </p>
-        )}
-      </section>
     </>
   );
 }
@@ -2352,10 +2334,50 @@ function createStationFeatures(stations, selectedStation) {
       const feature = new Feature({
         geometry: new Point(fromLonLat([station.lon, station.lat])),
         stationId: station.id,
+        name: station.name,
+        station_type: station.station_type,
+        region_code: station.region_code,
+        is_main_rail_station: Boolean(station.is_main_rail_station),
+        is_visible_default: station.is_visible_default,
+        exclude_reason: station.exclude_reason,
+        esr_user: station.esr_user,
+        uic_ref: station.uic_ref,
       });
       feature.setId(station.id);
       return feature;
     });
+}
+
+function getStationVisualPriority(feature) {
+  const isMain = Boolean(feature.get('is_main_rail_station'));
+  const isVisibleDefault = feature.get('is_visible_default');
+  const excludeReason = feature.get('exclude_reason');
+  const stationType = String(feature.get('station_type') || '').toLowerCase();
+  const hasRailwayCode = Boolean(feature.get('esr_user') || feature.get('uic_ref'));
+
+  if (isMain) {
+    return 'main';
+  }
+
+  if (isVisibleDefault === false || excludeReason) {
+    return 'hidden_default';
+  }
+
+  if (
+    stationType.includes('platform') ||
+    stationType.includes('halt') ||
+    stationType.includes('stop') ||
+    stationType.includes('останов') ||
+    stationType.includes('платформ')
+  ) {
+    return 'minor';
+  }
+
+  if (hasRailwayCode) {
+    return 'coded';
+  }
+
+  return 'normal';
 }
 
 function createLineFeatures(lines) {
@@ -2374,7 +2396,14 @@ function createLineFeatures(lines) {
             properties: {
               id: line.id,
               region_code: line.region_code,
-              is_service_line: line.is_service_line,
+              name: line.name,
+              line_type: line.line_type,
+              usage_type: line.usage_type,
+              service_type: line.service_type,
+              is_service_line: Boolean(line.is_service_line),
+              is_main_passenger_line: Boolean(line.is_main_passenger_line),
+              is_visible_default: line.is_visible_default,
+              exclude_reason: line.exclude_reason,
             },
           },
         ],
@@ -2713,6 +2742,7 @@ function MapPanel({
     selectionModeRef.current = selectionMode;
     districtLayerRef.current?.changed();
     districtLabelLayerRef.current?.setVisible(selectionMode);
+    russiaBoundaryLayerRef.current?.changed();
   }, [selectionMode]);
 
   useEffect(() => {
@@ -2756,23 +2786,61 @@ function MapPanel({
 
     const russiaBoundaryLayer = new VectorLayer({
       source: russiaBoundarySource,
-      style: new Style({
-        stroke: new Stroke({
-          color: '#374151',
-          width: 2.6,
+      style: () =>
+        new Style({
+          stroke: new Stroke({
+            color: selectionModeRef.current
+              ? 'rgba(55, 65, 81, 0.65)'
+              : 'rgba(55, 65, 81, 0.32)',
+            width: selectionModeRef.current ? 2.2 : 1.4,
+            lineDash: selectionModeRef.current ? undefined : [12, 8],
+          }),
+          zIndex: 10,
         }),
-      }),
     });
 
     const lineLayer = new VectorImageLayer({
       source: lineSource,
       imageRatio: 1.3,
-      style: new Style({
-        stroke: new Stroke({
-          color: 'rgba(37, 99, 235, 0.50)',
-          width: 1.9,
-        }),
-      }),
+      style: (feature) => {
+        const isService = Boolean(feature.get('is_service_line'));
+        const isMainPassenger = Boolean(feature.get('is_main_passenger_line'));
+        const isVisibleDefault = feature.get('is_visible_default');
+        const excludeReason = feature.get('exclude_reason');
+
+        if (isVisibleDefault === false || excludeReason) {
+          return null;
+        }
+
+        if (isService) {
+          return new Style({
+            stroke: new Stroke({
+              color: 'rgba(100, 116, 139, 0.45)',
+              width: 1.2,
+              lineDash: [6, 6],
+            }),
+            zIndex: 12,
+          });
+        }
+
+        if (isMainPassenger) {
+          return new Style({
+            stroke: new Stroke({
+              color: 'rgba(37, 99, 235, 0.72)',
+              width: 2.4,
+            }),
+            zIndex: 18,
+          });
+        }
+
+        return new Style({
+          stroke: new Stroke({
+            color: 'rgba(37, 99, 235, 0.45)',
+            width: 1.6,
+          }),
+          zIndex: 14,
+        });
+      },
     });
 
     const routeLineLayer = new VectorLayer({
@@ -3553,14 +3621,6 @@ export default function App() {
   }, [loadRegionSummaries]);
 
   useEffect(() => {
-    if (!hasLoadedData) {
-      return;
-    }
-
-    loadRoutes(routeSearchQuery);
-  }, [hasLoadedData, loadRoutes]);
-
-  useEffect(() => {
     const runningRegionCodes = Object.entries(updateStates)
       .filter(([, item]) => item.status === 'running' || item.status === 'starting')
       .map(([code]) => code);
@@ -3880,24 +3940,17 @@ export default function App() {
     try {
       setError('');
 
-      const [stationResponse, stationRoutesResponse] = await Promise.all([
-        fetch(`${BACKEND_URL}/api/stations/${stationId}`),
-        fetch(`${BACKEND_URL}/api/stations/${stationId}/routes?limit=100`),
-      ]);
+      const stationResponse = await fetch(
+        `${BACKEND_URL}/api/stations/${stationId}?include_hidden=true`
+      );
 
       if (!stationResponse.ok) {
         throw new Error('Не удалось загрузить станцию');
       }
 
-      if (!stationRoutesResponse.ok) {
-        throw new Error('Не удалось загрузить маршруты станции');
-      }
-
       const stationData = await stationResponse.json();
-      const stationRoutesData = await stationRoutesResponse.json();
 
       setSelectedStation(stationData);
-      setStationRoutes(stationRoutesData.items || []);
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : 'Ошибка загрузки станции');
@@ -4562,7 +4615,6 @@ export default function App() {
 
       setRzdMessage(data.message || 'Маршрут импортирован. Загружаем его на карту...');
 
-      await loadRoutes(routeSearchQuery);
       await handleSelectRoute(routeId);
       setSidebarMode('routes');
     } catch (err) {
@@ -4575,8 +4627,6 @@ export default function App() {
     rzdDepDate,
     selectedRzdDestination,
     selectedStation,
-    loadRoutes,
-    routeSearchQuery,
     handleSelectRoute,
   ]);
 
