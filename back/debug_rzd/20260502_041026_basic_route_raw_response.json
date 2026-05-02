@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "stage": "get_rzd_train_stops_raw_response",
+    "train_number": "6268",
+    "departure_date": "02.05.2026"
+  },
+  "payload": {
+    "request": {
+      "train_number": "6268",
+      "dep_date": "02.05.2026",
+      "source_mode": "layer_5804"
+    },
+    "count": 1,
+    "items": [
+      {
+        "station_name": null,
+        "station_code": "2016",
+        "arrival_time": null,
+        "departure_time": null,
+        "waiting_time": null,
+        "distance": null,
+        "raw": {
+          "content": "Неверный номер поезда.",
+          "Code": 2016
+        }
+      }
+    ],
+    "raw": {
+      "GtExpress_Response": {
+        "ExprInfo": "II",
+        "ReqExpressZK": "0057635",
+        "ReqLocalRecv": "02.05.2026 04:10:25",
+        "ReqLocalSend": "02.05.2026 04:10:24",
+        "ReqAddress": "KUZD:2042",
+        "Error": {
+          "content": "Неверный номер поезда.",
+          "Code": 2016
+        },
+        "Version": "2.7.116",
+        "Type": "TrainRoute",
+        "ReqExpressDateTime": "02.05.2026 04:10"
+      }
+    }
+  }
+}

@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from app.db import engine, test_connection
+from app.analytics_router import router as analytics_router
 from app.route_import_service import import_route_payload
 from app.route_graph_matcher import resolve_route_for_map
 from app.virtual_route_service import build_virtual_route_path
@@ -60,6 +61,12 @@ except ImportError:
     RZD_ROUTE_SERVICE_AVAILABLE = False
 
 app = FastAPI(title="Railway GIS Backend")
+
+app.include_router(
+    analytics_router,
+    prefix="/analytics",
+    tags=["analytics"],
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -152,7 +159,7 @@ class RzdRouteCalendarByStationsRequest(BaseModel):
     origin_station_id: int
     destination_station_id: int
     start_date: date | None = None
-    days_ahead: int = Field(default=5, ge=1, le=30)
+    days_ahead: int = Field(default=2, ge=1, le=30)
     check_seats: bool = False
     nearby_radius_km: float = Field(default=5.0, ge=0.5, le=15.0)
     nearby_station_limit: int = Field(default=5, ge=1, le=10)
@@ -1153,6 +1160,7 @@ def get_route_by_id(route_id: int):
             detail=f"Не удалось построить маршрут на карте: {exc}",
         )
 
+
 @app.get("/api/routes/{route_id}/geometry")
 def get_route_geometry(route_id: int):
     stops_query = text("""
@@ -1513,6 +1521,59 @@ def search_rzd_routes_calendar_by_stations_endpoint(
             },
         )
 
+        try:
+            result_debug = result.model_dump() if hasattr(result, "model_dump") else result
+            trains_debug = (
+                result_debug.get("trains")
+                or result_debug.get("items")
+                or result_debug.get("results")
+                or result_debug.get("routes")
+                or []
+            )
+
+            print(
+                "RZD CALENDAR TRAINS DEBUG:",
+                [
+                    {
+                        "train_number": (
+                            item.get("train_number")
+                            or item.get("TrainNumber")
+                            or item.get("number")
+                            or item.get("Number")
+                        ),
+                        "origin": (
+                            item.get("origin_station_name")
+                            or item.get("StationFrom")
+                            or item.get("station_from")
+                        ),
+                        "destination": (
+                            item.get("destination_station_name")
+                            or item.get("StationTo")
+                            or item.get("station_to")
+                        ),
+                        "departure": (
+                            item.get("departure_time")
+                            or item.get("DepartureTime")
+                            or item.get("dep_time")
+                        ),
+                        "arrival": (
+                            item.get("arrival_time")
+                            or item.get("ArrivalTime")
+                            or item.get("arr_time")
+                        ),
+                        "travel_time": (
+                            item.get("travel_time")
+                            or item.get("TripDuration")
+                            or item.get("duration")
+                        ),
+                    }
+                    for item in trains_debug[:30]
+                    if isinstance(item, dict)
+                ],
+            )
+        except Exception as exc:
+            print("RZD CALENDAR TRAINS DEBUG FAILED:", repr(exc))
+
         return result
 
     except ValueError as exc:
@@ -1528,6 +1589,18 @@ def search_rzd_routes_calendar_by_stations_endpoint(
 @app.post("/api/rzd/trains/import")
 def import_rzd_train_endpoint(payload: RzdTrainImportRequest):
     ensure_rzd_route_service_available()
+
+    try:
+        if hasattr(payload, "model_dump"):
+            import_payload_debug = payload.model_dump()
+        elif hasattr(payload, "dict"):
+            import_payload_debug = payload.dict()
+        else:
+            import_payload_debug = payload
+
+        print("RZD TRAIN IMPORT REQUEST BODY:", import_payload_debug)
+    except Exception as exc:
+        print("RZD TRAIN IMPORT REQUEST BODY DEBUG FAILED:", repr(exc))
 
     train_number = payload.train_number.strip()
 

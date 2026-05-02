@@ -1,0 +1,4710 @@
+{
+  "meta": {
+    "stage": "get_rzd_train_stops_raw_response",
+    "train_number": "002Э",
+    "departure_date": "2026-05-01",
+    "formatted_departure_date": "01.05.2026"
+  },
+  "payload": {
+    "request": {
+      "train_number": "002Э",
+      "dep_date": "01.05.2026",
+      "source_mode": "layer_5804"
+    },
+    "count": 167,
+    "items": [
+      {
+        "station_name": [
+          "МОСКВА ЯР",
+          "ВЛАДИВОСТОК"
+        ],
+        "station_code": null,
+        "arrival_time": null,
+        "departure_time": null,
+        "waiting_time": null,
+        "distance": null,
+        "raw": {
+          "Station": [
+            "МОСКВА ЯР",
+            "ВЛАДИВОСТОК"
+          ],
+          "CodeFrom": 2000002,
+          "CodeTo": 2034130
+        }
+      },
+      {
+        "station_name": "МОСКВА ЯР",
+        "station_code": "2000002",
+        "arrival_time": null,
+        "departure_time": "01:00",
+        "waiting_time": null,
+        "distance": null,
+        "raw": {
+          "Station": "МОСКВА ЯР",
+          "Distance": 0,
+          "Days": "00",
+          "DepTime": "01:00",
+          "Code": 2000002
+        }
+      },
+      {
+        "station_name": "АЛЕКСАНД 1",
+        "station_code": "2000920",
+        "arrival_time": "02:32",
+        "departure_time": "02:34",
+        "waiting_time": "0002",
+        "distance": 112,
+        "raw": {
+          "ArvTime": "02:32",
+          "Station": "АЛЕКСАНД 1",
+          "Distance": 112,
+          "Days": "00",
+          "WaitingTime": "0002",
+          "DepTime": "02:34",
+          "Code": 2000920
+        }
+      },
+      {
+        "station_name": "РОСТОВ ВЕЛИК",
+        "station_code": "2010226",
+        "arrival_time": "03:49",
+        "departure_time": "03:50",
+        "waiting_time": "0001",
+        "distance": 224,
+        "raw": {
+          "ArvTime": "03:49",
+          "Station": "РОСТОВ ВЕЛИК",
+          "Distance": 224,
+          "Days": "00",
+          "WaitingTime": "0001",
+          "DepTime": "03:50",
+          "Code": 2010226
+        }
+      },
+      {
+        "station_name": "ЯРОСЛАВЛЬ",
+        "station_code": "2010002",
+        "arrival_time": "04:36",
+        "departure_time": "04:39",
+        "waiting_time": "0003",
+        "distance": 280,
+        "raw": {
+          "ArvTime": "04:36",
+          "Station": "ЯРОСЛАВЛЬ",
+          "Distance": 280,
+          "Days": "00",
+          "WaitingTime": "0003",
+          "DepTime": "04:39",
+          "Code": 2010002
+        }
+      },
+      {
+        "station_name": "НЕРЕХТА",
+        "station_code": "2010215",
+        "arrival_time": "05:27",
+        "departure_time": "05:32",
+        "waiting_time": "0005",
+        "distance": 330,
+        "raw": {
+          "ArvTime": "05:27",
+          "Station": "НЕРЕХТА",
+          "Distance": 330,
+          "Days": "00",
+          "WaitingTime": "0005",
+          "DepTime": "05:32",
+          "Code": 2010215
+        }
+      },
+      {
+        "station_name": "КОСТРОМА Н",
+        "station_code": "2010090",
+        "arrival_time": "06:30",
+        "departure_time": "07:15",
+        "waiting_time": "0045",
+        "distance": 376,
+        "raw": {
+          "ArvTime": "06:30",
+          "Station": "КОСТРОМА Н",
+          "Distance": 376,
+          "Days": "00",
+          "WaitingTime": "0045",
+          "DepTime": "07:15",
+          "Code": 2010090
+        }
+      },
+      {
+        "station_name": "СУДИСЛАВЛЬ",
+        "station_code": "2010287",
+        "arrival_time": "08:16",
+        "departure_time": "08:18",
+        "waiting_time": "0002",
+        "distance": 429,
+        "raw": {
+          "ArvTime": "08:16",
+          "Station": "СУДИСЛАВЛЬ",
+          "Distance": 429,
+          "Days": "00",
+          "WaitingTime": "0002",
+          "DepTime": "08:18",
+          "Code": 2010287
+        }
+      },
+      {
+        "station_name": "ГАЛИЧ",
+        "station_code": "2010269",
+        "arrival_time": "09:45",
+        "departure_time": "10:25",
+        "waiting_time": "0040",
+        "distance": 502,
+        "raw": {
+          "ArvTime": "09:45",
+          "Station": "ГАЛИЧ",
+          "Distance": 502,
+          "Days": "00",
+          "WaitingTime": "0040",
+          "DepTime": "10:25",
+          "Code": 2010269
+        }
+      },
+      {
+        "station_name": "АНТРОПОВО",
+        "station_code": "2010264",
+        "arrival_time": "11:03",
+        "departure_time": "11:04",
+        "waiting_time": "0001",
+        "distance": 548,
+        "raw": {
+          "ArvTime": "11:03",
+          "Station": "АНТРОПОВО",
+          "Distance": 548,
+          "Days": "00",
+          "WaitingTime": "0001",
+          "DepTime": "11:04",
+          "Code": 2010264
+        }
+      },
+      {
+        "station_name": "НИК ПОЛОМА",
+        "station_code": "2010261",
+        "arrival_time": "11:27",
+        "departure_time": "11:29",
+        "waiting_time": "0002",
+        "distance": 572,
+        "raw": {
+          "ArvTime": "11:27",
+          "Station": "НИК ПОЛОМА",
+          "Distance": 572,
+          "Days": "00",
+          "WaitingTime": "0002",
+          "DepTime": "11:29",
+          "Code": 2010261
+        }
+      },
+      {
+        "station_name": "НОМЖА",
+        "station_code": "2010259",
+        "arrival_time": "11:42",
+        "departure_time": "11:43",
+        "waiting_time": "0001",
+        "distance": 583,
+        "raw": {
+          "ArvTime": "11:42",
+          "Station": "НОМЖА",
+          "Distance": 583,
+          "Days": "00",
+          "WaitingTime": "0001",
+          "DepTime": "11:43",
+          "Code": 2010259
+        }
+      },
+      {
+        "station_name": "НЕЯ",
+        "station_code": "2010257",
+        "arrival_time": "11:59",
+        "departure_time": "12:00",
+        "waiting_time": "0001",
+        "distance": 601,
+        "raw": {
+          "ArvTime": "11:59",
+          "Station": "НЕЯ",
+          "Distance": 601,
+          "Days": "00",
+          "WaitingTime": "0001",
+          "DepTime": "12:00",
+          "Code": 2010257
+        }
+      },
+      {
+        "station_name": "БРАНТОВКА",
+        "station_code": "2010322",
+        "arrival_time": "12:24",
+        "departure_time": "12:25",
+        "waiting_time": "0001",
+        "distance": 629,
+        "raw": {
+          "ArvTime": "12:24",
+          "Station": "БРАНТОВКА",
+          "Distance": 629,
+          "Days": "00",
+          "WaitingTime": "0001",
+          "DepTime": "12:25",
+          "Code": 2010322
+        }
+      },
+      {
+        "station_name": "МАНТУРОВО",
+        "station_code": "2010254",
+        "arrival_time": "12:54",
+        "departure_time": "12:56",
+        "waiting_time": "0002",
+        "distance": 654,
+        "raw": {
+          "ArvTime": "12:54",
+          "Station": "МАНТУРОВО",
+          "Distance": 654,
+          "Days": "00",
+          "WaitingTime": "0002",
+          "DepTime": "12:56",
+          "Code": 2010254
+        }
+      },
+      {
+        "station_name": "ШАРЬЯ",
+        "station_code": "2010249",
+        "arrival_time": "13:40",
+        "departure_time": "13:54",
+        "waiting_time": "0014",
+        "distance": 702,
+        "raw": {
+          "ArvTime": "13:40",
+          "Station": "ШАРЬЯ",
+          "Distance": 702,
+          "Days": "00",
+          "WaitingTime": "0014",
+          "DepTime": "13:54",
+          "Code": 2010249
+        }
+      },
+      {
+        "station_name": "ЯКШАНГА",
+        "station_code": "2010246",
+        "arrival_time": "14:17",
+        "departure_time": "14:18",
+        "waiting_time": "0001",
+        "distance": 725,
+        "raw": {
+          "ArvTime": "14:17",
+          "Station": "ЯКШАНГА",
+          "Distance": 725,
+          "Days": "00",
+          "WaitingTime": "0001",
+          "DepTime": "14:18",
+          "Code": 2010246
+        }
+      },
+      {
+        "station_name": "ПОНАЗЫРЕВО",
+        "station_code": "2010244",
+        "arrival_time": "14:37",
+        "departure_time": "14:38",
+        "waiting_time": "0001",
+        "distance": 748,
+        "raw": {
+          "ArvTime": "14:37",
+          "Station": "ПОНАЗЫРЕВО",
+          "Distance": 748,
+          "Days": "00",
+          "WaitingTime": "0001",
+          "DepTime": "14:38",
+          "Code": 2010244
+        }
+      },
+      {
+        "station_name": "СУПРОТИВНЫЙ",
+        "station_code": "2010243",
+        "arrival_time": "14:50",
+        "departure_time": "14:51",
+        "waiting_time": "0001",
+        "distance": 758,
+        "raw": {
+          "ArvTime": "14:50",
+          "Station": "СУПРОТИВНЫЙ",
+          "Distance": 758,
+          "Days": "00",
+          "WaitingTime": "0001",
+          "DepTime": "14:51",
+          "Code": 2010243
+        }
+      },
+      {
+        "station_name": "ГОСТОВСКАЯ",
+        "station_code": "2010241",
+        "arrival_time": "15:05",
+        "departure_time": "15:06",
+        "waiting_time": "0001",
+        "distance": 770,
+        "raw": {
+          "ArvTime": "15:05",
+          "Station": "ГОСТОВСКАЯ",
+          "Distance": 770,
+          "Days": "00",
+          "WaitingTime": "0001",
+          "DepTime": "15:06",
+          "Code": 2010241
+        }
+      },
+      {
+        "station_name": "ШАБАЛИНО",
+        "station_code": "2010237",
+        "arrival_time": "15:35",
+        "departure_time": "15:37",
+        "waiting_time": "0002",
+        "distance": 796,
+        "raw": {
+          "ArvTime": "15:35",
+          "Station": "ШАБАЛИНО",
+          "Distance": 796,
+          "Days": "00",
+          "WaitingTime": "0002",
+          "DepTime": "15:37",
+          "Code": 2010237
+        }
+      },
+      {
+        "station_name": "СВЕЧА",
+        "station_code": "2010260",
+        "arrival_time": "15:57",
+        "departure_time": "15:59",
+        "waiting_time": "0002",
+        "distance": 819,
+        "raw": {
+          "ArvTime": "15:57",
+          "Station": "СВЕЧА",
+          "Distance": 819,
+          "Days": "00",
+          "WaitingTime": "0002",
+          "DepTime": "15:59",
+          "Code": 2010260
+        }
+      },
+      {
+        "station_name": "КОТЕЛЬНИЧ1",
+        "station_code": "2060450",
+        "arrival_time": "16:49",
+        "departure_time": "16:51",
+        "waiting_time": "0002",
+        "distance": 871,
+        "raw": {
+          "ArvTime": "16:49",
+          "Station": "КОТЕЛЬНИЧ1",
+          "Distance": 871,
+          "Days": "00",
+          "WaitingTime": "0002",
+          "DepTime": "16:51",
+          "Code": 2060450
+        }
+      },
+      {
+        "station_name": "КИРОВ ПАСС",
+        "station_code": "2060600",
+        "arrival_time": "18:12",
+        "departure_time": "18:37",
+        "waiting_time": "0025",
+        "distance": 958,
+        "raw": {
+          "ArvTime": "18:12",
+          "Station": "КИРОВ ПАСС",
+          "Distance": 958,
+          "Days": "00",
+          "WaitingTime": "0025",
+          "DepTime": "18:37",
+          "Code": 2060600
+        }
+      },
+      {
+        "station_name": "ГЛАЗОВ",
+        "station_code": "2060530",
+        "arrival_time": "22:04",
+        "departure_time": "22:07",
+        "waiting_time": "0003",
+        "distance": 1166,
+        "raw": {
+          "DiffTime": "01",
+          "ArvTime": "22:04",
+          "Station": "ГЛАЗОВ",
+          "Distance": 1166,
+          "Days": "00",
+          "WaitingTime": "0003",
+          "DepTime": "22:07",
+          "Code": 2060530
+        }
+      },
+      {
+        "station_name": "БАЛЕЗИНО",
+        "station_code": "2060506",
+        "arrival_time": "22:37",
+        "departure_time": "23:07",
+        "waiting_time": "0030",
+        "distance": 1195,
+        "raw": {
+          "DiffTime": "01",
+          "ArvTime": "22:37",
+          "Station": "БАЛЕЗИНО",
+          "Distance": 1195,
+          "Days": "00",
+          "WaitingTime": "0030",
+          "DepTime": "23:07",
+          "Code": 2060506
+        }
+      },
+      {
+        "station_name": "ВЕРЕЩАГИНО",
+        "station_code": "2030010",
+        "arrival_time": "01:18",
+        "departure_time": "01:20",
+        "waiting_time": "0002",
+        "distance": 1318,
+        "raw": {
+          "DiffTime": "02",
+          "ArvTime": "01:18",
+          "Station": "ВЕРЕЩАГИНО",
+          "Distance": 1318,
+          "Days": "01",
+          "WaitingTime": "0002",
+          "DepTime": "01:20",
+          "Code": 2030010
+        }
+      },
+      {
+        "station_name": "ПЕРМЬ 2",
+        "station_code": "2030400",
+        "arrival_time": "03:28",
+        "departure_time": "03:51",
+        "waiting_time": "0023",
+        "distance": 1438,
+        "raw": {
+          "DiffTime": "02",
+          "ArvTime": "03:28",
+          "Station": "ПЕРМЬ 2",
+          "Distance": 1438,
+          "Days": "01",
+          "WaitingTime": "0023",
+          "DepTime": "03:51",
+          "Code": 2030400
+        }
+      },
+      {
+        "station_name": "КУНГУР",
+        "station_code": "2030020",
+        "arrival_time": "05:33",
+        "departure_time": "05:35",
+        "waiting_time": "0002",
+        "distance": 1539,
+        "raw": {
+          "DiffTime": "02",
+          "ArvTime": "05:33",
+          "Station": "КУНГУР",
+          "Distance": 1539,
+          "Days": "01",
+          "WaitingTime": "0002",
+          "DepTime": "05:35",
+          "Code": 2030020
+        }
+      },
+      {
+        "station_name": "ЕКАТЕРИНБ П",
+        "station_code": "2030000",
+        "arrival_time": "09:35",
+        "departure_time": "10:10",
+        "waiting_time": "0035",
+        "distance": 1819,
+        "raw": {
+          "DiffTime": "02",
+          "ArvTime": "09:35",
+          "Station": "ЕКАТЕРИНБ П",
+          "Distance": 1819,
+          "Days": "01",
+          "WaitingTime": "0035",
+          "DepTime": "10:10",
+          "Code": 2030000
+        }
+      },
+      {
+        "station_name": "ТЮМЕНЬ",
+        "station_code": "2030100",
+        "arrival_time": "15:18",
+        "departure_time": "15:37",
+        "waiting_time": "0019",
+        "distance": 2145,
+        "raw": {
+          "DiffTime": "02",
+          "ArvTime": "15:18",
+          "Station": "ТЮМЕНЬ",
+          "Distance": 2145,
+          "Days": "01",
+          "WaitingTime": "0019",
+          "DepTime": "15:37",
+          "Code": 2030100
+        }
+      },
+      {
+        "station_name": "ЯЛУТОРОВСК",
+        "station_code": "2030263",
+        "arrival_time": "16:58",
+        "departure_time": "17:00",
+        "waiting_time": "0002",
+        "distance": 2219,
+        "raw": {
+          "DiffTime": "02",
+          "ArvTime": "16:58",
+          "Station": "ЯЛУТОРОВСК",
+          "Distance": 2219,
+          "Days": "01",
+          "WaitingTime": "0002",
+          "DepTime": "17:00",
+          "Code": 2030263
+        }
+      },
+      {
+        "station_name": "ИШИМ",
+        "station_code": "2030280",
+        "arrival_time": "19:45",
+        "departure_time": "19:50",
+        "waiting_time": "0005",
+        "distance": 2434,
+        "raw": {
+          "DiffTime": "02",
+          "ArvTime": "19:45",
+          "Station": "ИШИМ",
+          "Distance": 2434,
+          "Days": "01",
+          "WaitingTime": "0005",
+          "DepTime": "19:50",
+          "Code": 2030280
+        }
+      },
+      {
+        "station_name": "МАСЛЯНСКАЯ",
+        "station_code": "2030279",
+        "arrival_time": "20:31",
+        "departure_time": "20:33",
+        "waiting_time": "0002",
+        "distance": 2481,
+        "raw": {
+          "DiffTime": "02",
+          "ArvTime": "20:31",
+          "Station": "МАСЛЯНСКАЯ",
+          "Distance": 2481,
+          "Days": "01",
+          "WaitingTime": "0002",
+          "DepTime": "20:33",
+          "Code": 2030279
+        }
+      },
+      {
+        "station_name": "НАЗЫВАЕВСК",
+        "station_code": "2044990",
+        "arrival_time": "21:41",
+        "departure_time": "21:43",
+        "waiting_time": "0002",
+        "distance": 2568,
+        "raw": {
+          "DiffTime": "03",
+          "ArvTime": "21:41",
+          "Station": "НАЗЫВАЕВСК",
+          "Distance": 2568,
+          "Days": "01",
+          "WaitingTime": "0002",
+          "DepTime": "21:43",
+          "Code": 2044990
+        }
+      },
+      {
+        "station_name": "ОМСК-ПАСС",
+        "station_code": "2044700",
+        "arrival_time": "23:15",
+        "departure_time": "23:31",
+        "waiting_time": "0016",
+        "distance": 2717,
+        "raw": {
+          "DiffTime": "03",
+          "ArvTime": "23:15",
+          "Station": "ОМСК-ПАСС",
+          "Distance": 2717,
+          "Days": "01",
+          "WaitingTime": "0016",
+          "DepTime": "23:31",
+          "Code": 2044700
+        }
+      },
+      {
+        "station_name": "ТАТАРСКАЯ",
+        "station_code": "2044820",
+        "arrival_time": "01:23",
+        "departure_time": "01:25",
+        "waiting_time": "0002",
+        "distance": 2886,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "01:23",
+          "Station": "ТАТАРСКАЯ",
+          "Distance": 2886,
+          "Days": "02",
+          "WaitingTime": "0002",
+          "DepTime": "01:25",
+          "Code": 2044820
+        }
+      },
+      {
+        "station_name": "ЧАНЫ",
+        "station_code": "2044850",
+        "arrival_time": "01:58",
+        "departure_time": "02:00",
+        "waiting_time": "0002",
+        "distance": 2938,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "01:58",
+          "Station": "ЧАНЫ",
+          "Distance": 2938,
+          "Days": "02",
+          "WaitingTime": "0002",
+          "DepTime": "02:00",
+          "Code": 2044850
+        }
+      },
+      {
+        "station_name": "ОЗ КАРАЧИН",
+        "station_code": "2044758",
+        "arrival_time": "02:12",
+        "departure_time": "02:17",
+        "waiting_time": "0005",
+        "distance": 2950,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "02:12",
+          "Station": "ОЗ КАРАЧИН",
+          "Distance": 2950,
+          "Days": "02",
+          "WaitingTime": "0005",
+          "DepTime": "02:17",
+          "Code": 2044758
+        }
+      },
+      {
+        "station_name": "БАРАБИНСК",
+        "station_code": "2044690",
+        "arrival_time": "03:27",
+        "departure_time": "03:57",
+        "waiting_time": "0030",
+        "distance": 3041,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "03:27",
+          "Station": "БАРАБИНСК",
+          "Distance": 3041,
+          "Days": "02",
+          "WaitingTime": "0030",
+          "DepTime": "03:57",
+          "Code": 2044690
+        }
+      },
+      {
+        "station_name": "КАРГАТ",
+        "station_code": "2044770",
+        "arrival_time": "05:31",
+        "departure_time": "05:33",
+        "waiting_time": "0002",
+        "distance": 3166,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "05:31",
+          "Station": "КАРГАТ",
+          "Distance": 3166,
+          "Days": "02",
+          "WaitingTime": "0002",
+          "DepTime": "05:33",
+          "Code": 2044770
+        }
+      },
+      {
+        "station_name": "ОБЬ",
+        "station_code": "2044773",
+        "arrival_time": "07:30",
+        "departure_time": "07:32",
+        "waiting_time": "0002",
+        "distance": 3327,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "07:30",
+          "Station": "ОБЬ",
+          "Distance": 3327,
+          "Days": "02",
+          "WaitingTime": "0002",
+          "DepTime": "07:32",
+          "Code": 2044773
+        }
+      },
+      {
+        "station_name": "НОВОСИБ ГЛ",
+        "station_code": "2044001",
+        "arrival_time": "07:54",
+        "departure_time": "08:59",
+        "waiting_time": "0065",
+        "distance": 3344,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "07:54",
+          "Station": "НОВОСИБ ГЛ",
+          "Distance": 3344,
+          "Days": "02",
+          "WaitingTime": "0065",
+          "DepTime": "08:59",
+          "Code": 2044001
+        }
+      },
+      {
+        "station_name": "МОШКОВО",
+        "station_code": "2044778",
+        "arrival_time": "09:49",
+        "departure_time": "09:51",
+        "waiting_time": "0002",
+        "distance": 3402,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "09:49",
+          "Station": "МОШКОВО",
+          "Distance": 3402,
+          "Days": "02",
+          "WaitingTime": "0002",
+          "DepTime": "09:51",
+          "Code": 2044778
+        }
+      },
+      {
+        "station_name": "БОЛОТНАЯ",
+        "station_code": "2044930",
+        "arrival_time": "10:55",
+        "departure_time": "11:12",
+        "waiting_time": "0017",
+        "distance": 3470,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "10:55",
+          "Station": "БОЛОТНАЯ",
+          "Distance": 3470,
+          "Days": "02",
+          "WaitingTime": "0017",
+          "DepTime": "11:12",
+          "Code": 2044930
+        }
+      },
+      {
+        "station_name": "ЮРГА 1",
+        "station_code": "2028190",
+        "arrival_time": "11:41",
+        "departure_time": "11:46",
+        "waiting_time": "0005",
+        "distance": 3500,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "11:41",
+          "Station": "ЮРГА 1",
+          "Distance": 3500,
+          "Days": "02",
+          "WaitingTime": "0005",
+          "DepTime": "11:46",
+          "Code": 2028190
+        }
+      },
+      {
+        "station_name": "ТАЙГА",
+        "station_code": "2028180",
+        "arrival_time": "12:57",
+        "departure_time": "13:01",
+        "waiting_time": "0004",
+        "distance": 3573,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "12:57",
+          "Station": "ТАЙГА",
+          "Distance": 3573,
+          "Days": "02",
+          "WaitingTime": "0004",
+          "DepTime": "13:01",
+          "Code": 2028180
+        }
+      },
+      {
+        "station_name": "АНЖЕРСКАЯ",
+        "station_code": "2028010",
+        "arrival_time": "13:31",
+        "departure_time": "13:33",
+        "waiting_time": "0002",
+        "distance": 3604,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "13:31",
+          "Station": "АНЖЕРСКАЯ",
+          "Distance": 3604,
+          "Days": "02",
+          "WaitingTime": "0002",
+          "DepTime": "13:33",
+          "Code": 2028010
+        }
+      },
+      {
+        "station_name": "МАРИИНСК",
+        "station_code": "2038060",
+        "arrival_time": "15:08",
+        "departure_time": "15:42",
+        "waiting_time": "0034",
+        "distance": 3721,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "15:08",
+          "Station": "МАРИИНСК",
+          "Distance": 3721,
+          "Days": "02",
+          "WaitingTime": "0034",
+          "DepTime": "15:42",
+          "Code": 2038060
+        }
+      },
+      {
+        "station_name": "ТЯЖИН",
+        "station_code": "2038131",
+        "arrival_time": "16:33",
+        "departure_time": "16:35",
+        "waiting_time": "0002",
+        "distance": 3781,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "16:33",
+          "Station": "ТЯЖИН",
+          "Distance": 3781,
+          "Days": "02",
+          "WaitingTime": "0002",
+          "DepTime": "16:35",
+          "Code": 2038131
+        }
+      },
+      {
+        "station_name": "БОГОТОЛ",
+        "station_code": "2038155",
+        "arrival_time": "17:34",
+        "departure_time": "17:36",
+        "waiting_time": "0002",
+        "distance": 3854,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "17:34",
+          "Station": "БОГОТОЛ",
+          "Distance": 3854,
+          "Days": "02",
+          "WaitingTime": "0002",
+          "DepTime": "17:36",
+          "Code": 2038155
+        }
+      },
+      {
+        "station_name": "АЧИНСК 1",
+        "station_code": "2038210",
+        "arrival_time": "18:36",
+        "departure_time": "18:40",
+        "waiting_time": "0004",
+        "distance": 3922,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "18:36",
+          "Station": "АЧИНСК 1",
+          "Distance": 3922,
+          "Days": "02",
+          "WaitingTime": "0004",
+          "DepTime": "18:40",
+          "Code": 2038210
+        }
+      },
+      {
+        "station_name": "КРАСНОЯРСК П",
+        "station_code": "2038001",
+        "arrival_time": "21:32",
+        "departure_time": "22:23",
+        "waiting_time": "0051",
+        "distance": 4106,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "21:32",
+          "Station": "КРАСНОЯРСК П",
+          "Distance": 4106,
+          "Days": "02",
+          "WaitingTime": "0051",
+          "DepTime": "22:23",
+          "Code": 2038001
+        }
+      },
+      {
+        "station_name": "УЯР",
+        "station_code": "2038211",
+        "arrival_time": "00:18",
+        "departure_time": "00:20",
+        "waiting_time": "0002",
+        "distance": 4237,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "00:18",
+          "Station": "УЯР",
+          "Distance": 4237,
+          "Days": "03",
+          "WaitingTime": "0002",
+          "DepTime": "00:20",
+          "Code": 2038211
+        }
+      },
+      {
+        "station_name": "ЗАОЗЕРНАЯ",
+        "station_code": "2038175",
+        "arrival_time": "00:55",
+        "departure_time": "00:57",
+        "waiting_time": "0002",
+        "distance": 4272,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "00:55",
+          "Station": "ЗАОЗЕРНАЯ",
+          "Distance": 4272,
+          "Days": "03",
+          "WaitingTime": "0002",
+          "DepTime": "00:57",
+          "Code": 2038175
+        }
+      },
+      {
+        "station_name": "КАНСК ЕНИС",
+        "station_code": "2038240",
+        "arrival_time": "02:04",
+        "departure_time": "02:07",
+        "waiting_time": "0003",
+        "distance": 4353,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "02:04",
+          "Station": "КАНСК ЕНИС",
+          "Distance": 4353,
+          "Days": "03",
+          "WaitingTime": "0003",
+          "DepTime": "02:07",
+          "Code": 2038240
+        }
+      },
+      {
+        "station_name": "ИЛАНСКАЯ",
+        "station_code": "2038195",
+        "arrival_time": "02:35",
+        "departure_time": "02:52",
+        "waiting_time": "0017",
+        "distance": 4385,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "02:35",
+          "Station": "ИЛАНСКАЯ",
+          "Distance": 4385,
+          "Days": "03",
+          "WaitingTime": "0017",
+          "DepTime": "02:52",
+          "Code": 2038195
+        }
+      },
+      {
+        "station_name": "ИНГАШСКАЯ",
+        "station_code": "2038185",
+        "arrival_time": "03:22",
+        "departure_time": "03:23",
+        "waiting_time": "0001",
+        "distance": 4414,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "03:22",
+          "Station": "ИНГАШСКАЯ",
+          "Distance": 4414,
+          "Days": "03",
+          "WaitingTime": "0001",
+          "DepTime": "03:23",
+          "Code": 2038185
+        }
+      },
+      {
+        "station_name": "РЕШОТЫ",
+        "station_code": "2038235",
+        "arrival_time": "04:03",
+        "departure_time": "04:06",
+        "waiting_time": "0003",
+        "distance": 4461,
+        "raw": {
+          "DiffTime": "04",
+          "ArvTime": "04:03",
+          "Station": "РЕШОТЫ",
+          "Distance": 4461,
+          "Days": "03",
+          "WaitingTime": "0003",
+          "DepTime": "04:06",
+          "Code": 2038235
+        }
+      },
+      {
+        "station_name": "ЮРТЫ",
+        "station_code": "2054223",
+        "arrival_time": "04:47",
+        "departure_time": "04:49",
+        "waiting_time": "0002",
+        "distance": 4498,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "04:47",
+          "Station": "ЮРТЫ",
+          "Distance": 4498,
+          "Days": "03",
+          "WaitingTime": "0002",
+          "DepTime": "04:49",
+          "Code": 2054223
+        }
+      },
+      {
+        "station_name": "ТАЙШЕТ",
+        "station_code": "2054120",
+        "arrival_time": "05:17",
+        "departure_time": "05:20",
+        "waiting_time": "0003",
+        "distance": 4524,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "05:17",
+          "Station": "ТАЙШЕТ",
+          "Distance": 4524,
+          "Days": "03",
+          "WaitingTime": "0003",
+          "DepTime": "05:20",
+          "Code": 2054120
+        }
+      },
+      {
+        "station_name": "НИЖНЕУДИНСК",
+        "station_code": "2054310",
+        "arrival_time": "07:50",
+        "departure_time": "08:03",
+        "waiting_time": "0013",
+        "distance": 4688,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "07:50",
+          "Station": "НИЖНЕУДИНСК",
+          "Distance": 4688,
+          "Days": "03",
+          "WaitingTime": "0013",
+          "DepTime": "08:03",
+          "Code": 2054310
+        }
+      },
+      {
+        "station_name": "ТУЛУН",
+        "station_code": "2054550",
+        "arrival_time": "09:37",
+        "departure_time": "09:40",
+        "waiting_time": "0003",
+        "distance": 4804,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "09:37",
+          "Station": "ТУЛУН",
+          "Distance": 4804,
+          "Days": "03",
+          "WaitingTime": "0003",
+          "DepTime": "09:40",
+          "Code": 2054550
+        }
+      },
+      {
+        "station_name": "КУЙТУН",
+        "station_code": "2054325",
+        "arrival_time": "10:40",
+        "departure_time": "10:42",
+        "waiting_time": "0002",
+        "distance": 4883,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "10:40",
+          "Station": "КУЙТУН",
+          "Distance": 4883,
+          "Days": "03",
+          "WaitingTime": "0002",
+          "DepTime": "10:42",
+          "Code": 2054325
+        }
+      },
+      {
+        "station_name": "ЗИМА",
+        "station_code": "2054280",
+        "arrival_time": "11:33",
+        "departure_time": "12:00",
+        "waiting_time": "0027",
+        "distance": 4943,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "11:33",
+          "Station": "ЗИМА",
+          "Distance": 4943,
+          "Days": "03",
+          "WaitingTime": "0027",
+          "DepTime": "12:00",
+          "Code": 2054280
+        }
+      },
+      {
+        "station_name": "ЗАЛАРИ",
+        "station_code": "2054315",
+        "arrival_time": "12:51",
+        "departure_time": "12:53",
+        "waiting_time": "0002",
+        "distance": 4998,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "12:51",
+          "Station": "ЗАЛАРИ",
+          "Distance": 4998,
+          "Days": "03",
+          "WaitingTime": "0002",
+          "DepTime": "12:53",
+          "Code": 2054315
+        }
+      },
+      {
+        "station_name": "ЧЕРЕМХОВО",
+        "station_code": "2054305",
+        "arrival_time": "13:59",
+        "departure_time": "14:01",
+        "waiting_time": "0002",
+        "distance": 5063,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "13:59",
+          "Station": "ЧЕРЕМХОВО",
+          "Distance": 5063,
+          "Days": "03",
+          "WaitingTime": "0002",
+          "DepTime": "14:01",
+          "Code": 2054305
+        }
+      },
+      {
+        "station_name": "УСОЛ СИБИР",
+        "station_code": "2054795",
+        "arrival_time": "14:58",
+        "departure_time": "15:00",
+        "waiting_time": "0002",
+        "distance": 5126,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "14:58",
+          "Station": "УСОЛ СИБИР",
+          "Distance": 5126,
+          "Days": "03",
+          "WaitingTime": "0002",
+          "DepTime": "15:00",
+          "Code": 2054795
+        }
+      },
+      {
+        "station_name": "АНГАРСК",
+        "station_code": "2054260",
+        "arrival_time": "15:26",
+        "departure_time": "15:29",
+        "waiting_time": "0003",
+        "distance": 5154,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "15:26",
+          "Station": "АНГАРСК",
+          "Distance": 5154,
+          "Days": "03",
+          "WaitingTime": "0003",
+          "DepTime": "15:29",
+          "Code": 2054260
+        }
+      },
+      {
+        "station_name": "ИРКУТ СОРТ",
+        "station_code": "2054002",
+        "arrival_time": "16:04",
+        "departure_time": "16:06",
+        "waiting_time": "0002",
+        "distance": 5186,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "16:04",
+          "Station": "ИРКУТ СОРТ",
+          "Distance": 5186,
+          "Days": "03",
+          "WaitingTime": "0002",
+          "DepTime": "16:06",
+          "Code": 2054002
+        }
+      },
+      {
+        "station_name": "ИРКУТСК ПАСС",
+        "station_code": "2054001",
+        "arrival_time": "16:19",
+        "departure_time": "17:02",
+        "waiting_time": "0043",
+        "distance": 5194,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "16:19",
+          "Station": "ИРКУТСК ПАСС",
+          "Distance": 5194,
+          "Days": "03",
+          "WaitingTime": "0043",
+          "DepTime": "17:02",
+          "Code": 2054001
+        }
+      },
+      {
+        "station_name": "СЛЮДЯНКА 1",
+        "station_code": "2054320",
+        "arrival_time": "19:40",
+        "departure_time": "19:42",
+        "waiting_time": "0002",
+        "distance": 5320,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "19:40",
+          "Station": "СЛЮДЯНКА 1",
+          "Distance": 5320,
+          "Days": "03",
+          "WaitingTime": "0002",
+          "DepTime": "19:42",
+          "Code": 2054320
+        }
+      },
+      {
+        "station_name": "БАЙКАЛЬСК",
+        "station_code": "2054546",
+        "arrival_time": "20:26",
+        "departure_time": "20:28",
+        "waiting_time": "0002",
+        "distance": 5361,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "20:26",
+          "Station": "БАЙКАЛЬСК",
+          "Distance": 5361,
+          "Days": "03",
+          "WaitingTime": "0002",
+          "DepTime": "20:28",
+          "Code": 2054546
+        }
+      },
+      {
+        "station_name": "МЫСОВАЯ",
+        "station_code": "2054745",
+        "arrival_time": "22:17",
+        "departure_time": "22:19",
+        "waiting_time": "0002",
+        "distance": 5486,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "22:17",
+          "Station": "МЫСОВАЯ",
+          "Distance": 5486,
+          "Days": "03",
+          "WaitingTime": "0002",
+          "DepTime": "22:19",
+          "Code": 2054745
+        }
+      },
+      {
+        "station_name": "ТИМЛЮЙ",
+        "station_code": "2054560",
+        "arrival_time": "23:18",
+        "departure_time": "23:19",
+        "waiting_time": "0001",
+        "distance": 5552,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "23:18",
+          "Station": "ТИМЛЮЙ",
+          "Distance": 5552,
+          "Days": "03",
+          "WaitingTime": "0001",
+          "DepTime": "23:19",
+          "Code": 2054560
+        }
+      },
+      {
+        "station_name": "СЕЛЕНГА",
+        "station_code": "2054765",
+        "arrival_time": "23:37",
+        "departure_time": "23:39",
+        "waiting_time": "0002",
+        "distance": 5570,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "23:37",
+          "Station": "СЕЛЕНГА",
+          "Distance": 5570,
+          "Days": "03",
+          "WaitingTime": "0002",
+          "DepTime": "23:39",
+          "Code": 2054765
+        }
+      },
+      {
+        "station_name": "УЛАН УДЭ П",
+        "station_code": "2054785",
+        "arrival_time": "01:01",
+        "departure_time": "01:31",
+        "waiting_time": "0030",
+        "distance": 5650,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "01:01",
+          "Station": "УЛАН УДЭ П",
+          "Distance": 5650,
+          "Days": "04",
+          "WaitingTime": "0030",
+          "DepTime": "01:31",
+          "Code": 2054785
+        }
+      },
+      {
+        "station_name": "ЗАИГРАЕВО",
+        "station_code": "2054554",
+        "arrival_time": "02:42",
+        "departure_time": "02:44",
+        "waiting_time": "0002",
+        "distance": 5707,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "02:42",
+          "Station": "ЗАИГРАЕВО",
+          "Distance": 5707,
+          "Days": "04",
+          "WaitingTime": "0002",
+          "DepTime": "02:44",
+          "Code": 2054554
+        }
+      },
+      {
+        "station_name": "ГОРХОН",
+        "station_code": "2054558",
+        "arrival_time": "03:37",
+        "departure_time": "03:39",
+        "waiting_time": "0002",
+        "distance": 5759,
+        "raw": {
+          "DiffTime": "05",
+          "ArvTime": "03:37",
+          "Station": "ГОРХОН",
+          "Distance": 5759,
+          "Days": "04",
+          "WaitingTime": "0002",
+          "DepTime": "03:39",
+          "Code": 2054558
+        }
+      },
+      {
+        "station_name": "ПЕТР ЗАВОД",
+        "station_code": "2050410",
+        "arrival_time": "04:21",
+        "departure_time": "04:26",
+        "waiting_time": "0005",
+        "distance": 5793,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "04:21",
+          "Station": "ПЕТР ЗАВОД",
+          "Distance": 5793,
+          "Days": "04",
+          "WaitingTime": "0005",
+          "DepTime": "04:26",
+          "Code": 2050410
+        }
+      },
+      {
+        "station_name": "БАДА",
+        "station_code": "2050498",
+        "arrival_time": "06:03",
+        "departure_time": "06:05",
+        "waiting_time": "0002",
+        "distance": 5892,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "06:03",
+          "Station": "БАДА",
+          "Distance": 5892,
+          "Days": "04",
+          "WaitingTime": "0002",
+          "DepTime": "06:05",
+          "Code": 2050498
+        }
+      },
+      {
+        "station_name": "ХИЛОК",
+        "station_code": "2050490",
+        "arrival_time": "07:08",
+        "departure_time": "07:29",
+        "waiting_time": "0021",
+        "distance": 5943,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "07:08",
+          "Station": "ХИЛОК",
+          "Distance": 5943,
+          "Days": "04",
+          "WaitingTime": "0021",
+          "DepTime": "07:29",
+          "Code": 2050490
+        }
+      },
+      {
+        "station_name": "ХУШЕНГА",
+        "station_code": "2050356",
+        "arrival_time": "08:15",
+        "departure_time": "08:17",
+        "waiting_time": "0002",
+        "distance": 5980,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "08:15",
+          "Station": "ХУШЕНГА",
+          "Distance": 5980,
+          "Days": "04",
+          "WaitingTime": "0002",
+          "DepTime": "08:17",
+          "Code": 2050356
+        }
+      },
+      {
+        "station_name": "ХАРАГУН",
+        "station_code": "2050357",
+        "arrival_time": "08:38",
+        "departure_time": "08:40",
+        "waiting_time": "0002",
+        "distance": 6002,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "08:38",
+          "Station": "ХАРАГУН",
+          "Distance": 6002,
+          "Days": "04",
+          "WaitingTime": "0002",
+          "DepTime": "08:40",
+          "Code": 2050357
+        }
+      },
+      {
+        "station_name": "МОГЗОН",
+        "station_code": "2050341",
+        "arrival_time": "09:32",
+        "departure_time": "09:34",
+        "waiting_time": "0002",
+        "distance": 6063,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "09:32",
+          "Station": "МОГЗОН",
+          "Distance": 6063,
+          "Days": "04",
+          "WaitingTime": "0002",
+          "DepTime": "09:34",
+          "Code": 2050341
+        }
+      },
+      {
+        "station_name": "ЧИТА 2",
+        "station_code": "2050001",
+        "arrival_time": "12:14",
+        "departure_time": "12:50",
+        "waiting_time": "0036",
+        "distance": 6207,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "12:14",
+          "Station": "ЧИТА 2",
+          "Distance": 6207,
+          "Days": "04",
+          "WaitingTime": "0036",
+          "DepTime": "12:50",
+          "Code": 2050001
+        }
+      },
+      {
+        "station_name": "КАРЫМСКАЯ",
+        "station_code": "2050480",
+        "arrival_time": "15:03",
+        "departure_time": "15:21",
+        "waiting_time": "0018",
+        "distance": 6303,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "15:03",
+          "Station": "КАРЫМСКАЯ",
+          "Distance": 6303,
+          "Days": "04",
+          "WaitingTime": "0018",
+          "DepTime": "15:21",
+          "Code": 2050480
+        }
+      },
+      {
+        "station_name": "СОЛНЦЕВАЯ",
+        "station_code": "2050540",
+        "arrival_time": "17:19",
+        "departure_time": "17:21",
+        "waiting_time": "0002",
+        "distance": 6416,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "17:19",
+          "Station": "СОЛНЦЕВАЯ",
+          "Distance": 6416,
+          "Days": "04",
+          "WaitingTime": "0002",
+          "DepTime": "17:21",
+          "Code": 2050540
+        }
+      },
+      {
+        "station_name": "ШИЛКА ПАСС",
+        "station_code": "2050440",
+        "arrival_time": "18:02",
+        "departure_time": "18:04",
+        "waiting_time": "0002",
+        "distance": 6454,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "18:02",
+          "Station": "ШИЛКА ПАСС",
+          "Distance": 6454,
+          "Days": "04",
+          "WaitingTime": "0002",
+          "DepTime": "18:04",
+          "Code": 2050440
+        }
+      },
+      {
+        "station_name": "ПРИИСКОВАЯ",
+        "station_code": "2050390",
+        "arrival_time": "18:48",
+        "departure_time": "18:50",
+        "waiting_time": "0002",
+        "distance": 6499,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "18:48",
+          "Station": "ПРИИСКОВАЯ",
+          "Distance": 6499,
+          "Days": "04",
+          "WaitingTime": "0002",
+          "DepTime": "18:50",
+          "Code": 2050390
+        }
+      },
+      {
+        "station_name": "КУЭНГА",
+        "station_code": "2050338",
+        "arrival_time": "19:30",
+        "departure_time": "19:33",
+        "waiting_time": "0003",
+        "distance": 6535,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "19:30",
+          "Station": "КУЭНГА",
+          "Distance": 6535,
+          "Days": "04",
+          "WaitingTime": "0003",
+          "DepTime": "19:33",
+          "Code": 2050338
+        }
+      },
+      {
+        "station_name": "ЧЕРНЫШ ЗАБ",
+        "station_code": "2050470",
+        "arrival_time": "20:41",
+        "departure_time": "21:11",
+        "waiting_time": "0030",
+        "distance": 6596,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "20:41",
+          "Station": "ЧЕРНЫШ ЗАБ",
+          "Distance": 6596,
+          "Days": "04",
+          "WaitingTime": "0030",
+          "DepTime": "21:11",
+          "Code": 2050470
+        }
+      },
+      {
+        "station_name": "ЗИЛОВО",
+        "station_code": "2050417",
+        "arrival_time": "22:37",
+        "departure_time": "22:39",
+        "waiting_time": "0002",
+        "distance": 6679,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "22:37",
+          "Station": "ЗИЛОВО",
+          "Distance": 6679,
+          "Days": "04",
+          "WaitingTime": "0002",
+          "DepTime": "22:39",
+          "Code": 2050417
+        }
+      },
+      {
+        "station_name": "СБЕГА",
+        "station_code": "2050422",
+        "arrival_time": "00:10",
+        "departure_time": "00:11",
+        "waiting_time": "0001",
+        "distance": 6768,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "00:10",
+          "Station": "СБЕГА",
+          "Distance": 6768,
+          "Days": "05",
+          "WaitingTime": "0001",
+          "DepTime": "00:11",
+          "Code": 2050422
+        }
+      },
+      {
+        "station_name": "КСЕНЬЕВСК",
+        "station_code": "2050339",
+        "arrival_time": "00:56",
+        "departure_time": "00:58",
+        "waiting_time": "0002",
+        "distance": 6809,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "00:56",
+          "Station": "КСЕНЬЕВСК",
+          "Distance": 6809,
+          "Days": "05",
+          "WaitingTime": "0002",
+          "DepTime": "00:58",
+          "Code": 2050339
+        }
+      },
+      {
+        "station_name": "МОГОЧА",
+        "station_code": "2050510",
+        "arrival_time": "02:57",
+        "departure_time": "03:22",
+        "waiting_time": "0025",
+        "distance": 6917,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "02:57",
+          "Station": "МОГОЧА",
+          "Distance": 6917,
+          "Days": "05",
+          "WaitingTime": "0025",
+          "DepTime": "03:22",
+          "Code": 2050510
+        }
+      },
+      {
+        "station_name": "АМАЗАР",
+        "station_code": "2050344",
+        "arrival_time": "05:02",
+        "departure_time": "05:07",
+        "waiting_time": "0005",
+        "distance": 7015,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "05:02",
+          "Station": "АМАЗАР",
+          "Distance": 7015,
+          "Days": "05",
+          "WaitingTime": "0005",
+          "DepTime": "05:07",
+          "Code": 2050344
+        }
+      },
+      {
+        "station_name": "ЕРОФЕЙ ПАВЛ",
+        "station_code": "2050337",
+        "arrival_time": "07:06",
+        "departure_time": "07:27",
+        "waiting_time": "0021",
+        "distance": 7122,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "07:06",
+          "Station": "ЕРОФЕЙ ПАВЛ",
+          "Distance": 7122,
+          "Days": "05",
+          "WaitingTime": "0021",
+          "DepTime": "07:27",
+          "Code": 2050337
+        }
+      },
+      {
+        "station_name": "УРУША",
+        "station_code": "2050335",
+        "arrival_time": "09:26",
+        "departure_time": "09:28",
+        "waiting_time": "0002",
+        "distance": 7220,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "09:26",
+          "Station": "УРУША",
+          "Distance": 7220,
+          "Days": "05",
+          "WaitingTime": "0002",
+          "DepTime": "09:28",
+          "Code": 2050335
+        }
+      },
+      {
+        "station_name": "СКОВОРОДИНО",
+        "station_code": "2050370",
+        "arrival_time": "11:15",
+        "departure_time": "12:01",
+        "waiting_time": "0046",
+        "distance": 7316,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "11:15",
+          "Station": "СКОВОРОДИНО",
+          "Distance": 7316,
+          "Days": "05",
+          "WaitingTime": "0046",
+          "DepTime": "12:01",
+          "Code": 2050370
+        }
+      },
+      {
+        "station_name": "ТАЛДАН",
+        "station_code": "2050333",
+        "arrival_time": "13:46",
+        "departure_time": "13:47",
+        "waiting_time": "0001",
+        "distance": 7411,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "13:46",
+          "Station": "ТАЛДАН",
+          "Distance": 7411,
+          "Days": "05",
+          "WaitingTime": "0001",
+          "DepTime": "13:47",
+          "Code": 2050333
+        }
+      },
+      {
+        "station_name": "МАГДАГАЧИ",
+        "station_code": "2050430",
+        "arrival_time": "15:28",
+        "departure_time": "15:43",
+        "waiting_time": "0015",
+        "distance": 7504,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "15:28",
+          "Station": "МАГДАГАЧИ",
+          "Distance": 7504,
+          "Days": "05",
+          "WaitingTime": "0015",
+          "DepTime": "15:43",
+          "Code": 2050430
+        }
+      },
+      {
+        "station_name": "ТЫГДА",
+        "station_code": "2050380",
+        "arrival_time": "16:45",
+        "departure_time": "16:50",
+        "waiting_time": "0005",
+        "distance": 7569,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "16:45",
+          "Station": "ТЫГДА",
+          "Distance": 7569,
+          "Days": "05",
+          "WaitingTime": "0005",
+          "DepTime": "16:50",
+          "Code": 2050380
+        }
+      },
+      {
+        "station_name": "УШУМУН",
+        "station_code": "2050332",
+        "arrival_time": "17:29",
+        "departure_time": "17:31",
+        "waiting_time": "0002",
+        "distance": 7612,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "17:29",
+          "Station": "УШУМУН",
+          "Distance": 7612,
+          "Days": "05",
+          "WaitingTime": "0002",
+          "DepTime": "17:31",
+          "Code": 2050332
+        }
+      },
+      {
+        "station_name": "ШИМАНОВСК",
+        "station_code": "2050450",
+        "arrival_time": "19:01",
+        "departure_time": "19:03",
+        "waiting_time": "0002",
+        "distance": 7734,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "19:01",
+          "Station": "ШИМАНОВСК",
+          "Distance": 7734,
+          "Days": "05",
+          "WaitingTime": "0002",
+          "DepTime": "19:03",
+          "Code": 2050450
+        }
+      },
+      {
+        "station_name": "ЛЕДЯНАЯ",
+        "station_code": "2050336",
+        "arrival_time": "19:43",
+        "departure_time": "19:44",
+        "waiting_time": "0001",
+        "distance": 7775,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "19:43",
+          "Station": "ЛЕДЯНАЯ",
+          "Distance": 7775,
+          "Days": "05",
+          "WaitingTime": "0001",
+          "DepTime": "19:44",
+          "Code": 2050336
+        }
+      },
+      {
+        "station_name": "СВОБОДНЫЙ",
+        "station_code": "2050340",
+        "arrival_time": "20:20",
+        "departure_time": "20:25",
+        "waiting_time": "0005",
+        "distance": 7818,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "20:20",
+          "Station": "СВОБОДНЫЙ",
+          "Distance": 7818,
+          "Days": "05",
+          "WaitingTime": "0005",
+          "DepTime": "20:25",
+          "Code": 2050340
+        }
+      },
+      {
+        "station_name": "БЕЛОГОРСК",
+        "station_code": "2050330",
+        "arrival_time": "21:18",
+        "departure_time": "22:08",
+        "waiting_time": "0050",
+        "distance": 7876,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "21:18",
+          "Station": "БЕЛОГОРСК",
+          "Distance": 7876,
+          "Days": "05",
+          "WaitingTime": "0050",
+          "DepTime": "22:08",
+          "Code": 2050330
+        }
+      },
+      {
+        "station_name": "ЕКАТЕРИНОС",
+        "station_code": "2050520",
+        "arrival_time": "23:21",
+        "departure_time": "23:23",
+        "waiting_time": "0002",
+        "distance": 7955,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "23:21",
+          "Station": "ЕКАТЕРИНОС",
+          "Distance": 7955,
+          "Days": "05",
+          "WaitingTime": "0002",
+          "DepTime": "23:23",
+          "Code": 2050520
+        }
+      },
+      {
+        "station_name": "ЗАВИТАЯ",
+        "station_code": "2050334",
+        "arrival_time": "23:59",
+        "departure_time": "00:01",
+        "waiting_time": "0002",
+        "distance": 7995,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "23:59",
+          "Station": "ЗАВИТАЯ",
+          "Distance": 7995,
+          "Days": "06",
+          "WaitingTime": "0002",
+          "DepTime": "00:01",
+          "Code": 2050334
+        }
+      },
+      {
+        "station_name": "БУРЕЯ",
+        "station_code": "2050360",
+        "arrival_time": "00:38",
+        "departure_time": "00:43",
+        "waiting_time": "0005",
+        "distance": 8040,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "00:38",
+          "Station": "БУРЕЯ",
+          "Distance": 8040,
+          "Days": "06",
+          "WaitingTime": "0005",
+          "DepTime": "00:43",
+          "Code": 2050360
+        }
+      },
+      {
+        "station_name": "АРХАРА",
+        "station_code": "2034570",
+        "arrival_time": "01:25",
+        "departure_time": "01:27",
+        "waiting_time": "0002",
+        "distance": 8091,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "01:25",
+          "Station": "АРХАРА",
+          "Distance": 8091,
+          "Days": "06",
+          "WaitingTime": "0002",
+          "DepTime": "01:27",
+          "Code": 2034570
+        }
+      },
+      {
+        "station_name": "КУНДУР ХАБ",
+        "station_code": "2034569",
+        "arrival_time": "02:44",
+        "departure_time": "02:45",
+        "waiting_time": "0001",
+        "distance": 8165,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "02:44",
+          "Station": "КУНДУР ХАБ",
+          "Distance": 8165,
+          "Days": "06",
+          "WaitingTime": "0001",
+          "DepTime": "02:45",
+          "Code": 2034569
+        }
+      },
+      {
+        "station_name": "ОБЛУЧЬЕ",
+        "station_code": "2034640",
+        "arrival_time": "03:29",
+        "departure_time": "03:44",
+        "waiting_time": "0015",
+        "distance": 8201,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "03:29",
+          "Station": "ОБЛУЧЬЕ",
+          "Distance": 8201,
+          "Days": "06",
+          "WaitingTime": "0015",
+          "DepTime": "03:44",
+          "Code": 2034640
+        }
+      },
+      {
+        "station_name": "ИЗВЕСТКОВАЯ",
+        "station_code": "2034690",
+        "arrival_time": "04:34",
+        "departure_time": "04:35",
+        "waiting_time": "0001",
+        "distance": 8245,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "04:34",
+          "Station": "ИЗВЕСТКОВАЯ",
+          "Distance": 8245,
+          "Days": "06",
+          "WaitingTime": "0001",
+          "DepTime": "04:35",
+          "Code": 2034690
+        }
+      },
+      {
+        "station_name": "БИРАКАН",
+        "station_code": "2034593",
+        "arrival_time": "04:53",
+        "departure_time": "04:54",
+        "waiting_time": "0001",
+        "distance": 8258,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "04:53",
+          "Station": "БИРАКАН",
+          "Distance": 8258,
+          "Days": "06",
+          "WaitingTime": "0001",
+          "DepTime": "04:54",
+          "Code": 2034593
+        }
+      },
+      {
+        "station_name": "ТЕПЛ ОЗЕРО",
+        "station_code": "2034780",
+        "arrival_time": "05:08",
+        "departure_time": "05:09",
+        "waiting_time": "0001",
+        "distance": 8271,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "05:08",
+          "Station": "ТЕПЛ ОЗЕРО",
+          "Distance": 8271,
+          "Days": "06",
+          "WaitingTime": "0001",
+          "DepTime": "05:09",
+          "Code": 2034780
+        }
+      },
+      {
+        "station_name": "ИЗВЕС ЗАВ",
+        "station_code": "2034517",
+        "arrival_time": "05:18",
+        "departure_time": "05:19",
+        "waiting_time": "0001",
+        "distance": 8276,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "05:18",
+          "Station": "ИЗВЕС ЗАВ",
+          "Distance": 8276,
+          "Days": "06",
+          "WaitingTime": "0001",
+          "DepTime": "05:19",
+          "Code": 2034517
+        }
+      },
+      {
+        "station_name": "БИРА",
+        "station_code": "2034590",
+        "arrival_time": "05:53",
+        "departure_time": "05:54",
+        "waiting_time": "0001",
+        "distance": 8317,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "05:53",
+          "Station": "БИРА",
+          "Distance": 8317,
+          "Days": "06",
+          "WaitingTime": "0001",
+          "DepTime": "05:54",
+          "Code": 2034590
+        }
+      },
+      {
+        "station_name": "БИРОБИДЖАН",
+        "station_code": "2034400",
+        "arrival_time": "06:28",
+        "departure_time": "06:35",
+        "waiting_time": "0007",
+        "distance": 8361,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "06:28",
+          "Station": "БИРОБИДЖАН",
+          "Distance": 8361,
+          "Days": "06",
+          "WaitingTime": "0007",
+          "DepTime": "06:35",
+          "Code": 2034400
+        }
+      },
+      {
+        "station_name": "ИН",
+        "station_code": "2034790",
+        "arrival_time": "07:23",
+        "departure_time": "07:24",
+        "waiting_time": "0001",
+        "distance": 8433,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "07:23",
+          "Station": "ИН",
+          "Distance": 8433,
+          "Days": "06",
+          "WaitingTime": "0001",
+          "DepTime": "07:24",
+          "Code": 2034790
+        }
+      },
+      {
+        "station_name": "ХАБАРОВСК 1",
+        "station_code": "2034001",
+        "arrival_time": "08:50",
+        "departure_time": "10:00",
+        "waiting_time": "0070",
+        "distance": 8534,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "08:50",
+          "Station": "ХАБАРОВСК 1",
+          "Distance": 8534,
+          "Days": "06",
+          "WaitingTime": "0070",
+          "DepTime": "10:00",
+          "Code": 2034001
+        }
+      },
+      {
+        "station_name": "ВЕРИНО",
+        "station_code": "2034623",
+        "arrival_time": "11:11",
+        "departure_time": "11:12",
+        "waiting_time": "0001",
+        "distance": 8601,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "11:11",
+          "Station": "ВЕРИНО",
+          "Distance": 8601,
+          "Days": "06",
+          "WaitingTime": "0001",
+          "DepTime": "11:12",
+          "Code": 2034623
+        }
+      },
+      {
+        "station_name": "ХОР",
+        "station_code": "2034624",
+        "arrival_time": "11:24",
+        "departure_time": "11:25",
+        "waiting_time": "0001",
+        "distance": 8615,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "11:24",
+          "Station": "ХОР",
+          "Distance": 8615,
+          "Days": "06",
+          "WaitingTime": "0001",
+          "DepTime": "11:25",
+          "Code": 2034624
+        }
+      },
+      {
+        "station_name": "ВЯЗЕМСКАЯ",
+        "station_code": "2034610",
+        "arrival_time": "12:05",
+        "departure_time": "12:20",
+        "waiting_time": "0015",
+        "distance": 8662,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "12:05",
+          "Station": "ВЯЗЕМСКАЯ",
+          "Distance": 8662,
+          "Days": "06",
+          "WaitingTime": "0015",
+          "DepTime": "12:20",
+          "Code": 2034610
+        }
+      },
+      {
+        "station_name": "БИКИН",
+        "station_code": "2034580",
+        "arrival_time": "13:51",
+        "departure_time": "13:54",
+        "waiting_time": "0003",
+        "distance": 8767,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "13:51",
+          "Station": "БИКИН",
+          "Distance": 8767,
+          "Days": "06",
+          "WaitingTime": "0003",
+          "DepTime": "13:54",
+          "Code": 2034580
+        }
+      },
+      {
+        "station_name": "ЛУЧЕГОРСК",
+        "station_code": "2034671",
+        "arrival_time": "14:33",
+        "departure_time": "14:38",
+        "waiting_time": "0005",
+        "distance": 8814,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "14:33",
+          "Station": "ЛУЧЕГОРСК",
+          "Distance": 8814,
+          "Days": "06",
+          "WaitingTime": "0005",
+          "DepTime": "14:38",
+          "Code": 2034671
+        }
+      },
+      {
+        "station_name": "ГУБЕРОВО",
+        "station_code": "2034465",
+        "arrival_time": "15:05",
+        "departure_time": "15:07",
+        "waiting_time": "0002",
+        "distance": 8850,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "15:05",
+          "Station": "ГУБЕРОВО",
+          "Distance": 8850,
+          "Days": "06",
+          "WaitingTime": "0002",
+          "DepTime": "15:07",
+          "Code": 2034465
+        }
+      },
+      {
+        "station_name": "ДАЛЬНЕР 1",
+        "station_code": "2034620",
+        "arrival_time": "15:44",
+        "departure_time": "15:49",
+        "waiting_time": "0005",
+        "distance": 8886,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "15:44",
+          "Station": "ДАЛЬНЕР 1",
+          "Distance": 8886,
+          "Days": "06",
+          "WaitingTime": "0005",
+          "DepTime": "15:49",
+          "Code": 2034620
+        }
+      },
+      {
+        "station_name": "РУЖИНО",
+        "station_code": "2034650",
+        "arrival_time": "16:39",
+        "departure_time": "16:54",
+        "waiting_time": "0015",
+        "distance": 8943,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "16:39",
+          "Station": "РУЖИНО",
+          "Distance": 8943,
+          "Days": "06",
+          "WaitingTime": "0015",
+          "DepTime": "16:54",
+          "Code": 2034650
+        }
+      },
+      {
+        "station_name": "ШМАКОВКА",
+        "station_code": "2034514",
+        "arrival_time": "17:29",
+        "departure_time": "17:31",
+        "waiting_time": "0002",
+        "distance": 8987,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "17:29",
+          "Station": "ШМАКОВКА",
+          "Distance": 8987,
+          "Days": "06",
+          "WaitingTime": "0002",
+          "DepTime": "17:31",
+          "Code": 2034514
+        }
+      },
+      {
+        "station_name": "СПАССК ДАЛЬН",
+        "station_code": "2034670",
+        "arrival_time": "18:26",
+        "departure_time": "18:31",
+        "waiting_time": "0005",
+        "distance": 9060,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "18:26",
+          "Station": "СПАССК ДАЛЬН",
+          "Distance": 9060,
+          "Days": "06",
+          "WaitingTime": "0005",
+          "DepTime": "18:31",
+          "Code": 2034670
+        }
+      },
+      {
+        "station_name": "МУЧНАЯ",
+        "station_code": "2034676",
+        "arrival_time": "19:10",
+        "departure_time": "19:12",
+        "waiting_time": "0002",
+        "distance": 9102,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "19:10",
+          "Station": "МУЧНАЯ",
+          "Distance": 9102,
+          "Days": "06",
+          "WaitingTime": "0002",
+          "DepTime": "19:12",
+          "Code": 2034676
+        }
+      },
+      {
+        "station_name": "СИБИРЦЕВО",
+        "station_code": "2034660",
+        "arrival_time": "19:33",
+        "departure_time": "19:35",
+        "waiting_time": "0002",
+        "distance": 9120,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "19:33",
+          "Station": "СИБИРЦЕВО",
+          "Distance": 9120,
+          "Days": "06",
+          "WaitingTime": "0002",
+          "DepTime": "19:35",
+          "Code": 2034660
+        }
+      },
+      {
+        "station_name": "ОЗЕРН ПАДЬ",
+        "station_code": "2034693",
+        "arrival_time": "20:09",
+        "departure_time": "20:11",
+        "waiting_time": "0002",
+        "distance": 9152,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "20:09",
+          "Station": "ОЗЕРН ПАДЬ",
+          "Distance": 9152,
+          "Days": "06",
+          "WaitingTime": "0002",
+          "DepTime": "20:11",
+          "Code": 2034693
+        }
+      },
+      {
+        "station_name": "УССУРИЙСК",
+        "station_code": "2034750",
+        "arrival_time": "20:43",
+        "departure_time": "21:05",
+        "waiting_time": "0022",
+        "distance": 9188,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "20:43",
+          "Station": "УССУРИЙСК",
+          "Distance": 9188,
+          "Days": "06",
+          "WaitingTime": "0022",
+          "DepTime": "21:05",
+          "Code": 2034750
+        }
+      },
+      {
+        "station_name": "УГОЛЬНАЯ",
+        "station_code": "2034740",
+        "arrival_time": "22:30",
+        "departure_time": "22:35",
+        "waiting_time": "0005",
+        "distance": 9267,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "22:30",
+          "Station": "УГОЛЬНАЯ",
+          "Distance": 9267,
+          "Days": "06",
+          "WaitingTime": "0005",
+          "DepTime": "22:35",
+          "Code": 2034740
+        }
+      },
+      {
+        "station_name": "ВЛАДИВОСТОК",
+        "station_code": "2034130",
+        "arrival_time": "23:17",
+        "departure_time": null,
+        "waiting_time": null,
+        "distance": 9300,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "23:17",
+          "Station": "ВЛАДИВОСТОК",
+          "Distance": 9300,
+          "Days": "06",
+          "Code": 2034130
+        }
+      },
+      {
+        "station_name": "СКОВОРОДИНО",
+        "station_code": "2050370",
+        "arrival_time": "11:15",
+        "departure_time": "12:45",
+        "waiting_time": "0090",
+        "distance": 7316,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "11:15",
+          "Station": "СКОВОРОДИНО",
+          "Distance": 7316,
+          "Days": "05",
+          "WaitingTime": "0090",
+          "DepTime": "12:45",
+          "Code": 2050370
+        }
+      },
+      {
+        "station_name": "ШТУРМ",
+        "station_code": "2048040",
+        "arrival_time": "13:55",
+        "departure_time": "13:56",
+        "waiting_time": "0001",
+        "distance": 7364,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "13:55",
+          "Station": "ШТУРМ",
+          "Distance": 7364,
+          "Days": "05",
+          "WaitingTime": "0001",
+          "InvertingTrain": "",
+          "DepTime": "13:56",
+          "Code": 2048040
+        }
+      },
+      {
+        "station_name": "МУРТЫГИТ",
+        "station_code": "2048030",
+        "arrival_time": "14:39",
+        "departure_time": "14:40",
+        "waiting_time": "0001",
+        "distance": 7395,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "14:39",
+          "Station": "МУРТЫГИТ",
+          "Distance": 7395,
+          "Days": "05",
+          "WaitingTime": "0001",
+          "InvertingTrain": "",
+          "DepTime": "14:40",
+          "Code": 2048030
+        }
+      },
+      {
+        "station_name": "ПУРИКАН",
+        "station_code": "2048011",
+        "arrival_time": "15:04",
+        "departure_time": "15:05",
+        "waiting_time": "0001",
+        "distance": 7411,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "15:04",
+          "Station": "ПУРИКАН",
+          "Distance": 7411,
+          "Days": "05",
+          "WaitingTime": "0001",
+          "InvertingTrain": "",
+          "DepTime": "15:05",
+          "Code": 2048011
+        }
+      },
+      {
+        "station_name": "АНОСОВСКАЯ",
+        "station_code": "2048010",
+        "arrival_time": "15:28",
+        "departure_time": "15:30",
+        "waiting_time": "0002",
+        "distance": 7428,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "15:28",
+          "Station": "АНОСОВСКАЯ",
+          "Distance": 7428,
+          "Days": "05",
+          "WaitingTime": "0002",
+          "InvertingTrain": "",
+          "DepTime": "15:30",
+          "Code": 2048010
+        }
+      },
+      {
+        "station_name": "ЗАБОЛОТНОЕ",
+        "station_code": "2048013",
+        "arrival_time": "16:09",
+        "departure_time": "16:11",
+        "waiting_time": "0002",
+        "distance": 7459,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "16:09",
+          "Station": "ЗАБОЛОТНОЕ",
+          "Distance": 7459,
+          "Days": "05",
+          "WaitingTime": "0002",
+          "InvertingTrain": "",
+          "DepTime": "16:11",
+          "Code": 2048013
+        }
+      },
+      {
+        "station_name": "БЕЛЕНЬКАЯ",
+        "station_code": "2048020",
+        "arrival_time": "16:43",
+        "departure_time": "16:45",
+        "waiting_time": "0002",
+        "distance": 7479,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "16:43",
+          "Station": "БЕЛЕНЬКАЯ",
+          "Distance": 7479,
+          "Days": "05",
+          "WaitingTime": "0002",
+          "InvertingTrain": "",
+          "DepTime": "16:45",
+          "Code": 2048020
+        }
+      },
+      {
+        "station_name": "ТЫНДА",
+        "station_code": "2048000",
+        "arrival_time": "17:55",
+        "departure_time": "20:10",
+        "waiting_time": "0135",
+        "distance": 7526,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "17:55",
+          "Station": "ТЫНДА",
+          "Distance": 7526,
+          "Days": "05",
+          "WaitingTime": "0135",
+          "InvertingTrain": "",
+          "DepTime": "20:10",
+          "Code": 2048000
+        }
+      },
+      {
+        "station_name": "МОГОТ",
+        "station_code": "2048018",
+        "arrival_time": "21:36",
+        "departure_time": "21:37",
+        "waiting_time": "0001",
+        "distance": 7597,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "21:36",
+          "Station": "МОГОТ",
+          "Distance": 7597,
+          "Days": "05",
+          "WaitingTime": "0001",
+          "InvertingTrain": "",
+          "DepTime": "21:37",
+          "Code": 2048018
+        }
+      },
+      {
+        "station_name": "РИХАРД ЗОРГЕ",
+        "station_code": "2034544",
+        "arrival_time": "22:04",
+        "departure_time": "22:05",
+        "waiting_time": "0001",
+        "distance": 7617,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "22:04",
+          "Station": "РИХАРД ЗОРГЕ",
+          "Distance": 7617,
+          "Days": "05",
+          "WaitingTime": "0001",
+          "InvertingTrain": "",
+          "DepTime": "22:05",
+          "Code": 2034544
+        }
+      },
+      {
+        "station_name": "ЯКУТСКИЙ",
+        "station_code": "2048019",
+        "arrival_time": "22:27",
+        "departure_time": "22:28",
+        "waiting_time": "0001",
+        "distance": 7633,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "22:27",
+          "Station": "ЯКУТСКИЙ",
+          "Distance": 7633,
+          "Days": "05",
+          "WaitingTime": "0001",
+          "InvertingTrain": "",
+          "DepTime": "22:28",
+          "Code": 2048019
+        }
+      },
+      {
+        "station_name": "НАГОРНАЯ Я",
+        "station_code": "2048025",
+        "arrival_time": "22:44",
+        "departure_time": "22:50",
+        "waiting_time": "0006",
+        "distance": 7646,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "22:44",
+          "Station": "НАГОРНАЯ Я",
+          "Distance": 7646,
+          "Days": "05",
+          "WaitingTime": "0006",
+          "InvertingTrain": "",
+          "DepTime": "22:50",
+          "Code": 2048025
+        }
+      },
+      {
+        "station_name": "АЯМ",
+        "station_code": "2048021",
+        "arrival_time": "23:18",
+        "departure_time": "23:20",
+        "waiting_time": "0002",
+        "distance": 7666,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "23:18",
+          "Station": "АЯМ",
+          "Distance": 7666,
+          "Days": "05",
+          "WaitingTime": "0002",
+          "InvertingTrain": "",
+          "DepTime": "23:20",
+          "Code": 2048021
+        }
+      },
+      {
+        "station_name": "ЗОЛОТИНКА",
+        "station_code": "2048022",
+        "arrival_time": "23:45",
+        "departure_time": "23:49",
+        "waiting_time": "0004",
+        "distance": 7688,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "23:45",
+          "Station": "ЗОЛОТИНКА",
+          "Distance": 7688,
+          "Days": "05",
+          "WaitingTime": "0004",
+          "InvertingTrain": "",
+          "DepTime": "23:49",
+          "Code": 2048022
+        }
+      },
+      {
+        "station_name": "ОКУРДАН",
+        "station_code": "2034035",
+        "arrival_time": "00:11",
+        "departure_time": "00:13",
+        "waiting_time": "0002",
+        "distance": 7713,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "00:11",
+          "Station": "ОКУРДАН",
+          "Distance": 7713,
+          "Days": "06",
+          "WaitingTime": "0002",
+          "InvertingTrain": "",
+          "DepTime": "00:13",
+          "Code": 2034035
+        }
+      },
+      {
+        "station_name": "ОБОРЧО",
+        "station_code": "2048023",
+        "arrival_time": "00:56",
+        "departure_time": "00:57",
+        "waiting_time": "0001",
+        "distance": 7730,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "00:56",
+          "Station": "ОБОРЧО",
+          "Distance": 7730,
+          "Days": "06",
+          "WaitingTime": "0001",
+          "InvertingTrain": "",
+          "DepTime": "00:57",
+          "Code": 2048023
+        }
+      },
+      {
+        "station_name": "БЕРКАКИТ",
+        "station_code": "2048024",
+        "arrival_time": "01:19",
+        "departure_time": "01:21",
+        "waiting_time": "0002",
+        "distance": 7746,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "01:19",
+          "Station": "БЕРКАКИТ",
+          "Distance": 7746,
+          "Days": "06",
+          "WaitingTime": "0002",
+          "InvertingTrain": "",
+          "DepTime": "01:21",
+          "Code": 2048024
+        }
+      },
+      {
+        "station_name": "НЕРЮНГРИ П",
+        "station_code": "2048090",
+        "arrival_time": "01:33",
+        "departure_time": null,
+        "waiting_time": null,
+        "distance": 7755,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "01:33",
+          "Station": "НЕРЮНГРИ П",
+          "Distance": 7755,
+          "Days": "06",
+          "InvertingTrain": "",
+          "Code": 2048090
+        }
+      },
+      {
+        "station_name": [
+          "НОВОСИБ ГЛ",
+          "НЕРЮНГРИ П"
+        ],
+        "station_code": null,
+        "arrival_time": null,
+        "departure_time": null,
+        "waiting_time": null,
+        "distance": null,
+        "raw": {
+          "Station": [
+            "НОВОСИБ ГЛ",
+            "НЕРЮНГРИ П"
+          ],
+          "CodeFrom": 2044001,
+          "CodeTo": 2048090
+        }
+      },
+      {
+        "station_name": "БЕЛОГОРСК",
+        "station_code": "2050330",
+        "arrival_time": "21:18",
+        "departure_time": "00:18",
+        "waiting_time": "0180",
+        "distance": 7876,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "21:18",
+          "Station": "БЕЛОГОРСК",
+          "TailForward": "",
+          "Distance": 7876,
+          "Days": "06",
+          "WaitingTime": "0180",
+          "InvertingTrain": "",
+          "DepTime": "00:18",
+          "Code": 2050330
+        }
+      },
+      {
+        "station_name": "БЛАГОВЕЩЕНСК",
+        "station_code": "2050300",
+        "arrival_time": "02:20",
+        "departure_time": null,
+        "waiting_time": null,
+        "distance": 7985,
+        "raw": {
+          "DiffTime": "06",
+          "ArvTime": "02:20",
+          "Station": "БЛАГОВЕЩЕНСК",
+          "TailForward": "",
+          "Distance": 7985,
+          "Days": "06",
+          "InvertingTrain": "",
+          "Code": 2050300
+        }
+      },
+      {
+        "station_name": [
+          "МОСКВА ЯР",
+          "БЛАГОВЕЩЕНСК"
+        ],
+        "station_code": null,
+        "arrival_time": null,
+        "departure_time": null,
+        "waiting_time": null,
+        "distance": null,
+        "raw": {
+          "Station": [
+            "МОСКВА ЯР",
+            "БЛАГОВЕЩЕНСК"
+          ],
+          "CodeFrom": 2000002,
+          "CodeTo": 2050300
+        }
+      },
+      {
+        "station_name": "УССУРИЙСК",
+        "station_code": "2034750",
+        "arrival_time": "20:43",
+        "departure_time": "22:00",
+        "waiting_time": "0077",
+        "distance": 9188,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "20:43",
+          "Station": "УССУРИЙСК",
+          "Distance": 9188,
+          "Days": "06",
+          "WaitingTime": "0077",
+          "DepTime": "22:00",
+          "Code": 2034750
+        }
+      },
+      {
+        "station_name": "АРТЕМ",
+        "station_code": "2035670",
+        "arrival_time": "23:26",
+        "departure_time": "23:27",
+        "waiting_time": "0001",
+        "distance": 9276,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "23:26",
+          "Station": "АРТЕМ",
+          "Distance": 9276,
+          "Days": "06",
+          "WaitingTime": "0001",
+          "DepTime": "23:27",
+          "Code": 2035670
+        }
+      },
+      {
+        "station_name": "СМОЛЯНИН",
+        "station_code": "2034730",
+        "arrival_time": "00:08",
+        "departure_time": "00:33",
+        "waiting_time": "0025",
+        "distance": 9311,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "00:08",
+          "Station": "СМОЛЯНИН",
+          "Distance": 9311,
+          "Days": "07",
+          "WaitingTime": "0025",
+          "DepTime": "00:33",
+          "Code": 2034730
+        }
+      },
+      {
+        "station_name": "ПАРТИЗАНСК",
+        "station_code": "2034715",
+        "arrival_time": "02:04",
+        "departure_time": "02:08",
+        "waiting_time": "0004",
+        "distance": 9395,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "02:04",
+          "Station": "ПАРТИЗАНСК",
+          "Distance": 9395,
+          "Days": "07",
+          "WaitingTime": "0004",
+          "DepTime": "02:08",
+          "Code": 2034715
+        }
+      },
+      {
+        "station_name": "НАХОДКА",
+        "station_code": "2034721",
+        "arrival_time": "02:53",
+        "departure_time": "03:03",
+        "waiting_time": "0010",
+        "distance": 9436,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "02:53",
+          "Station": "НАХОДКА",
+          "Distance": 9436,
+          "Days": "07",
+          "WaitingTime": "0010",
+          "DepTime": "03:03",
+          "Code": 2034721
+        }
+      },
+      {
+        "station_name": "ТИХООКЕАНС",
+        "station_code": "2034770",
+        "arrival_time": "03:20",
+        "departure_time": null,
+        "waiting_time": null,
+        "distance": 9446,
+        "raw": {
+          "DiffTime": "07",
+          "ArvTime": "03:20",
+          "Station": "ТИХООКЕАНС",
+          "Distance": 9446,
+          "Days": "07",
+          "Code": 2034770
+        }
+      },
+      {
+        "station_name": [
+          "ХАБАРОВСК 1",
+          "ТИХООКЕАНС"
+        ],
+        "station_code": null,
+        "arrival_time": null,
+        "departure_time": null,
+        "waiting_time": null,
+        "distance": null,
+        "raw": {
+          "Station": [
+            "ХАБАРОВСК 1",
+            "ТИХООКЕАНС"
+          ],
+          "CodeFrom": 2034001,
+          "CodeTo": 2034770
+        }
+      }
+    ],
+    "raw": {
+      "GtExpress_Response": {
+        "ReqExpressZK": "0915345",
+        "ReqLocalRecv": "01.05.2026 16:42:50",
+        "ReqLocalSend": "01.05.2026 16:42:50",
+        "ReqAddress": "KUZD:2043",
+        "Train": {
+          "Route": {
+            "Station": [
+              "МОСКВА ЯР",
+              "ВЛАДИВОСТОК"
+            ],
+            "CodeFrom": 2000002,
+            "CodeTo": 2034130
+          },
+          "Number": "002Э"
+        },
+        "Version": "2.7.116",
+        "Routes": [
+          {
+            "Stop": [
+              {
+                "Station": "МОСКВА ЯР",
+                "Distance": 0,
+                "Days": "00",
+                "DepTime": "01:00",
+                "Code": 2000002
+              },
+              {
+                "ArvTime": "02:32",
+                "Station": "АЛЕКСАНД 1",
+                "Distance": 112,
+                "Days": "00",
+                "WaitingTime": "0002",
+                "DepTime": "02:34",
+                "Code": 2000920
+              },
+              {
+                "ArvTime": "03:49",
+                "Station": "РОСТОВ ВЕЛИК",
+                "Distance": 224,
+                "Days": "00",
+                "WaitingTime": "0001",
+                "DepTime": "03:50",
+                "Code": 2010226
+              },
+              {
+                "ArvTime": "04:36",
+                "Station": "ЯРОСЛАВЛЬ",
+                "Distance": 280,
+                "Days": "00",
+                "WaitingTime": "0003",
+                "DepTime": "04:39",
+                "Code": 2010002
+              },
+              {
+                "ArvTime": "05:27",
+                "Station": "НЕРЕХТА",
+                "Distance": 330,
+                "Days": "00",
+                "WaitingTime": "0005",
+                "DepTime": "05:32",
+                "Code": 2010215
+              },
+              {
+                "ArvTime": "06:30",
+                "Station": "КОСТРОМА Н",
+                "Distance": 376,
+                "Days": "00",
+                "WaitingTime": "0045",
+                "DepTime": "07:15",
+                "Code": 2010090
+              },
+              {
+                "ArvTime": "08:16",
+                "Station": "СУДИСЛАВЛЬ",
+                "Distance": 429,
+                "Days": "00",
+                "WaitingTime": "0002",
+                "DepTime": "08:18",
+                "Code": 2010287
+              },
+              {
+                "ArvTime": "09:45",
+                "Station": "ГАЛИЧ",
+                "Distance": 502,
+                "Days": "00",
+                "WaitingTime": "0040",
+                "DepTime": "10:25",
+                "Code": 2010269
+              },
+              {
+                "ArvTime": "11:03",
+                "Station": "АНТРОПОВО",
+                "Distance": 548,
+                "Days": "00",
+                "WaitingTime": "0001",
+                "DepTime": "11:04",
+                "Code": 2010264
+              },
+              {
+                "ArvTime": "11:27",
+                "Station": "НИК ПОЛОМА",
+                "Distance": 572,
+                "Days": "00",
+                "WaitingTime": "0002",
+                "DepTime": "11:29",
+                "Code": 2010261
+              },
+              {
+                "ArvTime": "11:42",
+                "Station": "НОМЖА",
+                "Distance": 583,
+                "Days": "00",
+                "WaitingTime": "0001",
+                "DepTime": "11:43",
+                "Code": 2010259
+              },
+              {
+                "ArvTime": "11:59",
+                "Station": "НЕЯ",
+                "Distance": 601,
+                "Days": "00",
+                "WaitingTime": "0001",
+                "DepTime": "12:00",
+                "Code": 2010257
+              },
+              {
+                "ArvTime": "12:24",
+                "Station": "БРАНТОВКА",
+                "Distance": 629,
+                "Days": "00",
+                "WaitingTime": "0001",
+                "DepTime": "12:25",
+                "Code": 2010322
+              },
+              {
+                "ArvTime": "12:54",
+                "Station": "МАНТУРОВО",
+                "Distance": 654,
+                "Days": "00",
+                "WaitingTime": "0002",
+                "DepTime": "12:56",
+                "Code": 2010254
+              },
+              {
+                "ArvTime": "13:40",
+                "Station": "ШАРЬЯ",
+                "Distance": 702,
+                "Days": "00",
+                "WaitingTime": "0014",
+                "DepTime": "13:54",
+                "Code": 2010249
+              },
+              {
+                "ArvTime": "14:17",
+                "Station": "ЯКШАНГА",
+                "Distance": 725,
+                "Days": "00",
+                "WaitingTime": "0001",
+                "DepTime": "14:18",
+                "Code": 2010246
+              },
+              {
+                "ArvTime": "14:37",
+                "Station": "ПОНАЗЫРЕВО",
+                "Distance": 748,
+                "Days": "00",
+                "WaitingTime": "0001",
+                "DepTime": "14:38",
+                "Code": 2010244
+              },
+              {
+                "ArvTime": "14:50",
+                "Station": "СУПРОТИВНЫЙ",
+                "Distance": 758,
+                "Days": "00",
+                "WaitingTime": "0001",
+                "DepTime": "14:51",
+                "Code": 2010243
+              },
+              {
+                "ArvTime": "15:05",
+                "Station": "ГОСТОВСКАЯ",
+                "Distance": 770,
+                "Days": "00",
+                "WaitingTime": "0001",
+                "DepTime": "15:06",
+                "Code": 2010241
+              },
+              {
+                "ArvTime": "15:35",
+                "Station": "ШАБАЛИНО",
+                "Distance": 796,
+                "Days": "00",
+                "WaitingTime": "0002",
+                "DepTime": "15:37",
+                "Code": 2010237
+              },
+              {
+                "ArvTime": "15:57",
+                "Station": "СВЕЧА",
+                "Distance": 819,
+                "Days": "00",
+                "WaitingTime": "0002",
+                "DepTime": "15:59",
+                "Code": 2010260
+              },
+              {
+                "ArvTime": "16:49",
+                "Station": "КОТЕЛЬНИЧ1",
+                "Distance": 871,
+                "Days": "00",
+                "WaitingTime": "0002",
+                "DepTime": "16:51",
+                "Code": 2060450
+              },
+              {
+                "ArvTime": "18:12",
+                "Station": "КИРОВ ПАСС",
+                "Distance": 958,
+                "Days": "00",
+                "WaitingTime": "0025",
+                "DepTime": "18:37",
+                "Code": 2060600
+              },
+              {
+                "DiffTime": "01",
+                "ArvTime": "22:04",
+                "Station": "ГЛАЗОВ",
+                "Distance": 1166,
+                "Days": "00",
+                "WaitingTime": "0003",
+                "DepTime": "22:07",
+                "Code": 2060530
+              },
+              {
+                "DiffTime": "01",
+                "ArvTime": "22:37",
+                "Station": "БАЛЕЗИНО",
+                "Distance": 1195,
+                "Days": "00",
+                "WaitingTime": "0030",
+                "DepTime": "23:07",
+                "Code": 2060506
+              },
+              {
+                "DiffTime": "02",
+                "ArvTime": "01:18",
+                "Station": "ВЕРЕЩАГИНО",
+                "Distance": 1318,
+                "Days": "01",
+                "WaitingTime": "0002",
+                "DepTime": "01:20",
+                "Code": 2030010
+              },
+              {
+                "DiffTime": "02",
+                "ArvTime": "03:28",
+                "Station": "ПЕРМЬ 2",
+                "Distance": 1438,
+                "Days": "01",
+                "WaitingTime": "0023",
+                "DepTime": "03:51",
+                "Code": 2030400
+              },
+              {
+                "DiffTime": "02",
+                "ArvTime": "05:33",
+                "Station": "КУНГУР",
+                "Distance": 1539,
+                "Days": "01",
+                "WaitingTime": "0002",
+                "DepTime": "05:35",
+                "Code": 2030020
+              },
+              {
+                "DiffTime": "02",
+                "ArvTime": "09:35",
+                "Station": "ЕКАТЕРИНБ П",
+                "Distance": 1819,
+                "Days": "01",
+                "WaitingTime": "0035",
+                "DepTime": "10:10",
+                "Code": 2030000
+              },
+              {
+                "DiffTime": "02",
+                "ArvTime": "15:18",
+                "Station": "ТЮМЕНЬ",
+                "Distance": 2145,
+                "Days": "01",
+                "WaitingTime": "0019",
+                "DepTime": "15:37",
+                "Code": 2030100
+              },
+              {
+                "DiffTime": "02",
+                "ArvTime": "16:58",
+                "Station": "ЯЛУТОРОВСК",
+                "Distance": 2219,
+                "Days": "01",
+                "WaitingTime": "0002",
+                "DepTime": "17:00",
+                "Code": 2030263
+              },
+              {
+                "DiffTime": "02",
+                "ArvTime": "19:45",
+                "Station": "ИШИМ",
+                "Distance": 2434,
+                "Days": "01",
+                "WaitingTime": "0005",
+                "DepTime": "19:50",
+                "Code": 2030280
+              },
+              {
+                "DiffTime": "02",
+                "ArvTime": "20:31",
+                "Station": "МАСЛЯНСКАЯ",
+                "Distance": 2481,
+                "Days": "01",
+                "WaitingTime": "0002",
+                "DepTime": "20:33",
+                "Code": 2030279
+              },
+              {
+                "DiffTime": "03",
+                "ArvTime": "21:41",
+                "Station": "НАЗЫВАЕВСК",
+                "Distance": 2568,
+                "Days": "01",
+                "WaitingTime": "0002",
+                "DepTime": "21:43",
+                "Code": 2044990
+              },
+              {
+                "DiffTime": "03",
+                "ArvTime": "23:15",
+                "Station": "ОМСК-ПАСС",
+                "Distance": 2717,
+                "Days": "01",
+                "WaitingTime": "0016",
+                "DepTime": "23:31",
+                "Code": 2044700
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "01:23",
+                "Station": "ТАТАРСКАЯ",
+                "Distance": 2886,
+                "Days": "02",
+                "WaitingTime": "0002",
+                "DepTime": "01:25",
+                "Code": 2044820
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "01:58",
+                "Station": "ЧАНЫ",
+                "Distance": 2938,
+                "Days": "02",
+                "WaitingTime": "0002",
+                "DepTime": "02:00",
+                "Code": 2044850
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "02:12",
+                "Station": "ОЗ КАРАЧИН",
+                "Distance": 2950,
+                "Days": "02",
+                "WaitingTime": "0005",
+                "DepTime": "02:17",
+                "Code": 2044758
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "03:27",
+                "Station": "БАРАБИНСК",
+                "Distance": 3041,
+                "Days": "02",
+                "WaitingTime": "0030",
+                "DepTime": "03:57",
+                "Code": 2044690
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "05:31",
+                "Station": "КАРГАТ",
+                "Distance": 3166,
+                "Days": "02",
+                "WaitingTime": "0002",
+                "DepTime": "05:33",
+                "Code": 2044770
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "07:30",
+                "Station": "ОБЬ",
+                "Distance": 3327,
+                "Days": "02",
+                "WaitingTime": "0002",
+                "DepTime": "07:32",
+                "Code": 2044773
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "07:54",
+                "Station": "НОВОСИБ ГЛ",
+                "Distance": 3344,
+                "Days": "02",
+                "WaitingTime": "0065",
+                "DepTime": "08:59",
+                "Code": 2044001
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "09:49",
+                "Station": "МОШКОВО",
+                "Distance": 3402,
+                "Days": "02",
+                "WaitingTime": "0002",
+                "DepTime": "09:51",
+                "Code": 2044778
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "10:55",
+                "Station": "БОЛОТНАЯ",
+                "Distance": 3470,
+                "Days": "02",
+                "WaitingTime": "0017",
+                "DepTime": "11:12",
+                "Code": 2044930
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "11:41",
+                "Station": "ЮРГА 1",
+                "Distance": 3500,
+                "Days": "02",
+                "WaitingTime": "0005",
+                "DepTime": "11:46",
+                "Code": 2028190
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "12:57",
+                "Station": "ТАЙГА",
+                "Distance": 3573,
+                "Days": "02",
+                "WaitingTime": "0004",
+                "DepTime": "13:01",
+                "Code": 2028180
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "13:31",
+                "Station": "АНЖЕРСКАЯ",
+                "Distance": 3604,
+                "Days": "02",
+                "WaitingTime": "0002",
+                "DepTime": "13:33",
+                "Code": 2028010
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "15:08",
+                "Station": "МАРИИНСК",
+                "Distance": 3721,
+                "Days": "02",
+                "WaitingTime": "0034",
+                "DepTime": "15:42",
+                "Code": 2038060
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "16:33",
+                "Station": "ТЯЖИН",
+                "Distance": 3781,
+                "Days": "02",
+                "WaitingTime": "0002",
+                "DepTime": "16:35",
+                "Code": 2038131
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "17:34",
+                "Station": "БОГОТОЛ",
+                "Distance": 3854,
+                "Days": "02",
+                "WaitingTime": "0002",
+                "DepTime": "17:36",
+                "Code": 2038155
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "18:36",
+                "Station": "АЧИНСК 1",
+                "Distance": 3922,
+                "Days": "02",
+                "WaitingTime": "0004",
+                "DepTime": "18:40",
+                "Code": 2038210
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "21:32",
+                "Station": "КРАСНОЯРСК П",
+                "Distance": 4106,
+                "Days": "02",
+                "WaitingTime": "0051",
+                "DepTime": "22:23",
+                "Code": 2038001
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "00:18",
+                "Station": "УЯР",
+                "Distance": 4237,
+                "Days": "03",
+                "WaitingTime": "0002",
+                "DepTime": "00:20",
+                "Code": 2038211
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "00:55",
+                "Station": "ЗАОЗЕРНАЯ",
+                "Distance": 4272,
+                "Days": "03",
+                "WaitingTime": "0002",
+                "DepTime": "00:57",
+                "Code": 2038175
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "02:04",
+                "Station": "КАНСК ЕНИС",
+                "Distance": 4353,
+                "Days": "03",
+                "WaitingTime": "0003",
+                "DepTime": "02:07",
+                "Code": 2038240
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "02:35",
+                "Station": "ИЛАНСКАЯ",
+                "Distance": 4385,
+                "Days": "03",
+                "WaitingTime": "0017",
+                "DepTime": "02:52",
+                "Code": 2038195
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "03:22",
+                "Station": "ИНГАШСКАЯ",
+                "Distance": 4414,
+                "Days": "03",
+                "WaitingTime": "0001",
+                "DepTime": "03:23",
+                "Code": 2038185
+              },
+              {
+                "DiffTime": "04",
+                "ArvTime": "04:03",
+                "Station": "РЕШОТЫ",
+                "Distance": 4461,
+                "Days": "03",
+                "WaitingTime": "0003",
+                "DepTime": "04:06",
+                "Code": 2038235
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "04:47",
+                "Station": "ЮРТЫ",
+                "Distance": 4498,
+                "Days": "03",
+                "WaitingTime": "0002",
+                "DepTime": "04:49",
+                "Code": 2054223
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "05:17",
+                "Station": "ТАЙШЕТ",
+                "Distance": 4524,
+                "Days": "03",
+                "WaitingTime": "0003",
+                "DepTime": "05:20",
+                "Code": 2054120
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "07:50",
+                "Station": "НИЖНЕУДИНСК",
+                "Distance": 4688,
+                "Days": "03",
+                "WaitingTime": "0013",
+                "DepTime": "08:03",
+                "Code": 2054310
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "09:37",
+                "Station": "ТУЛУН",
+                "Distance": 4804,
+                "Days": "03",
+                "WaitingTime": "0003",
+                "DepTime": "09:40",
+                "Code": 2054550
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "10:40",
+                "Station": "КУЙТУН",
+                "Distance": 4883,
+                "Days": "03",
+                "WaitingTime": "0002",
+                "DepTime": "10:42",
+                "Code": 2054325
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "11:33",
+                "Station": "ЗИМА",
+                "Distance": 4943,
+                "Days": "03",
+                "WaitingTime": "0027",
+                "DepTime": "12:00",
+                "Code": 2054280
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "12:51",
+                "Station": "ЗАЛАРИ",
+                "Distance": 4998,
+                "Days": "03",
+                "WaitingTime": "0002",
+                "DepTime": "12:53",
+                "Code": 2054315
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "13:59",
+                "Station": "ЧЕРЕМХОВО",
+                "Distance": 5063,
+                "Days": "03",
+                "WaitingTime": "0002",
+                "DepTime": "14:01",
+                "Code": 2054305
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "14:58",
+                "Station": "УСОЛ СИБИР",
+                "Distance": 5126,
+                "Days": "03",
+                "WaitingTime": "0002",
+                "DepTime": "15:00",
+                "Code": 2054795
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "15:26",
+                "Station": "АНГАРСК",
+                "Distance": 5154,
+                "Days": "03",
+                "WaitingTime": "0003",
+                "DepTime": "15:29",
+                "Code": 2054260
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "16:04",
+                "Station": "ИРКУТ СОРТ",
+                "Distance": 5186,
+                "Days": "03",
+                "WaitingTime": "0002",
+                "DepTime": "16:06",
+                "Code": 2054002
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "16:19",
+                "Station": "ИРКУТСК ПАСС",
+                "Distance": 5194,
+                "Days": "03",
+                "WaitingTime": "0043",
+                "DepTime": "17:02",
+                "Code": 2054001
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "19:40",
+                "Station": "СЛЮДЯНКА 1",
+                "Distance": 5320,
+                "Days": "03",
+                "WaitingTime": "0002",
+                "DepTime": "19:42",
+                "Code": 2054320
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "20:26",
+                "Station": "БАЙКАЛЬСК",
+                "Distance": 5361,
+                "Days": "03",
+                "WaitingTime": "0002",
+                "DepTime": "20:28",
+                "Code": 2054546
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "22:17",
+                "Station": "МЫСОВАЯ",
+                "Distance": 5486,
+                "Days": "03",
+                "WaitingTime": "0002",
+                "DepTime": "22:19",
+                "Code": 2054745
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "23:18",
+                "Station": "ТИМЛЮЙ",
+                "Distance": 5552,
+                "Days": "03",
+                "WaitingTime": "0001",
+                "DepTime": "23:19",
+                "Code": 2054560
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "23:37",
+                "Station": "СЕЛЕНГА",
+                "Distance": 5570,
+                "Days": "03",
+                "WaitingTime": "0002",
+                "DepTime": "23:39",
+                "Code": 2054765
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "01:01",
+                "Station": "УЛАН УДЭ П",
+                "Distance": 5650,
+                "Days": "04",
+                "WaitingTime": "0030",
+                "DepTime": "01:31",
+                "Code": 2054785
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "02:42",
+                "Station": "ЗАИГРАЕВО",
+                "Distance": 5707,
+                "Days": "04",
+                "WaitingTime": "0002",
+                "DepTime": "02:44",
+                "Code": 2054554
+              },
+              {
+                "DiffTime": "05",
+                "ArvTime": "03:37",
+                "Station": "ГОРХОН",
+                "Distance": 5759,
+                "Days": "04",
+                "WaitingTime": "0002",
+                "DepTime": "03:39",
+                "Code": 2054558
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "04:21",
+                "Station": "ПЕТР ЗАВОД",
+                "Distance": 5793,
+                "Days": "04",
+                "WaitingTime": "0005",
+                "DepTime": "04:26",
+                "Code": 2050410
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "06:03",
+                "Station": "БАДА",
+                "Distance": 5892,
+                "Days": "04",
+                "WaitingTime": "0002",
+                "DepTime": "06:05",
+                "Code": 2050498
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "07:08",
+                "Station": "ХИЛОК",
+                "Distance": 5943,
+                "Days": "04",
+                "WaitingTime": "0021",
+                "DepTime": "07:29",
+                "Code": 2050490
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "08:15",
+                "Station": "ХУШЕНГА",
+                "Distance": 5980,
+                "Days": "04",
+                "WaitingTime": "0002",
+                "DepTime": "08:17",
+                "Code": 2050356
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "08:38",
+                "Station": "ХАРАГУН",
+                "Distance": 6002,
+                "Days": "04",
+                "WaitingTime": "0002",
+                "DepTime": "08:40",
+                "Code": 2050357
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "09:32",
+                "Station": "МОГЗОН",
+                "Distance": 6063,
+                "Days": "04",
+                "WaitingTime": "0002",
+                "DepTime": "09:34",
+                "Code": 2050341
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "12:14",
+                "Station": "ЧИТА 2",
+                "Distance": 6207,
+                "Days": "04",
+                "WaitingTime": "0036",
+                "DepTime": "12:50",
+                "Code": 2050001
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "15:03",
+                "Station": "КАРЫМСКАЯ",
+                "Distance": 6303,
+                "Days": "04",
+                "WaitingTime": "0018",
+                "DepTime": "15:21",
+                "Code": 2050480
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "17:19",
+                "Station": "СОЛНЦЕВАЯ",
+                "Distance": 6416,
+                "Days": "04",
+                "WaitingTime": "0002",
+                "DepTime": "17:21",
+                "Code": 2050540
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "18:02",
+                "Station": "ШИЛКА ПАСС",
+                "Distance": 6454,
+                "Days": "04",
+                "WaitingTime": "0002",
+                "DepTime": "18:04",
+                "Code": 2050440
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "18:48",
+                "Station": "ПРИИСКОВАЯ",
+                "Distance": 6499,
+                "Days": "04",
+                "WaitingTime": "0002",
+                "DepTime": "18:50",
+                "Code": 2050390
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "19:30",
+                "Station": "КУЭНГА",
+                "Distance": 6535,
+                "Days": "04",
+                "WaitingTime": "0003",
+                "DepTime": "19:33",
+                "Code": 2050338
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "20:41",
+                "Station": "ЧЕРНЫШ ЗАБ",
+                "Distance": 6596,
+                "Days": "04",
+                "WaitingTime": "0030",
+                "DepTime": "21:11",
+                "Code": 2050470
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "22:37",
+                "Station": "ЗИЛОВО",
+                "Distance": 6679,
+                "Days": "04",
+                "WaitingTime": "0002",
+                "DepTime": "22:39",
+                "Code": 2050417
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "00:10",
+                "Station": "СБЕГА",
+                "Distance": 6768,
+                "Days": "05",
+                "WaitingTime": "0001",
+                "DepTime": "00:11",
+                "Code": 2050422
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "00:56",
+                "Station": "КСЕНЬЕВСК",
+                "Distance": 6809,
+                "Days": "05",
+                "WaitingTime": "0002",
+                "DepTime": "00:58",
+                "Code": 2050339
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "02:57",
+                "Station": "МОГОЧА",
+                "Distance": 6917,
+                "Days": "05",
+                "WaitingTime": "0025",
+                "DepTime": "03:22",
+                "Code": 2050510
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "05:02",
+                "Station": "АМАЗАР",
+                "Distance": 7015,
+                "Days": "05",
+                "WaitingTime": "0005",
+                "DepTime": "05:07",
+                "Code": 2050344
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "07:06",
+                "Station": "ЕРОФЕЙ ПАВЛ",
+                "Distance": 7122,
+                "Days": "05",
+                "WaitingTime": "0021",
+                "DepTime": "07:27",
+                "Code": 2050337
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "09:26",
+                "Station": "УРУША",
+                "Distance": 7220,
+                "Days": "05",
+                "WaitingTime": "0002",
+                "DepTime": "09:28",
+                "Code": 2050335
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "11:15",
+                "Station": "СКОВОРОДИНО",
+                "Distance": 7316,
+                "Days": "05",
+                "WaitingTime": "0046",
+                "DepTime": "12:01",
+                "Code": 2050370
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "13:46",
+                "Station": "ТАЛДАН",
+                "Distance": 7411,
+                "Days": "05",
+                "WaitingTime": "0001",
+                "DepTime": "13:47",
+                "Code": 2050333
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "15:28",
+                "Station": "МАГДАГАЧИ",
+                "Distance": 7504,
+                "Days": "05",
+                "WaitingTime": "0015",
+                "DepTime": "15:43",
+                "Code": 2050430
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "16:45",
+                "Station": "ТЫГДА",
+                "Distance": 7569,
+                "Days": "05",
+                "WaitingTime": "0005",
+                "DepTime": "16:50",
+                "Code": 2050380
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "17:29",
+                "Station": "УШУМУН",
+                "Distance": 7612,
+                "Days": "05",
+                "WaitingTime": "0002",
+                "DepTime": "17:31",
+                "Code": 2050332
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "19:01",
+                "Station": "ШИМАНОВСК",
+                "Distance": 7734,
+                "Days": "05",
+                "WaitingTime": "0002",
+                "DepTime": "19:03",
+                "Code": 2050450
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "19:43",
+                "Station": "ЛЕДЯНАЯ",
+                "Distance": 7775,
+                "Days": "05",
+                "WaitingTime": "0001",
+                "DepTime": "19:44",
+                "Code": 2050336
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "20:20",
+                "Station": "СВОБОДНЫЙ",
+                "Distance": 7818,
+                "Days": "05",
+                "WaitingTime": "0005",
+                "DepTime": "20:25",
+                "Code": 2050340
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "21:18",
+                "Station": "БЕЛОГОРСК",
+                "Distance": 7876,
+                "Days": "05",
+                "WaitingTime": "0050",
+                "DepTime": "22:08",
+                "Code": 2050330
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "23:21",
+                "Station": "ЕКАТЕРИНОС",
+                "Distance": 7955,
+                "Days": "05",
+                "WaitingTime": "0002",
+                "DepTime": "23:23",
+                "Code": 2050520
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "23:59",
+                "Station": "ЗАВИТАЯ",
+                "Distance": 7995,
+                "Days": "06",
+                "WaitingTime": "0002",
+                "DepTime": "00:01",
+                "Code": 2050334
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "00:38",
+                "Station": "БУРЕЯ",
+                "Distance": 8040,
+                "Days": "06",
+                "WaitingTime": "0005",
+                "DepTime": "00:43",
+                "Code": 2050360
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "01:25",
+                "Station": "АРХАРА",
+                "Distance": 8091,
+                "Days": "06",
+                "WaitingTime": "0002",
+                "DepTime": "01:27",
+                "Code": 2034570
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "02:44",
+                "Station": "КУНДУР ХАБ",
+                "Distance": 8165,
+                "Days": "06",
+                "WaitingTime": "0001",
+                "DepTime": "02:45",
+                "Code": 2034569
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "03:29",
+                "Station": "ОБЛУЧЬЕ",
+                "Distance": 8201,
+                "Days": "06",
+                "WaitingTime": "0015",
+                "DepTime": "03:44",
+                "Code": 2034640
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "04:34",
+                "Station": "ИЗВЕСТКОВАЯ",
+                "Distance": 8245,
+                "Days": "06",
+                "WaitingTime": "0001",
+                "DepTime": "04:35",
+                "Code": 2034690
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "04:53",
+                "Station": "БИРАКАН",
+                "Distance": 8258,
+                "Days": "06",
+                "WaitingTime": "0001",
+                "DepTime": "04:54",
+                "Code": 2034593
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "05:08",
+                "Station": "ТЕПЛ ОЗЕРО",
+                "Distance": 8271,
+                "Days": "06",
+                "WaitingTime": "0001",
+                "DepTime": "05:09",
+                "Code": 2034780
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "05:18",
+                "Station": "ИЗВЕС ЗАВ",
+                "Distance": 8276,
+                "Days": "06",
+                "WaitingTime": "0001",
+                "DepTime": "05:19",
+                "Code": 2034517
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "05:53",
+                "Station": "БИРА",
+                "Distance": 8317,
+                "Days": "06",
+                "WaitingTime": "0001",
+                "DepTime": "05:54",
+                "Code": 2034590
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "06:28",
+                "Station": "БИРОБИДЖАН",
+                "Distance": 8361,
+                "Days": "06",
+                "WaitingTime": "0007",
+                "DepTime": "06:35",
+                "Code": 2034400
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "07:23",
+                "Station": "ИН",
+                "Distance": 8433,
+                "Days": "06",
+                "WaitingTime": "0001",
+                "DepTime": "07:24",
+                "Code": 2034790
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "08:50",
+                "Station": "ХАБАРОВСК 1",
+                "Distance": 8534,
+                "Days": "06",
+                "WaitingTime": "0070",
+                "DepTime": "10:00",
+                "Code": 2034001
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "11:11",
+                "Station": "ВЕРИНО",
+                "Distance": 8601,
+                "Days": "06",
+                "WaitingTime": "0001",
+                "DepTime": "11:12",
+                "Code": 2034623
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "11:24",
+                "Station": "ХОР",
+                "Distance": 8615,
+                "Days": "06",
+                "WaitingTime": "0001",
+                "DepTime": "11:25",
+                "Code": 2034624
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "12:05",
+                "Station": "ВЯЗЕМСКАЯ",
+                "Distance": 8662,
+                "Days": "06",
+                "WaitingTime": "0015",
+                "DepTime": "12:20",
+                "Code": 2034610
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "13:51",
+                "Station": "БИКИН",
+                "Distance": 8767,
+                "Days": "06",
+                "WaitingTime": "0003",
+                "DepTime": "13:54",
+                "Code": 2034580
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "14:33",
+                "Station": "ЛУЧЕГОРСК",
+                "Distance": 8814,
+                "Days": "06",
+                "WaitingTime": "0005",
+                "DepTime": "14:38",
+                "Code": 2034671
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "15:05",
+                "Station": "ГУБЕРОВО",
+                "Distance": 8850,
+                "Days": "06",
+                "WaitingTime": "0002",
+                "DepTime": "15:07",
+                "Code": 2034465
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "15:44",
+                "Station": "ДАЛЬНЕР 1",
+                "Distance": 8886,
+                "Days": "06",
+                "WaitingTime": "0005",
+                "DepTime": "15:49",
+                "Code": 2034620
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "16:39",
+                "Station": "РУЖИНО",
+                "Distance": 8943,
+                "Days": "06",
+                "WaitingTime": "0015",
+                "DepTime": "16:54",
+                "Code": 2034650
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "17:29",
+                "Station": "ШМАКОВКА",
+                "Distance": 8987,
+                "Days": "06",
+                "WaitingTime": "0002",
+                "DepTime": "17:31",
+                "Code": 2034514
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "18:26",
+                "Station": "СПАССК ДАЛЬН",
+                "Distance": 9060,
+                "Days": "06",
+                "WaitingTime": "0005",
+                "DepTime": "18:31",
+                "Code": 2034670
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "19:10",
+                "Station": "МУЧНАЯ",
+                "Distance": 9102,
+                "Days": "06",
+                "WaitingTime": "0002",
+                "DepTime": "19:12",
+                "Code": 2034676
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "19:33",
+                "Station": "СИБИРЦЕВО",
+                "Distance": 9120,
+                "Days": "06",
+                "WaitingTime": "0002",
+                "DepTime": "19:35",
+                "Code": 2034660
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "20:09",
+                "Station": "ОЗЕРН ПАДЬ",
+                "Distance": 9152,
+                "Days": "06",
+                "WaitingTime": "0002",
+                "DepTime": "20:11",
+                "Code": 2034693
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "20:43",
+                "Station": "УССУРИЙСК",
+                "Distance": 9188,
+                "Days": "06",
+                "WaitingTime": "0022",
+                "DepTime": "21:05",
+                "Code": 2034750
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "22:30",
+                "Station": "УГОЛЬНАЯ",
+                "Distance": 9267,
+                "Days": "06",
+                "WaitingTime": "0005",
+                "DepTime": "22:35",
+                "Code": 2034740
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "23:17",
+                "Station": "ВЛАДИВОСТОК",
+                "Distance": 9300,
+                "Days": "06",
+                "Code": 2034130
+              }
+            ],
+            "Title": "ОСНОВНОЙ МАРШРУТ",
+            "Route": {
+              "Station": [
+                "МОСКВА ЯР",
+                "ВЛАДИВОСТОК"
+              ],
+              "CodeFrom": 2000002,
+              "CodeTo": 2034130
+            }
+          },
+          {
+            "Stop": [
+              {
+                "DiffTime": "06",
+                "ArvTime": "11:15",
+                "Station": "СКОВОРОДИНО",
+                "Distance": 7316,
+                "Days": "05",
+                "WaitingTime": "0090",
+                "DepTime": "12:45",
+                "Code": 2050370
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "13:55",
+                "Station": "ШТУРМ",
+                "Distance": 7364,
+                "Days": "05",
+                "WaitingTime": "0001",
+                "InvertingTrain": "",
+                "DepTime": "13:56",
+                "Code": 2048040
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "14:39",
+                "Station": "МУРТЫГИТ",
+                "Distance": 7395,
+                "Days": "05",
+                "WaitingTime": "0001",
+                "InvertingTrain": "",
+                "DepTime": "14:40",
+                "Code": 2048030
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "15:04",
+                "Station": "ПУРИКАН",
+                "Distance": 7411,
+                "Days": "05",
+                "WaitingTime": "0001",
+                "InvertingTrain": "",
+                "DepTime": "15:05",
+                "Code": 2048011
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "15:28",
+                "Station": "АНОСОВСКАЯ",
+                "Distance": 7428,
+                "Days": "05",
+                "WaitingTime": "0002",
+                "InvertingTrain": "",
+                "DepTime": "15:30",
+                "Code": 2048010
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "16:09",
+                "Station": "ЗАБОЛОТНОЕ",
+                "Distance": 7459,
+                "Days": "05",
+                "WaitingTime": "0002",
+                "InvertingTrain": "",
+                "DepTime": "16:11",
+                "Code": 2048013
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "16:43",
+                "Station": "БЕЛЕНЬКАЯ",
+                "Distance": 7479,
+                "Days": "05",
+                "WaitingTime": "0002",
+                "InvertingTrain": "",
+                "DepTime": "16:45",
+                "Code": 2048020
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "17:55",
+                "Station": "ТЫНДА",
+                "Distance": 7526,
+                "Days": "05",
+                "WaitingTime": "0135",
+                "InvertingTrain": "",
+                "DepTime": "20:10",
+                "Code": 2048000
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "21:36",
+                "Station": "МОГОТ",
+                "Distance": 7597,
+                "Days": "05",
+                "WaitingTime": "0001",
+                "InvertingTrain": "",
+                "DepTime": "21:37",
+                "Code": 2048018
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "22:04",
+                "Station": "РИХАРД ЗОРГЕ",
+                "Distance": 7617,
+                "Days": "05",
+                "WaitingTime": "0001",
+                "InvertingTrain": "",
+                "DepTime": "22:05",
+                "Code": 2034544
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "22:27",
+                "Station": "ЯКУТСКИЙ",
+                "Distance": 7633,
+                "Days": "05",
+                "WaitingTime": "0001",
+                "InvertingTrain": "",
+                "DepTime": "22:28",
+                "Code": 2048019
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "22:44",
+                "Station": "НАГОРНАЯ Я",
+                "Distance": 7646,
+                "Days": "05",
+                "WaitingTime": "0006",
+                "InvertingTrain": "",
+                "DepTime": "22:50",
+                "Code": 2048025
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "23:18",
+                "Station": "АЯМ",
+                "Distance": 7666,
+                "Days": "05",
+                "WaitingTime": "0002",
+                "InvertingTrain": "",
+                "DepTime": "23:20",
+                "Code": 2048021
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "23:45",
+                "Station": "ЗОЛОТИНКА",
+                "Distance": 7688,
+                "Days": "05",
+                "WaitingTime": "0004",
+                "InvertingTrain": "",
+                "DepTime": "23:49",
+                "Code": 2048022
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "00:11",
+                "Station": "ОКУРДАН",
+                "Distance": 7713,
+                "Days": "06",
+                "WaitingTime": "0002",
+                "InvertingTrain": "",
+                "DepTime": "00:13",
+                "Code": 2034035
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "00:56",
+                "Station": "ОБОРЧО",
+                "Distance": 7730,
+                "Days": "06",
+                "WaitingTime": "0001",
+                "InvertingTrain": "",
+                "DepTime": "00:57",
+                "Code": 2048023
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "01:19",
+                "Station": "БЕРКАКИТ",
+                "Distance": 7746,
+                "Days": "06",
+                "WaitingTime": "0002",
+                "InvertingTrain": "",
+                "DepTime": "01:21",
+                "Code": 2048024
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "01:33",
+                "Station": "НЕРЮНГРИ П",
+                "Distance": 7755,
+                "Days": "06",
+                "InvertingTrain": "",
+                "Code": 2048090
+              }
+            ],
+            "Title": "ВАГОНЫ",
+            "Route": {
+              "Station": [
+                "НОВОСИБ ГЛ",
+                "НЕРЮНГРИ П"
+              ],
+              "CodeFrom": 2044001,
+              "CodeTo": 2048090
+            }
+          },
+          {
+            "Stop": [
+              {
+                "DiffTime": "06",
+                "ArvTime": "21:18",
+                "Station": "БЕЛОГОРСК",
+                "TailForward": "",
+                "Distance": 7876,
+                "Days": "06",
+                "WaitingTime": "0180",
+                "InvertingTrain": "",
+                "DepTime": "00:18",
+                "Code": 2050330
+              },
+              {
+                "DiffTime": "06",
+                "ArvTime": "02:20",
+                "Station": "БЛАГОВЕЩЕНСК",
+                "TailForward": "",
+                "Distance": 7985,
+                "Days": "06",
+                "InvertingTrain": "",
+                "Code": 2050300
+              }
+            ],
+            "Title": "ВАГОНЫ",
+            "Route": {
+              "Station": [
+                "МОСКВА ЯР",
+                "БЛАГОВЕЩЕНСК"
+              ],
+              "CodeFrom": 2000002,
+              "CodeTo": 2050300
+            }
+          },
+          {
+            "Stop": [
+              {
+                "DiffTime": "07",
+                "ArvTime": "20:43",
+                "Station": "УССУРИЙСК",
+                "Distance": 9188,
+                "Days": "06",
+                "WaitingTime": "0077",
+                "DepTime": "22:00",
+                "Code": 2034750
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "23:26",
+                "Station": "АРТЕМ",
+                "Distance": 9276,
+                "Days": "06",
+                "WaitingTime": "0001",
+                "DepTime": "23:27",
+                "Code": 2035670
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "00:08",
+                "Station": "СМОЛЯНИН",
+                "Distance": 9311,
+                "Days": "07",
+                "WaitingTime": "0025",
+                "DepTime": "00:33",
+                "Code": 2034730
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "02:04",
+                "Station": "ПАРТИЗАНСК",
+                "Distance": 9395,
+                "Days": "07",
+                "WaitingTime": "0004",
+                "DepTime": "02:08",
+                "Code": 2034715
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "02:53",
+                "Station": "НАХОДКА",
+                "Distance": 9436,
+                "Days": "07",
+                "WaitingTime": "0010",
+                "DepTime": "03:03",
+                "Code": 2034721
+              },
+              {
+                "DiffTime": "07",
+                "ArvTime": "03:20",
+                "Station": "ТИХООКЕАНС",
+                "Distance": 9446,
+                "Days": "07",
+                "Code": 2034770
+              }
+            ],
+            "Title": "ВАГОНЫ",
+            "Route": {
+              "Station": [
+                "ХАБАРОВСК 1",
+                "ТИХООКЕАНС"
+              ],
+              "CodeFrom": 2034001,
+              "CodeTo": 2034770
+            }
+          }
+        ],
+        "Type": "TrainRoute",
+        "ReqExpressDateTime": "01.05.2026 00:00"
+      }
+    }
+  }
+}

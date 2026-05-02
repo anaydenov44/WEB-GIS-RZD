@@ -1,0 +1,355 @@
+{
+  "meta": {
+    "stage": "get_rzd_train_stops_raw_response",
+    "train_number": "026Г",
+    "departure_date": "03.05.2026"
+  },
+  "payload": {
+    "request": {
+      "train_number": "026Г",
+      "dep_date": "03.05.2026",
+      "source_mode": "layer_5804"
+    },
+    "count": 12,
+    "items": [
+      {
+        "station_name": [
+          "МОСКВА КАЗ",
+          "ИЖЕВСК"
+        ],
+        "station_code": null,
+        "arrival_time": null,
+        "departure_time": null,
+        "waiting_time": null,
+        "distance": null,
+        "raw": {
+          "Station": [
+            "МОСКВА КАЗ",
+            "ИЖЕВСК"
+          ],
+          "CodeFrom": 2000003,
+          "CodeTo": 2060150
+        }
+      },
+      {
+        "station_name": "МОСКВА КАЗ",
+        "station_code": "2000003",
+        "arrival_time": null,
+        "departure_time": "17:44",
+        "waiting_time": null,
+        "distance": null,
+        "raw": {
+          "Station": "МОСКВА КАЗ",
+          "Distance": 0,
+          "Days": "00",
+          "DepTime": "17:44",
+          "Code": 2000003
+        }
+      },
+      {
+        "station_name": "ВЕКОВКА",
+        "station_code": "2060712",
+        "arrival_time": "20:42",
+        "departure_time": "20:54",
+        "waiting_time": "0012",
+        "distance": 208,
+        "raw": {
+          "ArvTime": "20:42",
+          "Station": "ВЕКОВКА",
+          "Distance": 208,
+          "Days": "00",
+          "WaitingTime": "0012",
+          "DepTime": "20:54",
+          "Code": 2060712
+        }
+      },
+      {
+        "station_name": "МУРОМ 1",
+        "station_code": "2060370",
+        "arrival_time": "21:54",
+        "departure_time": "21:56",
+        "waiting_time": "0002",
+        "distance": 287,
+        "raw": {
+          "ArvTime": "21:54",
+          "Station": "МУРОМ 1",
+          "Distance": 287,
+          "Days": "00",
+          "WaitingTime": "0002",
+          "DepTime": "21:56",
+          "Code": 2060370
+        }
+      },
+      {
+        "station_name": "КАНАШ",
+        "station_code": "2060630",
+        "arrival_time": "03:10",
+        "departure_time": "03:25",
+        "waiting_time": "0015",
+        "distance": 665,
+        "raw": {
+          "ArvTime": "03:10",
+          "Station": "КАНАШ",
+          "Distance": 665,
+          "Days": "01",
+          "WaitingTime": "0015",
+          "DepTime": "03:25",
+          "Code": 2060630
+        }
+      },
+      {
+        "station_name": "ВОССТАН П",
+        "station_code": "2060961",
+        "arrival_time": "05:21",
+        "departure_time": "05:31",
+        "waiting_time": "0010",
+        "distance": 792,
+        "raw": {
+          "ArvTime": "05:21",
+          "Station": "ВОССТАН П",
+          "Distance": 792,
+          "Days": "01",
+          "WaitingTime": "0010",
+          "DepTime": "05:31",
+          "Code": 2060961
+        }
+      },
+      {
+        "station_name": "КУКМОР",
+        "station_code": "2060626",
+        "arrival_time": "07:20",
+        "departure_time": "07:22",
+        "waiting_time": "0002",
+        "distance": 927,
+        "raw": {
+          "ArvTime": "07:20",
+          "Station": "КУКМОР",
+          "Distance": 927,
+          "Days": "01",
+          "WaitingTime": "0002",
+          "DepTime": "07:22",
+          "Code": 2060626
+        }
+      },
+      {
+        "station_name": "ВЯТ ПОЛЯНЫ",
+        "station_code": "2060365",
+        "arrival_time": "07:33",
+        "departure_time": "07:37",
+        "waiting_time": "0004",
+        "distance": 936,
+        "raw": {
+          "ArvTime": "07:33",
+          "Station": "ВЯТ ПОЛЯНЫ",
+          "Distance": 936,
+          "Days": "01",
+          "WaitingTime": "0004",
+          "DepTime": "07:37",
+          "Code": 2060365
+        }
+      },
+      {
+        "station_name": "КИЗНЕР",
+        "station_code": "2060526",
+        "arrival_time": "08:17",
+        "departure_time": "08:18",
+        "waiting_time": "0001",
+        "distance": 974,
+        "raw": {
+          "DiffTime": "01",
+          "ArvTime": "08:17",
+          "Station": "КИЗНЕР",
+          "Distance": 974,
+          "Days": "01",
+          "WaitingTime": "0001",
+          "DepTime": "08:18",
+          "Code": 2060526
+        }
+      },
+      {
+        "station_name": "МОЖГА",
+        "station_code": "2060550",
+        "arrival_time": "08:59",
+        "departure_time": "09:01",
+        "waiting_time": "0002",
+        "distance": 1026,
+        "raw": {
+          "DiffTime": "01",
+          "ArvTime": "08:59",
+          "Station": "МОЖГА",
+          "Distance": 1026,
+          "Days": "01",
+          "WaitingTime": "0002",
+          "DepTime": "09:01",
+          "Code": 2060550
+        }
+      },
+      {
+        "station_name": "АГРЫЗ",
+        "station_code": "2060533",
+        "arrival_time": "09:50",
+        "departure_time": "10:05",
+        "waiting_time": "0015",
+        "distance": 1086,
+        "raw": {
+          "ArvTime": "09:50",
+          "Station": "АГРЫЗ",
+          "Distance": 1086,
+          "Days": "01",
+          "WaitingTime": "0015",
+          "DepTime": "10:05",
+          "Code": 2060533
+        }
+      },
+      {
+        "station_name": "ИЖЕВСК",
+        "station_code": "2060150",
+        "arrival_time": "10:43",
+        "departure_time": null,
+        "waiting_time": null,
+        "distance": 1119,
+        "raw": {
+          "DiffTime": "01",
+          "ArvTime": "10:43",
+          "Station": "ИЖЕВСК",
+          "Distance": 1119,
+          "Days": "01",
+          "Code": 2060150
+        }
+      }
+    ],
+    "raw": {
+      "GtExpress_Response": {
+        "ReqExpressZK": "0064792",
+        "ReqLocalRecv": "02.05.2026 04:20:56",
+        "ReqLocalSend": "02.05.2026 04:20:56",
+        "ReqAddress": "KUZD:2040",
+        "Train": {
+          "Route": {
+            "Station": [
+              "МОСКВА КАЗ",
+              "ИЖЕВСК"
+            ],
+            "CodeFrom": 2000003,
+            "CodeTo": 2060150
+          },
+          "Number": "026Г"
+        },
+        "Version": "2.7.116",
+        "Routes": {
+          "Stop": [
+            {
+              "Station": "МОСКВА КАЗ",
+              "Distance": 0,
+              "Days": "00",
+              "DepTime": "17:44",
+              "Code": 2000003
+            },
+            {
+              "ArvTime": "20:42",
+              "Station": "ВЕКОВКА",
+              "Distance": 208,
+              "Days": "00",
+              "WaitingTime": "0012",
+              "DepTime": "20:54",
+              "Code": 2060712
+            },
+            {
+              "ArvTime": "21:54",
+              "Station": "МУРОМ 1",
+              "Distance": 287,
+              "Days": "00",
+              "WaitingTime": "0002",
+              "DepTime": "21:56",
+              "Code": 2060370
+            },
+            {
+              "ArvTime": "03:10",
+              "Station": "КАНАШ",
+              "Distance": 665,
+              "Days": "01",
+              "WaitingTime": "0015",
+              "DepTime": "03:25",
+              "Code": 2060630
+            },
+            {
+              "ArvTime": "05:21",
+              "Station": "ВОССТАН П",
+              "Distance": 792,
+              "Days": "01",
+              "WaitingTime": "0010",
+              "DepTime": "05:31",
+              "Code": 2060961
+            },
+            {
+              "ArvTime": "07:20",
+              "Station": "КУКМОР",
+              "Distance": 927,
+              "Days": "01",
+              "WaitingTime": "0002",
+              "DepTime": "07:22",
+              "Code": 2060626
+            },
+            {
+              "ArvTime": "07:33",
+              "Station": "ВЯТ ПОЛЯНЫ",
+              "Distance": 936,
+              "Days": "01",
+              "WaitingTime": "0004",
+              "DepTime": "07:37",
+              "Code": 2060365
+            },
+            {
+              "DiffTime": "01",
+              "ArvTime": "08:17",
+              "Station": "КИЗНЕР",
+              "Distance": 974,
+              "Days": "01",
+              "WaitingTime": "0001",
+              "DepTime": "08:18",
+              "Code": 2060526
+            },
+            {
+              "DiffTime": "01",
+              "ArvTime": "08:59",
+              "Station": "МОЖГА",
+              "Distance": 1026,
+              "Days": "01",
+              "WaitingTime": "0002",
+              "DepTime": "09:01",
+              "Code": 2060550
+            },
+            {
+              "ArvTime": "09:50",
+              "Station": "АГРЫЗ",
+              "Distance": 1086,
+              "Days": "01",
+              "WaitingTime": "0015",
+              "DepTime": "10:05",
+              "Code": 2060533
+            },
+            {
+              "DiffTime": "01",
+              "ArvTime": "10:43",
+              "Station": "ИЖЕВСК",
+              "Distance": 1119,
+              "Days": "01",
+              "Code": 2060150
+            }
+          ],
+          "Title": "ОСНОВНОЙ МАРШРУТ",
+          "Route": {
+            "Station": [
+              "МОСКВА КАЗ",
+              "ИЖЕВСК"
+            ],
+            "CodeFrom": 2000003,
+            "CodeTo": 2060150
+          }
+        },
+        "Type": "TrainRoute",
+        "ReqExpressDateTime": "02.05.2026 00:00"
+      }
+    }
+  }
+}

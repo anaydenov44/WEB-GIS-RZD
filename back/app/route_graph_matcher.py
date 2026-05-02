@@ -1,4 +1,6 @@
 import json
+import logging
+import os
 import math
 import re
 import threading
@@ -29,6 +31,10 @@ MAX_TOPOLOGY_LINK_OPTIONS_PER_STATION = 6
 TOPOLOGY_FALLBACK_NODE_NEIGHBORS = 6
 TOPOLOGY_FALLBACK_NODE_MAX_DISTANCE_KM = 3.0
 
+TOPOLOGY_AUGMENT_NODE_NEIGHBORS = 12
+TOPOLOGY_AUGMENT_NODE_MAX_DISTANCE_KM = 8.0
+TOPOLOGY_LINK_OPTIONS_FINAL_LIMIT = 18
+
 LOCAL_RESCUE_NODE_RADIUS_KM = 2.0
 LOCAL_RESCUE_NODE_LIMIT = 10
 LOCAL_RESCUE_EXTRA_PENALTY = 1.25
@@ -46,8 +52,25 @@ ROUTE_LOCK_BIG_DISTANCE_REJECTION_KM = 150.0
 COMPONENT_BRIDGE_SMALL_COMPONENT_MAX_SIZE = 500
 COMPONENT_BRIDGE_MAX_GAP_KM = 2.0
 COMPONENT_BRIDGE_PAIR_LIMIT = 8
-COMPONENT_BRIDGE_EXTRA_PENALTY = 2.5
-COMPONENT_BRIDGE_SOURCE_PENALTY = 1.0
+COMPONENT_BRIDGE_EXTRA_PENALTY = 0.20
+COMPONENT_BRIDGE_SOURCE_PENALTY = 0.05
+COMPONENT_BRIDGE_GAP_SCORE_WEIGHT = 0.35
+
+TOPOLOGY_LINK_CONNECTOR_SCORE_WEIGHT = 0.15
+TOPOLOGY_FALLBACK_LINK_SCORE_PENALTY = 0.05
+TOPOLOGY_NON_PRIMARY_LINK_SCORE_PENALTY = 0.01
+TRANSITION_DISTANCE_SCORE_WEIGHT = 4.0
+
+ABSURD_PATH_MIN_GEO_KM = 5.0
+ABSURD_PATH_MAX_GEO_RATIO = 2.2
+ABSURD_PATH_MAX_GEO_EXTRA_KM = 35.0
+ABSURD_PATH_MAX_RZD_RATIO = 2.0
+ABSURD_PATH_MAX_RZD_EXTRA_KM = 40.0
+
+STATION_TRANSFER_MAX_LINK_KM = 1.5
+STATION_TRANSFER_MAX_LINKS_PER_STATION = 8
+STATION_TRANSFER_MAX_PAIR_KM = 3.0
+STATION_TRANSFER_EDGE_SOURCE = "runtime_station_transfer_connector"
 
 NORMALIZATION_REPLACEMENTS = {
     "ПАСС": "ПАССАЖИРСКИЙ",
@@ -94,11 +117,39 @@ SYNTHETIC_GAP_PAIR_LIMIT = 16
 SYNTHETIC_GAP_EXTRA_PENALTY = 1.5
 
 
+TRACE_LOGGER = logging.getLogger("route_matcher_trace")
 
 
+def matcher_trace_enabled(route_id: int | str | None = None) -> bool:
+    value = os.getenv("MATCHER_TRACE_ROUTE_ID", "").strip()
+
+    if not value:
+        return False
+
+    if value in {"1", "true", "TRUE", "all", "ALL", "*"}:
+        return True
+
+    if route_id is None:
+        return False
+
+    return str(route_id) == value
 
 
+def matcher_trace(
+    label: str,
+    payload: dict[str, Any],
+    *,
+    route_id: int | str | None = None,
+) -> None:
+    if not matcher_trace_enabled(route_id):
+        return
 
+    try:
+        message = json.dumps(payload, ensure_ascii=False, indent=2, default=str)
+    except Exception:
+        message = str(payload)
+
+    TRACE_LOGGER.warning("[MATCHER TRACE] %s\n%s", label, message)
 
 
 
@@ -111,7 +162,6 @@ def _link_source_rank(source: str | None) -> int:
     return ranks.get(source, 9)
 
 
-
 def _link_priority(item: dict[str, Any]) -> tuple[int, int, float, str]:
     return (
         _link_source_rank(item.get("source")),
@@ -119,15 +169,6 @@ def _link_priority(item: dict[str, Any]) -> tuple[int, int, float, str]:
         float(item.get("link_distance_km") or 999999.0),
         str(item.get("node_hash") or ""),
     )
-
-
-
-
-
-
-
-
-
 
 
 @dataclass
@@ -862,6 +903,50 @@ def derive_route_region_hints(
     }
 
 
+def expand_corridor_region_codes(region_codes: list[str]) -> list[str]:
+    result: list[str] = []
+    seen: set[str] = set()
+
+    def add(code: str | None) -> None:
+        if not code:
+            return
+        if code in seen:
+            return
+        seen.add(code)
+        result.append(code)
+
+    for code in region_codes:
+        add(code)
+
+    codes = set(result)
+
+    # Москва / центр → Урал почти всегда требует Поволжье как транзитный коридор.
+    if "central_fd" in codes and "ural_fd" in codes:
+        add("volga_fd")
+
+    # Центр → Сибирь требует Поволжье и Урал.
+    if "central_fd" in codes and "siberian_fd" in codes:
+        add("volga_fd")
+        add("ural_fd")
+
+    # Центр → Дальний Восток требует весь восточный коридор.
+    if "central_fd" in codes and "far_eastern_fd" in codes:
+        add("volga_fd")
+        add("ural_fd")
+        add("siberian_fd")
+
+    # Урал → Дальний Восток обычно требует Сибирь.
+    if "ural_fd" in codes and "far_eastern_fd" in codes:
+        add("siberian_fd")
+
+    # Поволжье → Дальний Восток обычно требует Урал и Сибирь.
+    if "volga_fd" in codes and "far_eastern_fd" in codes:
+        add("ural_fd")
+        add("siberian_fd")
+
+    return result[:MAX_ROUTE_REGION_CODES]
+
+
 def infer_route_region_codes(
     stops: list[dict[str, Any]],
     candidates_per_stop: list[list[Candidate]],
@@ -932,7 +1017,186 @@ def infer_route_region_codes(
         **logger_context,
     )
 
-    return inferred_region_codes
+    expanded_region_codes = expand_corridor_region_codes(inferred_region_codes)
+
+    if diagnostics is not None:
+        diagnostics["inferred_route_regions"]["expanded_region_codes"] = expanded_region_codes
+
+    log_event(
+        "info",
+        "route_regions_expanded_for_corridor",
+        original_region_codes=inferred_region_codes,
+        expanded_region_codes=expanded_region_codes,
+        **logger_context,
+    )
+
+    return expanded_region_codes
+
+
+def add_topology_edge_to_adjacency(
+    adjacency: dict[str, list[dict[str, Any]]],
+    *,
+    from_node_hash: str,
+    to_node_hash: str,
+    edge_id: int | None,
+    length_km: float,
+    geometry_coords: list[list[float]],
+    edge_source: str | None = None,
+    is_virtual_connector: bool = False,
+    reversed_direction: bool = False,
+) -> None:
+    if not from_node_hash or not to_node_hash:
+        return
+
+    if from_node_hash == to_node_hash:
+        return
+
+    if length_km <= 0:
+        return
+
+    adjacency[from_node_hash].append(
+        {
+            "edge_id": edge_id,
+            "id": edge_id,
+            "from_node_hash": from_node_hash,
+            "to_node_hash": to_node_hash,
+            "length_km": float(length_km),
+            "geometry_coords": geometry_coords or [],
+            "edge_source": edge_source,
+            "is_virtual_connector": bool(is_virtual_connector),
+            "reversed_direction": bool(reversed_direction),
+        }
+    )
+
+
+def add_runtime_station_transfer_edges(
+    *,
+    adjacency: dict[str, list[dict[str, Any]]],
+    station_links: dict[int, list[dict[str, Any]]],
+    stations_by_id: dict[int, dict[str, Any]],
+) -> int:
+    """
+    Добавляет runtime-переходы внутри станции между несколькими node_hash.
+
+    Зачем:
+    если станция связана с несколькими компонентами topology graph,
+    маршрут должен иметь возможность пройти через эту станцию как через узел пересадки.
+
+    В БД ничего не пишем.
+    Это только runtime-слой внутри build_network_data().
+    """
+
+    created_pairs_count = 0
+
+    for station_id, links in station_links.items():
+        station = stations_by_id.get(int(station_id))
+
+        if not station:
+            continue
+
+        station_lon = safe_float(station.get("lon"))
+        station_lat = safe_float(station.get("lat"))
+
+        if station_lon is None or station_lat is None:
+            continue
+
+        best_by_node_hash: dict[str, dict[str, Any]] = {}
+
+        for link in links or []:
+            node_hash = str(link.get("node_hash") or "")
+            if not node_hash:
+                continue
+
+            link_distance_km = safe_float(link.get("link_distance_km"))
+            node_lon = safe_float(link.get("node_lon"))
+            node_lat = safe_float(link.get("node_lat"))
+
+            if link_distance_km is None or node_lon is None or node_lat is None:
+                continue
+
+            if link_distance_km > STATION_TRANSFER_MAX_LINK_KM:
+                continue
+
+            existing = best_by_node_hash.get(node_hash)
+
+            if existing is None or link_distance_km < float(existing["link_distance_km"]):
+                best_by_node_hash[node_hash] = {
+                    **link,
+                    "node_hash": node_hash,
+                    "link_distance_km": float(link_distance_km),
+                    "node_lon": float(node_lon),
+                    "node_lat": float(node_lat),
+                }
+
+        transfer_links = list(best_by_node_hash.values())
+        transfer_links.sort(
+            key=lambda item: (
+                float(item.get("link_distance_km") or 999999.0),
+                str(item.get("node_hash") or ""),
+            )
+        )
+        transfer_links = transfer_links[:STATION_TRANSFER_MAX_LINKS_PER_STATION]
+
+        if len(transfer_links) < 2:
+            continue
+
+        for left_index in range(len(transfer_links)):
+            for right_index in range(left_index + 1, len(transfer_links)):
+                left = transfer_links[left_index]
+                right = transfer_links[right_index]
+
+                left_node_hash = str(left["node_hash"])
+                right_node_hash = str(right["node_hash"])
+
+                if left_node_hash == right_node_hash:
+                    continue
+
+                transfer_length_km = (
+                    float(left.get("link_distance_km") or 0.0)
+                    + float(right.get("link_distance_km") or 0.0)
+                )
+
+                if transfer_length_km <= 0:
+                    continue
+
+                if transfer_length_km > STATION_TRANSFER_MAX_PAIR_KM:
+                    continue
+
+                forward_geometry = [
+                    [float(left["node_lon"]), float(left["node_lat"])],
+                    [float(station_lon), float(station_lat)],
+                    [float(right["node_lon"]), float(right["node_lat"])],
+                ]
+
+                reverse_geometry = reverse_coords(forward_geometry)
+
+                add_topology_edge_to_adjacency(
+                    adjacency,
+                    from_node_hash=left_node_hash,
+                    to_node_hash=right_node_hash,
+                    edge_id=None,
+                    length_km=transfer_length_km,
+                    geometry_coords=forward_geometry,
+                    edge_source=STATION_TRANSFER_EDGE_SOURCE,
+                    is_virtual_connector=True,
+                    reversed_direction=False,
+                )
+
+                add_topology_edge_to_adjacency(
+                    adjacency,
+                    from_node_hash=right_node_hash,
+                    to_node_hash=left_node_hash,
+                    edge_id=None,
+                    length_km=transfer_length_km,
+                    geometry_coords=reverse_geometry,
+                    edge_source=STATION_TRANSFER_EDGE_SOURCE,
+                    is_virtual_connector=True,
+                    reversed_direction=True,
+                )
+
+                created_pairs_count += 1
+
+    return created_pairs_count
 
 
 def build_network_data(
@@ -1024,12 +1288,33 @@ def build_network_data(
 
     edges_query = text("""
         SELECT
+            e.id,
             e.source_node_hash,
             e.target_node_hash,
             e.length_km,
+            e.edge_source,
+            COALESCE(e.is_virtual_connector, FALSE) AS is_virtual_connector,
             ST_AsGeoJSON(e.geom) AS geometry
         FROM rail_graph_edges e
         WHERE e.scope_key = :scope_key;
+    """)
+
+    connectors_query = text("""
+        SELECT
+            NULL::integer AS id,
+            c.source_node_hash,
+            c.target_node_hash,
+            c.length_km,
+            'rail_graph_connector' AS edge_source,
+            TRUE AS is_virtual_connector,
+            ST_AsGeoJSON(c.geom) AS geometry
+        FROM rail_graph_connectors c
+        WHERE c.enabled = TRUE
+          AND c.scope_key = :scope_key
+          AND c.source_node_hash IS NOT NULL
+          AND c.target_node_hash IS NOT NULL
+          AND c.length_km IS NOT NULL
+          AND c.length_km > 0;
     """)
 
     station_links_query = text("""
@@ -1095,6 +1380,19 @@ def build_network_data(
         with engine.connect() as connection:
             node_rows = connection.execute(nodes_query, {"scope_key": scope_key}).fetchall()
             edge_rows = connection.execute(edges_query, {"scope_key": scope_key}).fetchall()
+
+            has_connectors_table = connection.execute(
+                text("SELECT to_regclass('public.rail_graph_connectors')")
+            ).scalar() is not None
+
+            if has_connectors_table:
+                connector_rows = connection.execute(
+                    connectors_query,
+                    {"scope_key": scope_key},
+                ).fetchall()
+            else:
+                connector_rows = []
+
             station_link_rows = connection.execute(
                 station_links_query,
                 {"scope_key": scope_key},
@@ -1110,41 +1408,72 @@ def build_network_data(
         }
 
     adjacency: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    for row in edge_rows:
+    skipped_edge_rows_count = 0
+    undirected_edge_rows_count = 0
+
+    all_edge_rows = list(edge_rows) + list(connector_rows)
+
+    for row in all_edge_rows:
         item = dict(row._mapping)
-        source_node_hash = str(item["source_node_hash"])
-        target_node_hash = str(item["target_node_hash"])
+
+        edge_id = item.get("id")
+        source_node_hash = str(item.get("source_node_hash") or "")
+        target_node_hash = str(item.get("target_node_hash") or "")
         length_km = safe_float(item.get("length_km"))
+        edge_source = item.get("edge_source") or "rail_graph_edge"
+        is_virtual_connector = bool(item.get("is_virtual_connector"))
+
         if not source_node_hash or not target_node_hash or source_node_hash == target_node_hash:
+            skipped_edge_rows_count += 1
             continue
+
         if length_km is None or length_km <= 0:
+            skipped_edge_rows_count += 1
             continue
 
         geometry_coords = parse_geometry_coords(item.get("geometry"))
+
         if len(geometry_coords) < 2:
             source_node = node_coords.get(source_node_hash)
             target_node = node_coords.get(target_node_hash)
+
             if source_node and target_node:
                 geometry_coords = [
                     [source_node["lon"], source_node["lat"]],
                     [target_node["lon"], target_node["lat"]],
                 ]
 
-        edge_payload = {
-            "from_node_hash": source_node_hash,
-            "to_node_hash": target_node_hash,
-            "length_km": float(length_km),
-            "geometry_coords": geometry_coords,
-        }
-        adjacency[source_node_hash].append(edge_payload)
+        if len(geometry_coords) < 2:
+            skipped_edge_rows_count += 1
+            continue
 
-        reverse_payload = {
-            "from_node_hash": target_node_hash,
-            "to_node_hash": source_node_hash,
-            "length_km": float(length_km),
-            "geometry_coords": reverse_coords(geometry_coords),
-        }
-        adjacency[target_node_hash].append(reverse_payload)
+        # Важно: здесь мы намеренно делаем граф НЕОРИЕНТИРОВАННЫМ.
+        # OSM way direction в нашем проекте не считается ограничением движения.
+        add_topology_edge_to_adjacency(
+            adjacency,
+            from_node_hash=source_node_hash,
+            to_node_hash=target_node_hash,
+            edge_id=edge_id,
+            length_km=float(length_km),
+            geometry_coords=geometry_coords,
+            edge_source=edge_source,
+            is_virtual_connector=is_virtual_connector,
+            reversed_direction=False,
+        )
+
+        add_topology_edge_to_adjacency(
+            adjacency,
+            from_node_hash=target_node_hash,
+            to_node_hash=source_node_hash,
+            edge_id=edge_id,
+            length_km=float(length_km),
+            geometry_coords=reverse_coords(geometry_coords),
+            edge_source=edge_source,
+            is_virtual_connector=is_virtual_connector,
+            reversed_direction=True,
+        )
+
+        undirected_edge_rows_count += 1
 
     station_links: dict[int, list[dict[str, Any]]] = defaultdict(list)
     for row in station_link_rows:
@@ -1161,18 +1490,38 @@ def build_network_data(
             }
         )
 
+    runtime_station_transfer_pairs_count = add_runtime_station_transfer_edges(
+        adjacency=adjacency,
+        station_links=station_links,
+        stations_by_id=stations_by_id,
+    )
+
     stats = {
         "network_mode": "scope_topology_graph",
         "region_codes": region_codes,
         "scope_key": scope_key,
         "visible_stations_count": len(stations_by_id),
         "adjacency_node_count": len(node_coords),
+
+        # raw_edge_rows_count — сколько строк пришло из rail_graph_edges.
+        # undirected_edge_rows_count — сколько валидных физических ребер использовано.
+        # directed_edge_count — сколько направленных переходов получилось в adjacency.
+        # Для неориентированного графа directed_edge_count обычно примерно в 2 раза больше.
+        "raw_edge_rows_count": len(edge_rows),
+        "connector_edge_rows_count": len(connector_rows),
+        "undirected_edge_rows_count": undirected_edge_rows_count,
+        "skipped_edge_rows_count": skipped_edge_rows_count,
         "directed_edge_count": sum(len(edges) for edges in adjacency.values()),
+        "graph_is_bidirectional": True,
+        "runtime_station_transfer_pairs_count": runtime_station_transfer_pairs_count,
+        "runtime_station_transfer_enabled": True,
+
         "topology_station_links_count": sum(len(items) for items in station_links.values()),
     }
 
     if diagnostics is not None:
         network_diag["raw_edge_rows_count"] = len(edge_rows)
+        network_diag["connector_edge_rows_count"] = len(connector_rows)
         network_diag["stats"] = stats
 
     if not node_coords or not adjacency:
@@ -1245,6 +1594,7 @@ def _build_reverse_topology_path_result(path: dict[str, Any]) -> dict[str, Any]:
                 "from_node_hash": edge.get("to_node_hash"),
                 "to_node_hash": edge.get("from_node_hash"),
                 "geometry_coords": reverse_coords(edge.get("geometry_coords") or []),
+                "reversed_direction": not bool(edge.get("reversed_direction")),
             }
         )
 
@@ -1325,10 +1675,15 @@ def dijkstra_topology_path(
         prev_node_hash, edge = previous[current_node_hash]
         edge_chain_reversed.append(
             {
+                "edge_id": edge.get("edge_id") or edge.get("id"),
+                "id": edge.get("edge_id") or edge.get("id"),
                 "from_node_hash": prev_node_hash,
                 "to_node_hash": current_node_hash,
                 "length_km": float(edge["length_km"]),
                 "geometry_coords": edge.get("geometry_coords") or [],
+                "edge_source": edge.get("edge_source"),
+                "is_virtual_connector": bool(edge.get("is_virtual_connector")),
+                "reversed_direction": bool(edge.get("reversed_direction")),
             }
         )
         node_path.append(prev_node_hash)
@@ -1701,6 +2056,14 @@ def try_isolated_component_bridge_rescue(
                         + float(end_link["link_distance_km"])
                     )
 
+                    outlier_penalty, outlier_diag = compute_topology_path_outlier_penalty(
+                        previous_stop=previous_stop,
+                        current_stop=current_stop,
+                        previous_candidate=previous_candidate,
+                        current_candidate=current_candidate,
+                        render_total_distance_km=render_total_distance_km,
+                    )
+
                     transition_cost, transition_diag = compute_transition_cost(
                         previous_stop=previous_stop,
                         next_stop=current_stop,
@@ -1717,7 +2080,7 @@ def try_isolated_component_bridge_rescue(
                     connector_penalty = (
                         float(start_link["link_distance_km"])
                         + float(end_link["link_distance_km"])
-                    ) * 4.0
+                    ) * TOPOLOGY_LINK_CONNECTOR_SCORE_WEIGHT
 
                     source_penalty = 0.0
                     if start_link.get("source") != "station_link":
@@ -1727,11 +2090,12 @@ def try_isolated_component_bridge_rescue(
 
                     bridge_penalty = (
                         COMPONENT_BRIDGE_EXTRA_PENALTY
-                        + float(bridge["gap_km"]) * 8.0
+                        + float(bridge["gap_km"]) * COMPONENT_BRIDGE_GAP_SCORE_WEIGHT
                     )
 
                     final_score = (
-                        float(transition_cost)
+                        float(transition_cost) * TRANSITION_DISTANCE_SCORE_WEIGHT
+                        + outlier_penalty
                         + connector_penalty
                         + source_penalty
                         + bridge_penalty
@@ -1739,7 +2103,7 @@ def try_isolated_component_bridge_rescue(
 
                     merged_coords = merge_coordinate_sequences(
                         [
-                            [[previous_candidate.lon, previous_candidate.lat], [float(start_link["node_lon"]), float(start_link["node_lat"])]]
+                            [[previous_candidate.lon, previous_candidate.lat], [float(start_link["node_lon"]), float(start_link["node_lat"])] ]
                             if [previous_candidate.lon, previous_candidate.lat] != [float(start_link["node_lon"]), float(start_link["node_lat"])]
                             else [],
                             path_before_bridge.get("coordinates") or [],
@@ -1804,6 +2168,7 @@ def try_isolated_component_bridge_rescue(
                                 "connector_end_km": float(end_link["link_distance_km"]),
                                 "bridge_gap_km": float(bridge["gap_km"]),
                                 "render_total_distance_km": render_total_distance_km,
+                                "outlier_diag": outlier_diag,
                                 "bridge_from_component_id": bridge["from_component_id"],
                                 "bridge_to_component_id": bridge["to_component_id"],
                             },
@@ -1847,64 +2212,128 @@ def get_station_link_options_for_candidate(
     station_links = network.get("station_links") or {}
 
     direct_links = station_links.get(candidate.station_id) or []
-    if direct_links:
-        return _normalize_link_options(direct_links[:MAX_TOPOLOGY_LINK_OPTIONS_PER_STATION])
+    direct_options = _normalize_link_options(direct_links)
 
-    cached = fallback_node_cache.get(candidate.station_id)
-    if cached is not None:
-        return cached
+    cached_nearest = fallback_node_cache.get(candidate.station_id)
+    if cached_nearest is not None:
+        nearest_options = cached_nearest
+    else:
+        node_catalog = build_topology_node_catalog(network)
 
-    node_catalog = build_topology_node_catalog(network)
+        nearest_nodes: list[dict[str, Any]] = []
 
-    nearest_nodes: list[dict[str, Any]] = []
-    for node in node_catalog:
-        distance_km = haversine_km(
-            candidate.lon,
-            candidate.lat,
-            float(node["lon"]),
-            float(node["lat"]),
+        for node in node_catalog:
+            distance_km = haversine_km(
+                candidate.lon,
+                candidate.lat,
+                float(node["lon"]),
+                float(node["lat"]),
+            )
+
+            if distance_km > TOPOLOGY_AUGMENT_NODE_MAX_DISTANCE_KM:
+                continue
+
+            nearest_nodes.append(
+                {
+                    "node_hash": node["node_hash"],
+                    "link_distance_km": distance_km,
+                    "is_primary": False,
+                    "node_lon": float(node["lon"]),
+                    "node_lat": float(node["lat"]),
+                    "source": "fallback_nearest_node",
+                }
+            )
+
+        nearest_nodes.sort(key=lambda item: (item["link_distance_km"], item["node_hash"]))
+
+        nearest_options = _normalize_link_options(
+            nearest_nodes[:TOPOLOGY_AUGMENT_NODE_NEIGHBORS]
         )
-        nearest_nodes.append(
-            {
-                "node_hash": node["node_hash"],
-                "link_distance_km": distance_km,
-                "is_primary": False,
-                "node_lon": float(node["lon"]),
-                "node_lat": float(node["lat"]),
-                "source": "fallback_nearest_node",
-            }
-        )
 
-    nearest_nodes.sort(key=lambda item: (item["link_distance_km"], item["node_hash"]))
+        fallback_node_cache[candidate.station_id] = nearest_options
 
-    selected = [
-        item for item in nearest_nodes
-        if item["link_distance_km"] <= TOPOLOGY_FALLBACK_NODE_MAX_DISTANCE_KM
-    ][:TOPOLOGY_FALLBACK_NODE_NEIGHBORS]
+    merged_by_node: dict[str, dict[str, Any]] = {}
 
-    if not selected:
-        selected = nearest_nodes[: min(3, len(nearest_nodes))]
+    for item in nearest_options + direct_options:
+        node_hash = str(item["node_hash"])
+        existing = merged_by_node.get(node_hash)
 
-    selected = _normalize_link_options(selected)
-    fallback_node_cache[candidate.station_id] = selected
-    return selected
+        if existing is None:
+            merged_by_node[node_hash] = item
+            continue
+
+        if _link_priority(item) < _link_priority(existing):
+            merged_by_node[node_hash] = item
+
+    merged = list(merged_by_node.values())
+    merged.sort(key=_link_priority)
+
+    return merged[:TOPOLOGY_LINK_OPTIONS_FINAL_LIMIT]
 
 
+def get_rzd_delta_km(
+    previous_stop: dict[str, Any],
+    current_stop: dict[str, Any],
+) -> float | None:
+    previous_distance = safe_float(previous_stop.get("distance_km"))
+    current_distance = safe_float(current_stop.get("distance_km"))
+
+    if previous_distance is None or current_distance is None:
+        return None
+
+    return max(0.0, current_distance - previous_distance)
 
 
+def compute_topology_path_outlier_penalty(
+    *,
+    previous_stop: dict[str, Any],
+    current_stop: dict[str, Any],
+    previous_candidate: Candidate,
+    current_candidate: Candidate,
+    render_total_distance_km: float,
+) -> tuple[float, dict[str, Any]]:
+    geo_distance_km = haversine_km(
+        previous_candidate.lon,
+        previous_candidate.lat,
+        current_candidate.lon,
+        current_candidate.lat,
+    )
 
+    rzd_delta_km = get_rzd_delta_km(previous_stop, current_stop)
 
+    penalty = 0.0
+    details: dict[str, Any] = {
+        "geo_distance_km": round(geo_distance_km, 3),
+        "rzd_delta_km": round(rzd_delta_km, 3) if rzd_delta_km is not None else None,
+        "render_total_distance_km": round(render_total_distance_km, 3),
+        "outlier_penalty": 0.0,
+        "outlier_reason": None,
+    }
 
+    if rzd_delta_km is not None and rzd_delta_km >= 1.0:
+        distance_error = abs(render_total_distance_km - rzd_delta_km)
+        relative_error = distance_error / max(rzd_delta_km, 1.0)
 
+        penalty += distance_error * 0.65
+        penalty += relative_error * 28.0
 
+        if render_total_distance_km > max(rzd_delta_km * 2.5, rzd_delta_km + 55.0):
+            penalty += 80.0
+            details["outlier_reason"] = "longer_than_rzd_delta"
 
+    elif geo_distance_km >= 5.0:
+        distance_error = max(0.0, render_total_distance_km - geo_distance_km)
+        relative_error = distance_error / max(geo_distance_km, 1.0)
 
+        penalty += distance_error * 0.25
+        penalty += relative_error * 12.0
 
+        if render_total_distance_km > max(geo_distance_km * 4.0, geo_distance_km + 120.0):
+            penalty += 60.0
+            details["outlier_reason"] = "longer_than_geo_distance"
 
-
-
-
-
+    details["outlier_penalty"] = round(penalty, 3)
+    return penalty, details
 
 
 def compute_transition_cost(
@@ -1974,9 +2403,31 @@ def compute_transition_cost(
             "rejected_reason": "graph_path_too_short",
         }
 
+    if delta_rzd >= 5.0:
+        max_reasonable_graph_distance = max(
+            delta_rzd * ABSURD_PATH_MAX_RZD_RATIO,
+            delta_rzd + ABSURD_PATH_MAX_RZD_EXTRA_KM,
+        )
+
+        if graph_distance > max_reasonable_graph_distance:
+            return None, {
+                "delta_rzd_km": delta_rzd,
+                "graph_distance_km": graph_distance,
+                "distance_error_km": abs(graph_distance - delta_rzd),
+                "relative_error": abs(graph_distance - delta_rzd) / max(delta_rzd, 1.0),
+                "hop_count": hop_count,
+                "rejected_reason": "graph_path_absurdly_long_for_rzd_delta",
+                "max_reasonable_graph_distance_km": max_reasonable_graph_distance,
+            }
+
     distance_error = abs(graph_distance - delta_rzd)
     relative_error = distance_error / max(delta_rzd, 10.0)
-    cost = distance_error * 0.09 + relative_error * 12.0 + max(0, hop_count - 1) * 0.12
+
+    cost = (
+        distance_error * 0.45
+        + relative_error * 22.0
+        + max(0, hop_count - 1) * 0.04
+    )
 
     return cost, {
         "delta_rzd_km": delta_rzd,
@@ -2448,6 +2899,14 @@ def _evaluate_topology_link_pair_options(
                 + float(end_link["link_distance_km"])
             )
 
+            outlier_penalty, outlier_diag = compute_topology_path_outlier_penalty(
+                previous_stop=previous_stop,
+                current_stop=current_stop,
+                previous_candidate=previous_candidate,
+                current_candidate=current_candidate,
+                render_total_distance_km=render_total_distance_km,
+            )
+
             transition_cost, transition_diag = compute_transition_cost(
                 previous_stop=previous_stop,
                 next_stop=current_stop,
@@ -2460,21 +2919,26 @@ def _evaluate_topology_link_pair_options(
             connector_penalty = (
                 float(start_link["link_distance_km"])
                 + float(end_link["link_distance_km"])
-            ) * 4.0
+            ) * TOPOLOGY_LINK_CONNECTOR_SCORE_WEIGHT
 
             source_penalty = 0.0
 
             if start_link.get("source") != "station_link":
-                source_penalty += 0.8
+                source_penalty += TOPOLOGY_FALLBACK_LINK_SCORE_PENALTY
             elif not start_link.get("is_primary"):
-                source_penalty += 0.15
+                source_penalty += TOPOLOGY_NON_PRIMARY_LINK_SCORE_PENALTY
 
             if end_link.get("source") != "station_link":
-                source_penalty += 0.8
+                source_penalty += TOPOLOGY_FALLBACK_LINK_SCORE_PENALTY
             elif not end_link.get("is_primary"):
-                source_penalty += 0.15
+                source_penalty += TOPOLOGY_NON_PRIMARY_LINK_SCORE_PENALTY
 
-            final_score = float(transition_cost) + connector_penalty + source_penalty
+            final_score = (
+                float(transition_cost) * TRANSITION_DISTANCE_SCORE_WEIGHT
+                + outlier_penalty
+                + connector_penalty
+                + source_penalty
+            )
 
             coordinates = _build_pair_path_coordinates(
                 previous_candidate=previous_candidate,
@@ -2504,6 +2968,7 @@ def _evaluate_topology_link_pair_options(
                         "connector_start_km": float(start_link["link_distance_km"]),
                         "connector_end_km": float(end_link["link_distance_km"]),
                         "render_total_distance_km": render_total_distance_km,
+                        "outlier_diag": outlier_diag,
                     },
                     "final_score": final_score,
                 }
@@ -2565,7 +3030,13 @@ def build_topology_path_between_candidates(
     network: dict[str, Any],
     path_cache: dict[tuple[str, str], dict[str, Any] | None],
     fallback_node_cache: dict[int, list[dict[str, Any]]],
+    trace_context: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
+    trace_context = trace_context or {}
+
+    route_id = trace_context.get("route_id")
+    segment_index = trace_context.get("segment_index")
+
     adjacency = network["adjacency"]
     node_coords = network["node_coords"]
 
@@ -2580,6 +3051,8 @@ def build_topology_path_between_candidates(
         fallback_node_cache,
     )
 
+    candidate_results: list[dict[str, Any]] = []
+
     direct_result = _evaluate_topology_link_pair_options(
         previous_stop=previous_stop,
         current_stop=current_stop,
@@ -2592,8 +3065,9 @@ def build_topology_path_between_candidates(
         path_cache=path_cache,
         search_mode="station_links_only",
     )
+
     if direct_result is not None:
-        return direct_result
+        candidate_results.append(direct_result)
 
     bridge_result = try_isolated_component_bridge_rescue(
         previous_stop=previous_stop,
@@ -2605,10 +3079,117 @@ def build_topology_path_between_candidates(
         all_start_links=start_links,
         all_end_links=end_links,
     )
-    if bridge_result is not None:
-        return bridge_result
 
-    return None
+    if bridge_result is not None:
+        candidate_results.append(bridge_result)
+
+    if not candidate_results:
+        matcher_trace(
+            "segment_no_path",
+            {
+                "route_id": route_id,
+                "segment_index": segment_index,
+                "from_stop_sequence": previous_stop.get("stop_sequence"),
+                "to_stop_sequence": current_stop.get("stop_sequence"),
+                "from_station_id": previous_candidate.station_id,
+                "from_station_name": previous_candidate.name,
+                "to_station_id": current_candidate.station_id,
+                "to_station_name": current_candidate.name,
+                "start_links": [
+                    {
+                        "node_hash": item.get("node_hash"),
+                        "source": item.get("source"),
+                        "is_primary": item.get("is_primary"),
+                        "link_distance_km": round(float(item.get("link_distance_km") or 0), 4),
+                    }
+                    for item in start_links[:12]
+                ],
+                "end_links": [
+                    {
+                        "node_hash": item.get("node_hash"),
+                        "source": item.get("source"),
+                        "is_primary": item.get("is_primary"),
+                        "link_distance_km": round(float(item.get("link_distance_km") or 0), 4),
+                    }
+                    for item in end_links[:12]
+                ],
+            },
+            route_id=route_id,
+        )
+        return None
+
+    def result_sort_key(item: dict[str, Any]) -> tuple[float, float, float, int]:
+        connector_start_km = float(item.get("connector_start_km") or 0.0)
+        connector_end_km = float(item.get("connector_end_km") or 0.0)
+
+        return (
+            float(item.get("final_score") or 999999.0),
+            float(item.get("total_score_km") or 999999.0),
+            connector_start_km + connector_end_km,
+            int(item.get("graph_edge_count") or 999999),
+        )
+
+    best_result = min(candidate_results, key=result_sort_key)
+
+    matcher_trace(
+        "segment_path_choice",
+        {
+            "route_id": route_id,
+            "segment_index": segment_index,
+            "from_stop_sequence": previous_stop.get("stop_sequence"),
+            "to_stop_sequence": current_stop.get("stop_sequence"),
+            "from_station_id": previous_candidate.station_id,
+            "from_station_name": previous_candidate.name,
+            "to_station_id": current_candidate.station_id,
+            "to_station_name": current_candidate.name,
+            "chosen": {
+                "render_method": best_result.get("render_method"),
+                "search_mode": best_result.get("search_mode"),
+                "final_score": round(float(best_result.get("final_score") or 0), 4),
+                "graph_distance_km": round(float(best_result.get("graph_distance_km") or 0), 3),
+                "total_score_km": round(float(best_result.get("total_score_km") or 0), 3),
+                "connector_start_km": round(float(best_result.get("connector_start_km") or 0), 4),
+                "connector_end_km": round(float(best_result.get("connector_end_km") or 0), 4),
+                "bridge_gap_km": (
+                    round(float(best_result.get("bridge_gap_km")), 4)
+                    if best_result.get("bridge_gap_km") is not None
+                    else None
+                ),
+                "graph_edge_count": best_result.get("graph_edge_count"),
+                "from_entry_node_hash": (best_result.get("start_link") or {}).get("node_hash"),
+                "to_entry_node_hash": (best_result.get("end_link") or {}).get("node_hash"),
+                "from_entry_source": (best_result.get("start_link") or {}).get("source"),
+                "to_entry_source": (best_result.get("end_link") or {}).get("source"),
+                "cost_diag": best_result.get("transition_diag"),
+            },
+            "all_candidates": [
+                {
+                    "render_method": item.get("render_method"),
+                    "search_mode": item.get("search_mode"),
+                    "final_score": round(float(item.get("final_score") or 0), 4),
+                    "graph_distance_km": round(float(item.get("graph_distance_km") or 0), 3),
+                    "total_score_km": round(float(item.get("total_score_km") or 0), 3),
+                    "connector_start_km": round(float(item.get("connector_start_km") or 0), 4),
+                    "connector_end_km": round(float(item.get("connector_end_km") or 0), 4),
+                    "bridge_gap_km": (
+                        round(float(item.get("bridge_gap_km")), 4)
+                        if item.get("bridge_gap_km") is not None
+                        else None
+                    ),
+                    "graph_edge_count": item.get("graph_edge_count"),
+                    "from_entry_node_hash": (item.get("start_link") or {}).get("node_hash"),
+                    "to_entry_node_hash": (item.get("end_link") or {}).get("node_hash"),
+                    "from_entry_source": (item.get("start_link") or {}).get("source"),
+                    "to_entry_source": (item.get("end_link") or {}).get("source"),
+                    "cost_diag": item.get("transition_diag"),
+                }
+                for item in sorted(candidate_results, key=result_sort_key)
+            ],
+        },
+        route_id=route_id,
+    )
+
+    return best_result
 
 
 def build_route_geometry_between_locked_candidates(
@@ -2671,6 +3252,12 @@ def build_route_geometry_between_locked_candidates(
             network=network,
             path_cache=path_cache,
             fallback_node_cache=fallback_node_cache,
+            trace_context={
+                "route_id": logger_context.get("route_id"),
+                "segment_index": index,
+                "from_stop_sequence": previous_stop.get("stop_sequence"),
+                "to_stop_sequence": current_stop.get("stop_sequence"),
+            },
         )
 
         if pair_path is not None:
@@ -2729,9 +3316,14 @@ def build_route_geometry_between_locked_candidates(
                                 {
                                     "segment_index": index,
                                     "edge_index": edge_index,
+                                    "edge_id": edge.get("edge_id") or edge.get("id"),
+                                    "id": edge.get("edge_id") or edge.get("id"),
                                     "from_node_hash": edge.get("from_node_hash"),
                                     "to_node_hash": edge.get("to_node_hash"),
                                     "length_km": edge.get("length_km"),
+                                    "edge_source": edge.get("edge_source"),
+                                    "is_virtual_connector": bool(edge.get("is_virtual_connector")),
+                                    "reversed_direction": bool(edge.get("reversed_direction")),
                                     "segment_source": "graph_locked_station_path",
                                     "geometry": edge_geometry,
                                 }
@@ -2766,9 +3358,14 @@ def build_route_geometry_between_locked_candidates(
                         {
                             "segment_index": index,
                             "edge_index": edge_index,
+                            "edge_id": edge.get("edge_id") or edge.get("id"),
+                            "id": edge.get("edge_id") or edge.get("id"),
                             "from_node_hash": edge.get("from_node_hash"),
                             "to_node_hash": edge.get("to_node_hash"),
                             "length_km": edge.get("length_km"),
+                            "edge_source": edge.get("edge_source"),
+                            "is_virtual_connector": bool(edge.get("is_virtual_connector")),
+                            "reversed_direction": bool(edge.get("reversed_direction")),
                             "segment_source": "graph_locked_station_path",
                             "geometry": edge_geometry,
                         }
@@ -2821,19 +3418,9 @@ def build_route_geometry_between_locked_candidates(
             )
             continue
 
-        fallback_coords = [
-            [previous_candidate.lon, previous_candidate.lat],
-            [current_candidate.lon, current_candidate.lat],
-        ]
-
-        if not current_group:
-            current_group = list(fallback_coords)
-        else:
-            if current_group[-1] == fallback_coords[0]:
-                current_group.extend(fallback_coords[1:])
-            else:
-                segment_coordinate_groups.append(current_group)
-                current_group = list(fallback_coords)
+        if current_group:
+            segment_coordinate_groups.append(current_group)
+            current_group = []
 
         segment_items.append(
             {
@@ -2842,11 +3429,8 @@ def build_route_geometry_between_locked_candidates(
                 "to_station_id": current_candidate.station_id,
                 "from_station_name": previous_candidate.name,
                 "to_station_name": current_candidate.name,
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": fallback_coords,
-                },
-                "segment_source": "fallback_straight",
+                "geometry": None,
+                "segment_source": "missing_graph_path",
             }
         )
 
@@ -2860,16 +3444,16 @@ def build_route_geometry_between_locked_candidates(
             "from_selected_station_name": previous_candidate.name,
             "to_selected_station_id": current_candidate.station_id,
             "to_selected_station_name": current_candidate.name,
-            "segment_render_method": "fallback_straight",
+            "segment_render_method": "missing_graph_path",
             "path_found": False,
-            "fallback_used": True,
+            "fallback_used": False,
             "reason": "topology_graph_path_not_found_for_locked_stations",
         }
         transition_logs.append(transition_log)
 
         log_event(
             "warning",
-            "locked_station_segment_rendered_with_fallback_straight",
+            "locked_station_segment_missing_graph_path",
             **transition_log,
             **logger_context,
         )
@@ -2934,7 +3518,11 @@ def build_feature_collection(
                     "route_id": route["id"],
                     "segment_index": segment.get("segment_index"),
                     "edge_index": segment.get("edge_index"),
+                    "edge_id": segment.get("edge_id") or segment.get("id"),
                     "length_km": segment.get("length_km"),
+                    "edge_source": segment.get("edge_source"),
+                    "is_virtual_connector": segment.get("is_virtual_connector"),
+                    "reversed_direction": segment.get("reversed_direction"),
                     "segment_source": segment.get("segment_source"),
                 },
                 "geometry": segment.get("geometry"),

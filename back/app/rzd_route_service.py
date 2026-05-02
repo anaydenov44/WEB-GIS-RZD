@@ -1,7 +1,9 @@
+import json
 import math
 import re
 import time
 from datetime import date, timedelta
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy import text
@@ -9,6 +11,38 @@ from sqlalchemy import text
 from app.db import engine
 from app.route_import_service import import_route_payload
 from app.rzd_client import RzdClient
+
+
+def dump_rzd_debug_payload(
+    *,
+    label: str,
+    payload: object,
+    meta: dict | None = None,
+) -> None:
+    debug_dir = Path("debug_rzd")
+    debug_dir.mkdir(exist_ok=True)
+
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    safe_label = "".join(
+        ch if ch.isalnum() or ch in "-_" else "_"
+        for ch in label
+    )
+
+    path = debug_dir / f"{timestamp}_{safe_label}.json"
+
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(
+            {
+                "meta": meta or {},
+                "payload": payload,
+            },
+            f,
+            ensure_ascii=False,
+            indent=2,
+            default=str,
+        )
+
+    print(f"RZD DEBUG DUMP saved: {path}")
 
 
 RZD_NEARBY_STATION_RADIUS_KM = 5.0
@@ -1250,7 +1284,7 @@ def build_code_pair_attempt_plan(
                     "origin_candidate": origin_candidate,
                     "destination_candidate": destination_candidate,
                     "exact_pair": exact_pair,
-                    "similar_pair": similar_pair,
+                    "similar_pair": not exact_pair,
                     "origin_code": origin_code,
                     "destination_code": destination_code,
                     "origin_distance_km": origin_distance,
@@ -1678,6 +1712,16 @@ def get_rzd_train_stops(
         dep_date=format_rzd_date(dep_date),
     )
 
+    dump_rzd_debug_payload(
+        label="basic_route_raw_response",
+        payload=payload,
+        meta={
+            "stage": "get_rzd_train_stops_raw_response",
+            "train_number": train_number,
+            "departure_date": format_rzd_date(dep_date),
+        },
+    )
+
     stops: list[dict[str, Any]] = []
     seen_keys: set[tuple[str, str | None, str | None, str | None]] = set()
 
@@ -1721,6 +1765,15 @@ def get_rzd_train_stops(
             }
         )
 
+    print(
+        "RZD BASIC ROUTE PARSED STOPS:",
+        {
+            "stops_count": len(stops),
+            "first_10": stops[:10],
+            "last_10": stops[-10:],
+        },
+    )
+
     return stops
 
 
@@ -1744,6 +1797,15 @@ def build_import_payload_from_rzd_train(
     # только из официальных остановок РЖД. OSM-станции не добавляются
     # как новые route_stops, а могут быть только match-привязкой позже.
     stops = normalize_official_rzd_stops(stops)
+
+    print(
+        "RZD IMPORT NORMALIZED STOPS:",
+        {
+            "normalized_stops_count": len(stops),
+            "first_10": stops[:10],
+            "last_10": stops[-10:],
+        },
+    )
 
     if len(stops) < 2:
         raise ValueError("RZD API returned less than 2 official stops for selected train")

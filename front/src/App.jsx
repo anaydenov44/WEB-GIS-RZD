@@ -7,14 +7,26 @@ import View from 'ol/View.js';
 import TileLayer from 'ol/layer/Tile.js';
 import VectorLayer from 'ol/layer/Vector.js';
 import VectorImageLayer from 'ol/layer/VectorImage.js';
+import HeatmapLayer from 'ol/layer/Heatmap.js';
 import OSM from 'ol/source/OSM.js';
 import VectorSource from 'ol/source/Vector.js';
 import Feature from 'ol/Feature.js';
 import Point from 'ol/geom/Point.js';
+import LineString from 'ol/geom/LineString.js';
 import GeoJSON from 'ol/format/GeoJSON.js';
 import { fromLonLat, transformExtent } from 'ol/proj.js';
 import { Style, Stroke, Fill, Circle as CircleStyle, Text } from 'ol/style.js';
 import { getCenter } from 'ol/extent.js';
+import AnalyticsPanel from './components/AnalyticsPanel.jsx';
+import { StationSearchSelect } from './components/StationSearchSelect.js';
+import {
+  DEFAULT_ANALYTICS_PARAMS,
+  DEFAULT_ALTERNATIVES_PARAMS,
+  analyzeRealRouteCorridor,
+  analyzeVirtualRouteCorridor,
+  buildRouteAlternatives,
+  buildAlternativesByStations,
+} from './api/analyticsApi.js';
 
 const BACKEND_URL = 'http://127.0.0.1:8000';
 const RZD_SEARCH_DAYS_AHEAD = 2;
@@ -352,14 +364,16 @@ function deriveSearchSections(items, loadedRegionCodes) {
   return { selected, other };
 }
 
-function Header({ selectionMode, sidebarMode }) {
-  const badgeText = selectionMode
-    ? 'Режим выбора федеральных округов'
-    : sidebarMode === 'routes'
-      ? 'Режим маршрутов'
-      : sidebarMode === 'virtual'
-        ? 'Режим виртуальных маршрутов'
-        : 'Режим инфраструктуры';
+function Header({ selectionMode, sidebarMode, mapMode }) {
+  const badgeText = mapMode === 'analytics'
+    ? 'Режим аналитики'
+    : selectionMode
+      ? 'Выбор округов'
+      : sidebarMode === 'routes'
+        ? 'Поиск поезда РЖД'
+        : sidebarMode === 'virtual'
+          ? 'Режим виртуальных маршрутов'
+          : 'Режим инфраструктуры';
 
   return (
     <header className="header">
@@ -858,7 +872,6 @@ function StationListBlock({
 function SidebarModeSwitch({ panelMode, setPanelMode }) {
   return (
     <section className="card sidebar-mode-card">
-      <div className="sidebar-mode-title">Режим боковой панели</div>
       <div className="panel-mode-switch">
         <button
           className={
@@ -970,6 +983,7 @@ function RouteDetailsCard({
   routesLoading,
   onClearRoute,
   onSelectStation,
+  onEnterAnalytics,
 }) {
   return (
     <section className="card route-details-card">
@@ -984,9 +998,11 @@ function RouteDetailsCard({
               <div className="route-details-title">{formatRouteTitle(selectedRoute)}</div>
               <div className="route-details-direction">{formatRouteDirection(selectedRoute)}</div>
             </div>
-            <button className="subtle-button" onClick={onClearRoute}>
-              Снять выбор
-            </button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button className="subtle-button" onClick={onClearRoute}>
+                Снять выбор
+              </button>
+            </div>
           </div>
 
           <div className="route-details-grid">
@@ -1177,26 +1193,26 @@ function InfrastructureSidebar({
 
       <section className="card">
         <h2>Поиск станции</h2>
-        <div className="search-row">
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Введите название станции"
-          />
-          <button onClick={onSearch}>Найти</button>
-        </div>
-        <p style={{ marginTop: '10px' }}>
-          {isSearchMode
-            ? 'Поиск показывает совпадения по выбранным и остальным зонам.'
-            : 'Сейчас показаны все загруженные станции.'}
-        </p>
+        <StationSearchSelect
+          placeholder="Введите название станции"
+          selectedStation={selectedStation}
+          onSelect={(station) => onSelectStation(station.id)}
+        />
       </section>
 
       <section className="card">
         <h2>Статус данных</h2>
-        <p>Станций в текущем списке: {stations.length}</p>
-        <p>Линий: {linesCount}</p>
-        <p>Состояние: {loading ? 'загрузка...' : 'готово'}</p>
+
+        <div className="data-status-row">
+          <span>Станций загружено:</span>
+          <strong>{stations.length}</strong>
+        </div>
+
+        <div className="data-status-row">
+          <span>Линий загружено:</span>
+          <strong>{linesCount}</strong>
+        </div>
+
         {error && <p className="error-text">Ошибка: {error}</p>}
       </section>
 
@@ -1240,65 +1256,14 @@ function InfrastructureSidebar({
           <p>Выбери станцию на карте или в списке.</p>
         )}
       </section>
-
-      <section className="card station-list-card">
-        <h2>Станции</h2>
-
-        {!isSearchMode ? (
-          <div className="station-list">
-            {stations.length === 0 ? (
-              <p>Нет данных для отображения.</p>
-            ) : (
-              stations.map((station) => (
-                <button
-                  key={`${station.region_code}-${station.id}`}
-                  className={
-                    selectedStation?.id === station.id
-                      ? 'station-list-item active'
-                      : 'station-list-item'
-                  }
-                  onClick={() => onSelectStation(station.id)}
-                >
-                  <div className="station-list-name">{station.name || 'Без названия'}</div>
-                  <div className="station-list-meta">
-                    {station.station_type || 'не указано'} • {station.region || 'не указано'}
-                  </div>
-                </button>
-              ))
-            )}
-          </div>
-        ) : (
-          <div className="station-list">
-            <StationListBlock
-              title="Результаты по выбранным зонам"
-              stations={searchSections.selected}
-              selectedStation={selectedStation}
-              onSelectStation={onSelectStation}
-            />
-
-            <StationListBlock
-              title="Результаты по остальным зонам"
-              stations={searchSections.other}
-              selectedStation={selectedStation}
-              onSelectStation={onSelectStation}
-            />
-          </div>
-        )}
-      </section>
     </>
   );
 }
 
 function RzdRouteSearchCard({
-  selectedStation,
-  rzdOriginProfile,
-  rzdOriginCode,
-  setRzdOriginCode,
-  rzdDestinationQuery,
-  setRzdDestinationQuery,
-  rzdDestinationOptions,
+  rzdOriginStation,
   selectedRzdDestination,
-  onSearchRzdDestination,
+  onSelectRzdOrigin,
   onSelectRzdDestination,
   rzdDepDate,
   setRzdDepDate,
@@ -1312,18 +1277,11 @@ function RzdRouteSearchCard({
   rzdCalendarDebug,
   onSearchRzdRoutes,
   onImportRzdTrain,
-  onBuildVirtualRoute,
-  virtualRouteLoading,
-  virtualRouteError,
-  virtualRouteMessage,
-  destinationNearbyRoutes,
-  destinationNearbyRoutesLoading,
-  onSelectRoute,
   rzdSearchProgress,
   rzdSearchProgressMessage,
 }) {
   const canSearch =
-    Boolean(selectedStation?.id) &&
+    Boolean(rzdOriginStation?.id) &&
     Boolean(selectedRzdDestination?.id) &&
     !rzdSearchLoading;
 
@@ -1332,53 +1290,24 @@ function RzdRouteSearchCard({
       <h2>Поиск реального поезда А→Б</h2>
 
       <p>
-        Станция А выбирается из OSM-слоя на карте. Станция Б ищется в локальной OSM-базе,
-        а поезд между ними проверяется через РЖД API. После выбора поезда маршрут
-        импортируется и отображается на карте.
+        Выберите станцию отправления и станцию назначения через поиск. Backend сам подберёт
+        подходящие коды РЖД и проверит ближайшие даты отправления.
       </p>
 
-      <div
-        style={{
-          background: '#f8fafc',
-          border: '1px solid rgba(148,163,184,0.25)',
-          borderRadius: 14,
-          padding: 12,
-          marginBottom: 14,
-        }}
-      >
-        <div style={{ fontSize: 13, color: '#64748b', marginBottom: 4 }}>
-          Откуда
-        </div>
+      <div style={{ display: 'grid', gap: 12, marginBottom: 14 }}>
+        <StationSearchSelect
+          label="Откуда"
+          placeholder="Введите станцию отправления"
+          selectedStation={rzdOriginStation}
+          onSelect={onSelectRzdOrigin}
+        />
 
-        {selectedStation ? (
-          <>
-            <div style={{ fontSize: 16, fontWeight: 800, color: '#111827' }}>
-              {selectedStation.name || 'Без названия'}
-            </div>
-
-            <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
-              {selectedStation.is_main_rail_station ? 'главная станция' : 'обычная станция'}
-            </div>
-
-            <div
-              style={{
-                marginTop: 10,
-                fontSize: 13,
-                color: '#64748b',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: 12,
-                padding: 10,
-              }}
-            >
-              Код РЖД API будет подобран автоматически на backend.
-            </div>
-          </>
-        ) : (
-          <div style={{ fontSize: 14, color: '#64748b' }}>
-            Выбери станцию А на карте или в списке станций.
-          </div>
-        )}
+        <StationSearchSelect
+          label="Куда"
+          placeholder="Введите станцию назначения"
+          selectedStation={selectedRzdDestination}
+          onSelect={onSelectRzdDestination}
+        />
       </div>
 
       <div style={{ marginBottom: 14 }}>
@@ -1391,138 +1320,40 @@ function RzdRouteSearchCard({
             marginBottom: 6,
           }}
         >
-          Куда
+          Дата отправления
         </label>
 
-        <div className="search-row">
-          <input
-            value={rzdDestinationQuery}
-            onChange={(event) => setRzdDestinationQuery(event.target.value)}
-            placeholder="Введите станцию назначения"
-          />
-          <button onClick={onSearchRzdDestination} disabled={rzdDestinationQuery.trim().length < 2}>
-            Найти
-          </button>
-        </div>
-
-        {selectedRzdDestination && (
-          <div
-            style={{
-              marginTop: 8,
-              fontSize: 13,
-              color: '#166534',
-              background: '#f0fdf4',
-              border: '1px solid #bbf7d0',
-              borderRadius: 12,
-              padding: 10,
-            }}
-          >
-            Выбрано: <strong>{selectedRzdDestination.name}</strong>
-          </div>
-        )}
-
-        {rzdDestinationOptions.length > 0 && (
-          <div
-            style={{
-              marginTop: 10,
-              display: 'grid',
-              gap: 8,
-              maxHeight: 180,
-              overflowY: 'auto',
-            }}
-          >
-            {rzdDestinationOptions.map((option) => (
-              <button
-                key={option.id}
-                className="station-list-item"
-                onClick={() => onSelectRzdDestination(option)}
-              >
-                <div className="station-list-name">{option.name || 'Без названия'}</div>
-                <div className="station-list-meta">
-                  {option.region || option.region_code || 'регион не указан'} •{' '}
-                  {option.is_main_rail_station ? 'главная станция' : 'обычная станция'}
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {selectedRzdDestination && (
-          <div
-            style={{
-              marginTop: 12,
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: 12,
-              padding: 10,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 13,
-                fontWeight: 800,
-                color: '#334155',
-                marginBottom: 8,
-              }}
-            >
-              Уже известные маршруты из зоны назначения
-            </div>
-
-            {destinationNearbyRoutesLoading ? (
-              <div style={{ fontSize: 13, color: '#64748b' }}>
-                Загружаем маршруты...
-              </div>
-            ) : destinationNearbyRoutes.length === 0 ? (
-              <div style={{ fontSize: 13, color: '#64748b' }}>
-                В зоне выбранной станции пока нет импортированных маршрутов.
-              </div>
-            ) : (
-              <div
-                style={{
-                  display: 'grid',
-                  gap: 6,
-                  maxHeight: 180,
-                  overflowY: 'auto',
-                  paddingRight: 4,
-                }}
-              >
-                {destinationNearbyRoutes.map((route) => (
-                  <button
-                    key={`${route.id}-${route.zone_station_id}`}
-                    className="station-route-item"
-                    onClick={() => onSelectRoute(route.id)}
-                  >
-                    <div className="station-route-title">
-                      {formatRouteTitle(route)}
-                    </div>
-                    <div className="station-route-meta">
-                      {formatRouteDirection(route)} • через {route.zone_station_name}
-                      {route.zone_station_distance_km !== null &&
-                      route.zone_station_distance_km !== undefined
-                        ? ` • ${route.zone_station_distance_km} км`
-                        : ''}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        <input
+          type="date"
+          value={rzdDepDate}
+          onChange={(event) => setRzdDepDate(event.target.value)}
+          style={{
+            width: '100%',
+            borderRadius: 12,
+            border: '1px solid #cbd5e1',
+            padding: '10px 12px',
+            fontSize: 14,
+          }}
+        />
       </div>
 
-      <div
+      <label
         style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          fontSize: 14,
+          color: '#111827',
           marginBottom: 14,
-          fontSize: 13,
-          color: '#64748b',
-          background: '#f8fafc',
-          border: '1px solid #e2e8f0',
-          borderRadius: 12,
-          padding: 10,
         }}
       >
-        Система проверит ближайшие 2 дня и покажет даты, на которые найдены поезда.
-      </div>
+        <input
+          type="checkbox"
+          checked={rzdIncludeTransfers}
+          onChange={(event) => setRzdIncludeTransfers(event.target.checked)}
+        />
+        Искать с пересадками
+      </label>
 
       <ActionButton
         variant="primary"
@@ -1574,17 +1405,6 @@ function RzdRouteSearchCard({
                 transition: 'width 240ms ease',
               }}
             />
-          </div>
-
-          <div
-            style={{
-              marginTop: 10,
-              fontSize: 12,
-              color: '#64748b',
-              lineHeight: 1.4,
-            }}
-          >
-            Проверяем варианты между выбранными зонами станций...
           </div>
         </div>
       )}
@@ -1832,28 +1652,12 @@ function RzdRouteSearchCard({
 }
 
 function RoutesSidebar({
-  routes,
-  routesLoading,
-  routesError,
-  routeSearchQuery,
-  setRouteSearchQuery,
-  onSearchRoutes,
-  onResetRoutes,
   selectedRoute,
-  onSelectRoute,
   onClearRoute,
   onSelectStation,
-  selectedStation,
-  stationRoutes,
-
-  rzdOriginProfile,
-  rzdOriginCode,
-  setRzdOriginCode,
-  rzdDestinationQuery,
-  setRzdDestinationQuery,
-  rzdDestinationOptions,
+  rzdOriginStation,
   selectedRzdDestination,
-  onSearchRzdDestination,
+  onSelectRzdOrigin,
   onSelectRzdDestination,
   rzdDepDate,
   setRzdDepDate,
@@ -1867,43 +1671,16 @@ function RoutesSidebar({
   rzdCalendarDebug,
   onSearchRzdRoutes,
   onImportRzdTrain,
-  onBuildVirtualRoute,
-  virtualRouteLoading,
-  virtualRouteError,
-  virtualRouteMessage,
-  destinationNearbyRoutes,
-  destinationNearbyRoutesLoading,
   rzdSearchProgress,
   rzdSearchProgressMessage,
+  onEnterAnalytics,
 }) {
   return (
     <>
-      <section className="card">
-        <h2>Режим маршрутов</h2>
-        <p>
-          Здесь собраны только функции, относящиеся к маршрутам.
-        </p>
-        <p>
-          Выбранный маршрут отображается на карте целиком, даже если выходит за пределы
-          загруженных федеральных округов.
-        </p>
-        <p>
-          Общий список сохранённых маршрутов скрыт из пользовательского интерфейса. БД
-          используется как внутренний cache; на карте показывается только выбранный или
-          только что импортированный маршрут.
-        </p>
-      </section>
-
       <RzdRouteSearchCard
-        selectedStation={selectedStation}
-        rzdOriginProfile={rzdOriginProfile}
-        rzdOriginCode={rzdOriginCode}
-        setRzdOriginCode={setRzdOriginCode}
-        rzdDestinationQuery={rzdDestinationQuery}
-        setRzdDestinationQuery={setRzdDestinationQuery}
-        rzdDestinationOptions={rzdDestinationOptions}
+        rzdOriginStation={rzdOriginStation}
         selectedRzdDestination={selectedRzdDestination}
-        onSearchRzdDestination={onSearchRzdDestination}
+        onSelectRzdOrigin={onSelectRzdOrigin}
         onSelectRzdDestination={onSelectRzdDestination}
         rzdDepDate={rzdDepDate}
         setRzdDepDate={setRzdDepDate}
@@ -1917,23 +1694,16 @@ function RoutesSidebar({
         rzdCalendarDebug={rzdCalendarDebug}
         onSearchRzdRoutes={onSearchRzdRoutes}
         onImportRzdTrain={onImportRzdTrain}
-        onBuildVirtualRoute={onBuildVirtualRoute}
-        virtualRouteLoading={virtualRouteLoading}
-        virtualRouteError={virtualRouteError}
-        virtualRouteMessage={virtualRouteMessage}
-        destinationNearbyRoutes={destinationNearbyRoutes}
-        destinationNearbyRoutesLoading={destinationNearbyRoutesLoading}
-        onSelectRoute={onSelectRoute}
         rzdSearchProgress={rzdSearchProgress}
         rzdSearchProgressMessage={rzdSearchProgressMessage}
       />
 
-
       <RouteDetailsCard
         selectedRoute={selectedRoute}
-        routesLoading={routesLoading}
+        routesLoading={false}
         onClearRoute={onClearRoute}
         onSelectStation={onSelectStation}
+        onEnterAnalytics={onEnterAnalytics}
       />
     </>
   );
@@ -1941,12 +1711,9 @@ function RoutesSidebar({
 
 
 function VirtualRoutesSidebar({
-  selectedStation,
-  virtualDestinationQuery,
-  setVirtualDestinationQuery,
-  virtualDestinationOptions,
+  selectedVirtualOrigin,
   selectedVirtualDestination,
-  onSearchVirtualDestination,
+  onSelectVirtualOrigin,
   onSelectVirtualDestination,
   onBuildVirtualRoute,
   virtualRouteLoading,
@@ -1954,112 +1721,29 @@ function VirtualRoutesSidebar({
   virtualRouteMessage,
   topologyProgress,
   topologyProgressMessage,
-  loadedRegionCodes,
 }) {
   return (
     <>
       <section className="card">
-        <h2>Виртуальные маршруты</h2>
+        <h2>Виртуальный маршрут по OSM</h2>
         <p>
           Этот режим строит теоретический путь по OSM topology graph. Это не расписание РЖД.
         </p>
-      </section>
 
-      <section className="card">
-        <h2>Точки маршрута</h2>
+        <div style={{ display: 'grid', gap: 12, marginBottom: 14 }}>
+          <StationSearchSelect
+            label="Станция А"
+            placeholder="Введите начальную станцию"
+            selectedStation={selectedVirtualOrigin}
+            onSelect={onSelectVirtualOrigin}
+          />
 
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
-            Точка А
-          </div>
-
-          {selectedStation ? (
-            <div
-              style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: 12,
-                padding: 10,
-                fontSize: 14,
-              }}
-            >
-              <strong>{selectedStation.name || 'Без названия'}</strong>
-              <div style={{ marginTop: 4, color: '#64748b', fontSize: 13 }}>
-                {selectedStation.region_code}
-              </div>
-            </div>
-          ) : (
-            <p style={{ margin: 0, color: '#64748b' }}>
-              Выберите станцию отправления на карте.
-            </p>
-          )}
-        </div>
-
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
-            Точка Б
-          </div>
-
-          <div className="search-row">
-            <input
-              value={virtualDestinationQuery}
-              onChange={(event) => setVirtualDestinationQuery(event.target.value)}
-              placeholder="Введите станцию назначения"
-            />
-            <button onClick={onSearchVirtualDestination}>Найти</button>
-          </div>
-
-          {virtualDestinationOptions.length > 0 && (
-            <div
-              style={{
-                display: 'grid',
-                gap: 6,
-                marginTop: 10,
-                maxHeight: 220,
-                overflowY: 'auto',
-                paddingRight: 4,
-              }}
-            >
-              {virtualDestinationOptions.map((station) => {
-                const isLoaded = loadedRegionCodes.includes(station.region_code);
-
-                return (
-                  <button
-                    key={station.id}
-                    className="station-list-item"
-                    onClick={() => onSelectVirtualDestination(station)}
-                  >
-                    <div className="station-list-name">
-                      {station.name || 'Без названия'}
-                    </div>
-                    <div className="station-list-meta">
-                      {station.region || station.region_code || 'регион не указан'} •{' '}
-                      {station.is_main_rail_station ? 'главная станция' : 'обычная станция'} •{' '}
-                      {isLoaded ? 'округ загружен' : 'округ не загружен'}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {selectedVirtualDestination && (
-            <div
-              style={{
-                marginTop: 10,
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: 12,
-                padding: 10,
-                fontSize: 14,
-              }}
-            >
-              <strong>{selectedVirtualDestination.name}</strong>
-              <div style={{ marginTop: 4, color: '#64748b', fontSize: 13 }}>
-                {selectedVirtualDestination.region_code}
-              </div>
-            </div>
-          )}
+          <StationSearchSelect
+            label="Станция Б"
+            placeholder="Введите конечную станцию"
+            selectedStation={selectedVirtualDestination}
+            onSelect={onSelectVirtualDestination}
+          />
         </div>
 
         <ActionButton
@@ -2068,7 +1752,7 @@ function VirtualRoutesSidebar({
           onClick={onBuildVirtualRoute}
           disabled={
             virtualRouteLoading ||
-            !selectedStation?.id ||
+            !selectedVirtualOrigin?.id ||
             !selectedVirtualDestination?.id
           }
         >
@@ -2158,6 +1842,7 @@ function VirtualRoutesSidebar({
   );
 }
 
+
 function LoadedSidebar({
   panelMode,
   setPanelMode,
@@ -2186,6 +1871,7 @@ function LoadedSidebar({
   selectedRoute,
   onSelectRoute,
   onClearRoute,
+  onEnterAnalytics,
   stationRoutes,
 
   rzdOriginProfile,
@@ -2194,8 +1880,9 @@ function LoadedSidebar({
   rzdDestinationQuery,
   setRzdDestinationQuery,
   rzdDestinationOptions,
+  rzdOriginStation,
   selectedRzdDestination,
-  onSearchRzdDestination,
+  onSelectRzdOrigin,
   onSelectRzdDestination,
   rzdDepDate,
   setRzdDepDate,
@@ -2216,9 +1903,9 @@ function LoadedSidebar({
 
   virtualDestinationQuery,
   setVirtualDestinationQuery,
-  virtualDestinationOptions,
+  selectedVirtualOrigin,
   selectedVirtualDestination,
-  onSearchVirtualDestination,
+  onSelectVirtualOrigin,
   onSelectVirtualDestination,
   onBuildVirtualRoute,
   virtualRouteLoading,
@@ -2251,27 +1938,13 @@ function LoadedSidebar({
         />
       ) : panelMode === 'routes' ? (
         <RoutesSidebar
-          routes={routes}
-          routesLoading={routesLoading}
-          routesError={routesError}
-          routeSearchQuery={routeSearchQuery}
-          setRouteSearchQuery={setRouteSearchQuery}
-          onSearchRoutes={onSearchRoutes}
-          onResetRoutes={onResetRoutes}
           selectedRoute={selectedRoute}
-          onSelectRoute={onSelectRoute}
           onClearRoute={onClearRoute}
+          onEnterAnalytics={onEnterAnalytics}
           onSelectStation={onSelectStation}
-          selectedStation={selectedStation}
-          stationRoutes={stationRoutes}
-          rzdOriginProfile={rzdOriginProfile}
-          rzdOriginCode={rzdOriginCode}
-          setRzdOriginCode={setRzdOriginCode}
-          rzdDestinationQuery={rzdDestinationQuery}
-          setRzdDestinationQuery={setRzdDestinationQuery}
-          rzdDestinationOptions={rzdDestinationOptions}
+          rzdOriginStation={rzdOriginStation}
           selectedRzdDestination={selectedRzdDestination}
-          onSearchRzdDestination={onSearchRzdDestination}
+          onSelectRzdOrigin={onSelectRzdOrigin}
           onSelectRzdDestination={onSelectRzdDestination}
           rzdDepDate={rzdDepDate}
           setRzdDepDate={setRzdDepDate}
@@ -2285,23 +1958,14 @@ function LoadedSidebar({
           rzdCalendarDebug={rzdCalendarDebug}
           onSearchRzdRoutes={onSearchRzdRoutes}
           onImportRzdTrain={onImportRzdTrain}
-          onBuildVirtualRoute={onBuildVirtualRoute}
-          virtualRouteLoading={virtualRouteLoading}
-          virtualRouteError={virtualRouteError}
-          virtualRouteMessage={virtualRouteMessage}
-          destinationNearbyRoutes={destinationNearbyRoutes}
-          destinationNearbyRoutesLoading={destinationNearbyRoutesLoading}
           rzdSearchProgress={rzdSearchProgress}
           rzdSearchProgressMessage={rzdSearchProgressMessage}
         />
       ) : (
         <VirtualRoutesSidebar
-          selectedStation={selectedStation}
-          virtualDestinationQuery={virtualDestinationQuery}
-          setVirtualDestinationQuery={setVirtualDestinationQuery}
-          virtualDestinationOptions={virtualDestinationOptions}
+          selectedVirtualOrigin={selectedVirtualOrigin}
           selectedVirtualDestination={selectedVirtualDestination}
-          onSearchVirtualDestination={onSearchVirtualDestination}
+          onSelectVirtualOrigin={onSelectVirtualOrigin}
           onSelectVirtualDestination={onSelectVirtualDestination}
           onBuildVirtualRoute={onBuildVirtualRoute}
           virtualRouteLoading={virtualRouteLoading}
@@ -2309,7 +1973,6 @@ function LoadedSidebar({
           virtualRouteMessage={virtualRouteMessage}
           topologyProgress={topologyProgress}
           topologyProgressMessage={topologyProgressMessage}
-          loadedRegionCodes={loadedRegionCodes}
         />
       )}
     </aside>
@@ -2514,6 +2177,148 @@ function createRouteStopFeatures(stops) {
     });
 }
 
+
+function createAnalyticsSettlementFeatures(settlements) {
+  const format = new GeoJSON();
+
+  return (settlements || []).flatMap((settlement) => {
+    try {
+      if (!settlement.geometry) {
+        return [];
+      }
+
+      const features = format.readFeatures(
+        {
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              geometry: settlement.geometry,
+              properties: {
+                analyticsSettlementId: settlement.id,
+                settlement,
+                score: settlement.score,
+                weight: Math.max(0.05, Math.min(1, Number(settlement.score || 0) / 100)),
+                attention_level: settlement.attention_level,
+                served: settlement.served,
+              },
+            },
+          ],
+        },
+        {
+          dataProjection: 'EPSG:4326',
+          featureProjection: 'EPSG:3857',
+        }
+      );
+
+      for (const feature of features) {
+        feature.setId(`analytics-settlement-${settlement.id}`);
+      }
+
+      return features;
+    } catch (error) {
+      console.error('Ошибка разбора analytics settlement:', settlement, error);
+      return [];
+    }
+  });
+}
+
+function createAnalyticsVirtualStationFeature(candidate) {
+  if (!candidate?.virtual_station?.geometry) {
+    return null;
+  }
+
+  try {
+    const format = new GeoJSON();
+    const feature = format.readFeature(
+      {
+        type: 'Feature',
+        geometry: candidate.virtual_station.geometry,
+        properties: {
+          analyticsVirtualStation: true,
+          candidate,
+        },
+      },
+      {
+        dataProjection: 'EPSG:4326',
+        featureProjection: 'EPSG:3857',
+      }
+    );
+    feature.setId(`analytics-virtual-station-${candidate.id}`);
+    return feature;
+  } catch (error) {
+    console.error('Ошибка разбора virtual station:', candidate, error);
+    return null;
+  }
+}
+
+function createAnalyticsConnectionFeature(candidate) {
+  const settlementCoords = candidate?.geometry?.coordinates;
+  const virtualStationCoords = candidate?.virtual_station?.geometry?.coordinates;
+
+  if (!settlementCoords || !virtualStationCoords) {
+    return null;
+  }
+
+  const feature = new Feature({
+    geometry: new LineString([
+      fromLonLat(settlementCoords),
+      fromLonLat(virtualStationCoords),
+    ]),
+    analyticsConnection: true,
+    candidate,
+  });
+
+  feature.setId(`analytics-connection-${candidate.id}`);
+  return feature;
+}
+
+
+function createAnalyticsAlternativeFeatures(alternatives) {
+  const format = new GeoJSON();
+
+  return (alternatives || []).flatMap((alternative) => {
+    try {
+      if (!alternative.geometry) {
+        return [];
+      }
+
+      const features = format.readFeatures(
+        {
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              geometry: alternative.geometry,
+              properties: {
+                analyticsAlternativeId: alternative.id,
+                alternative,
+                rank: alternative.rank,
+                length_km: alternative.length_km,
+                difference_ratio: alternative.difference_ratio,
+                overlap_ratio: alternative.overlap_ratio,
+              },
+            },
+          ],
+        },
+        {
+          dataProjection: 'EPSG:4326',
+          featureProjection: 'EPSG:3857',
+        }
+      );
+
+      for (const feature of features) {
+        feature.setId(`analytics-alternative-${alternative.id}`);
+      }
+
+      return features;
+    } catch (error) {
+      console.error('Ошибка разбора alternative route:', alternative, error);
+      return [];
+    }
+  });
+}
+
 function buildDistrictLabelFeatures(federalDistrictsData) {
   if (!federalDistrictsData) {
     return [];
@@ -2601,6 +2406,16 @@ function MapPanel({
   onSelectStation,
   selectedRoute,
   loading,
+  mapMode,
+  analyticsResult,
+  analyticsParams,
+  selectedAnalyticsCandidate,
+  onSelectAnalyticsCandidate,
+  showAnalyticsHeatmap,
+  showAnalyticsPoints,
+  routeAlternatives,
+  selectedAlternativeId,
+  showAlternatives,
 }) {
   const mapElementRef = useRef(null);
   const mapRef = useRef(null);
@@ -2613,6 +2428,11 @@ function MapPanel({
   const routeLineLayerRef = useRef(null);
   const routeNetworkSegmentsLayerRef = useRef(null);
   const routeStopsLayerRef = useRef(null);
+  const analyticsSettlementsLayerRef = useRef(null);
+  const analyticsHeatmapLayerRef = useRef(null);
+  const analyticsVirtualStationLayerRef = useRef(null);
+  const analyticsConnectionLayerRef = useRef(null);
+  const analyticsAlternativesLayerRef = useRef(null);
 
   const districtSourceRef = useRef(null);
   const districtLabelSourceRef = useRef(null);
@@ -2622,6 +2442,11 @@ function MapPanel({
   const routeLineSourceRef = useRef(null);
   const routeNetworkSegmentsSourceRef = useRef(null);
   const routeStopsSourceRef = useRef(null);
+  const analyticsSettlementsSourceRef = useRef(null);
+  const analyticsHeatmapSourceRef = useRef(null);
+  const analyticsVirtualStationSourceRef = useRef(null);
+  const analyticsConnectionSourceRef = useRef(null);
+  const analyticsAlternativesSourceRef = useRef(null);
 
   const hoverRegionCodeRef = useRef(null);
   const activeRegionCodeRef = useRef(activeRegionCode);
@@ -2629,6 +2454,10 @@ function MapPanel({
   const loadedRegionCodesRef = useRef(loadedRegionCodes);
   const selectionModeRef = useRef(selectionMode);
   const selectedStationIdRef = useRef(selectedStation?.id ?? null);
+  const mapModeRef = useRef(mapMode);
+  const onSelectAnalyticsCandidateRef = useRef(onSelectAnalyticsCandidate);
+  const selectedAnalyticsCandidateRef = useRef(selectedAnalyticsCandidate);
+  const selectedAlternativeIdRef = useRef(selectedAlternativeId);
 
   const districtStyleFunction = useCallback((feature) => {
     const code = feature.get('code');
@@ -2751,6 +2580,36 @@ function MapPanel({
   }, [selectedStation]);
 
   useEffect(() => {
+    mapModeRef.current = mapMode;
+    const isAnalytics = mapMode === 'analytics';
+
+    lineLayerRef.current?.setVisible(!isAnalytics);
+    stationLayerRef.current?.setVisible(!isAnalytics);
+    districtLayerRef.current?.setVisible(selectionMode || !isAnalytics);
+    districtLabelLayerRef.current?.setVisible(selectionMode && !isAnalytics);
+
+    analyticsSettlementsLayerRef.current?.setVisible(isAnalytics && showAnalyticsPoints);
+    analyticsHeatmapLayerRef.current?.setVisible(isAnalytics && showAnalyticsHeatmap);
+    analyticsVirtualStationLayerRef.current?.setVisible(isAnalytics);
+    analyticsConnectionLayerRef.current?.setVisible(isAnalytics);
+    analyticsAlternativesLayerRef.current?.setVisible(isAnalytics && showAlternatives);
+  }, [mapMode, selectionMode, showAnalyticsHeatmap, showAnalyticsPoints, showAlternatives]);
+
+  useEffect(() => {
+    onSelectAnalyticsCandidateRef.current = onSelectAnalyticsCandidate;
+  }, [onSelectAnalyticsCandidate]);
+
+  useEffect(() => {
+    selectedAnalyticsCandidateRef.current = selectedAnalyticsCandidate;
+    analyticsSettlementsLayerRef.current?.changed();
+  }, [selectedAnalyticsCandidate]);
+
+  useEffect(() => {
+    selectedAlternativeIdRef.current = selectedAlternativeId;
+    analyticsAlternativesLayerRef.current?.changed();
+  }, [selectedAlternativeId]);
+
+  useEffect(() => {
     if (!mapElementRef.current || mapRef.current) {
       return;
     }
@@ -2771,6 +2630,11 @@ function MapPanel({
     const routeLineSource = new VectorSource();
     const routeNetworkSegmentsSource = new VectorSource();
     const routeStopsSource = new VectorSource();
+    const analyticsSettlementsSource = new VectorSource();
+    const analyticsHeatmapSource = new VectorSource();
+    const analyticsVirtualStationSource = new VectorSource();
+    const analyticsConnectionSource = new VectorSource();
+    const analyticsAlternativesSource = new VectorSource();
 
     const districtLayer = new VectorLayer({
       source: districtSource,
@@ -2940,6 +2804,112 @@ function MapPanel({
       declutter: false,
     });
 
+    const analyticsHeatmapLayer = new HeatmapLayer({
+      source: analyticsHeatmapSource,
+      blur: 18,
+      radius: 16,
+      weight: (feature) => feature.get('weight') || 0.1,
+      visible: false,
+      zIndex: 92,
+    });
+
+    const analyticsSettlementsLayer = new VectorLayer({
+      source: analyticsSettlementsSource,
+      visible: false,
+      style: (feature) => {
+        const settlement = feature.get('settlement');
+        const isSelected = settlement?.id === selectedAnalyticsCandidateRef.current?.id;
+        const level = feature.get('attention_level');
+        const served = feature.get('served');
+
+        let fillColor = '#22c55e';
+        if (served) {
+          fillColor = '#64748b';
+        } else if (level === 'high') {
+          fillColor = '#dc2626';
+        } else if (level === 'medium') {
+          fillColor = '#f59e0b';
+        }
+
+        return new Style({
+          image: new CircleStyle({
+            radius: isSelected ? 9 : 6,
+            fill: new Fill({ color: fillColor }),
+            stroke: new Stroke({ color: '#ffffff', width: isSelected ? 2.4 : 1.5 }),
+          }),
+          zIndex: isSelected ? 105 : 96,
+        });
+      },
+    });
+
+    const analyticsConnectionLayer = new VectorLayer({
+      source: analyticsConnectionSource,
+      visible: false,
+      style: () =>
+        new Style({
+          stroke: new Stroke({
+            color: '#ef4444',
+            width: 2.4,
+            lineDash: [8, 8],
+          }),
+          zIndex: 106,
+        }),
+    });
+
+    const analyticsVirtualStationLayer = new VectorLayer({
+      source: analyticsVirtualStationSource,
+      visible: false,
+      style: () =>
+        new Style({
+          image: new CircleStyle({
+            radius: 8,
+            fill: new Fill({ color: '#7c3aed' }),
+            stroke: new Stroke({ color: '#ffffff', width: 2 }),
+          }),
+          zIndex: 107,
+        }),
+    });
+
+
+    const analyticsAlternativesLayer = new VectorLayer({
+      source: analyticsAlternativesSource,
+      visible: false,
+      style: (feature) => {
+        const alternative = feature.get('alternative');
+        const rank = Number(feature.get('rank') || 1);
+        const isSelected = alternative?.id === selectedAlternativeIdRef.current;
+
+        const colors = [
+          '#2563eb',
+          '#f97316',
+          '#db2777',
+          '#0891b2',
+          '#9333ea',
+          '#65a30d',
+        ];
+
+        const color = colors[(rank - 1) % colors.length];
+
+        return [
+          new Style({
+            stroke: new Stroke({
+              color: 'rgba(255,255,255,0.95)',
+              width: isSelected ? 9 : 7,
+            }),
+            zIndex: isSelected ? 113 : 110,
+          }),
+          new Style({
+            stroke: new Stroke({
+              color,
+              width: isSelected ? 4.8 : 3.6,
+              lineDash: rank === 1 ? undefined : [12, 8],
+            }),
+            zIndex: isSelected ? 114 : 111,
+          }),
+        ];
+      },
+    });
+
     const stationLayer = new VectorImageLayer({
       source: stationSource,
       imageRatio: 1.3,
@@ -2981,6 +2951,11 @@ function MapPanel({
         routeLineLayer,
         routeNetworkSegmentsLayer,
         routeStopsLayer,
+        analyticsHeatmapLayer,
+        analyticsSettlementsLayer,
+        analyticsConnectionLayer,
+        analyticsVirtualStationLayer,
+        analyticsAlternativesLayer,
       ],
       view,
       loadTilesWhileAnimating: true,
@@ -3033,6 +3008,27 @@ function MapPanel({
         return;
       }
 
+      if (mapModeRef.current === 'analytics') {
+        const analyticsFeature = map.forEachFeatureAtPixel(
+          event.pixel,
+          (foundFeature, layer) => {
+            if (layer === analyticsSettlementsLayerRef.current) {
+              return foundFeature;
+            }
+            return null;
+          },
+          { hitTolerance: 7 }
+        );
+
+        if (analyticsFeature) {
+          const settlement = analyticsFeature.get('settlement');
+          if (settlement) {
+            onSelectAnalyticsCandidateRef.current?.(settlement);
+          }
+          return;
+        }
+      }
+
       const stationFeature = map.forEachFeatureAtPixel(
         event.pixel,
         (foundFeature) => {
@@ -3058,6 +3054,11 @@ function MapPanel({
     routeLineLayerRef.current = routeLineLayer;
     routeNetworkSegmentsLayerRef.current = routeNetworkSegmentsLayer;
     routeStopsLayerRef.current = routeStopsLayer;
+    analyticsSettlementsLayerRef.current = analyticsSettlementsLayer;
+    analyticsHeatmapLayerRef.current = analyticsHeatmapLayer;
+    analyticsVirtualStationLayerRef.current = analyticsVirtualStationLayer;
+    analyticsConnectionLayerRef.current = analyticsConnectionLayer;
+    analyticsAlternativesLayerRef.current = analyticsAlternativesLayer;
 
     districtSourceRef.current = districtSource;
     districtLabelSourceRef.current = districtLabelSource;
@@ -3067,6 +3068,11 @@ function MapPanel({
     routeLineSourceRef.current = routeLineSource;
     routeNetworkSegmentsSourceRef.current = routeNetworkSegmentsSource;
     routeStopsSourceRef.current = routeStopsSource;
+    analyticsSettlementsSourceRef.current = analyticsSettlementsSource;
+    analyticsHeatmapSourceRef.current = analyticsHeatmapSource;
+    analyticsVirtualStationSourceRef.current = analyticsVirtualStationSource;
+    analyticsConnectionSourceRef.current = analyticsConnectionSource;
+    analyticsAlternativesSourceRef.current = analyticsAlternativesSource;
 
     setTimeout(() => {
       map.updateSize();
@@ -3315,6 +3321,77 @@ function MapPanel({
     }
   }, [selectedRoute]);
 
+  useEffect(() => {
+    if (!analyticsSettlementsSourceRef.current || !analyticsHeatmapSourceRef.current) {
+      return;
+    }
+
+    const settlements = (analyticsResult?.settlements || []).filter((item) => {
+      const population = Number(item.population ?? 0);
+      const minPopulation = Number(analyticsParams.min_population ?? 0);
+      const maxPopulation = Number(analyticsParams.max_population ?? Number.POSITIVE_INFINITY);
+
+      if (population < minPopulation) {
+        return false;
+      }
+
+      if (population > maxPopulation) {
+        return false;
+      }
+
+      return true;
+    });
+    const features = createAnalyticsSettlementFeatures(settlements);
+
+    analyticsSettlementsSourceRef.current.clear(true);
+    analyticsHeatmapSourceRef.current.clear(true);
+
+    if (features.length > 0) {
+      analyticsSettlementsSourceRef.current.addFeatures(features);
+      analyticsHeatmapSourceRef.current.addFeatures(features.map((feature) => feature.clone()));
+    }
+  }, [analyticsResult, analyticsParams]);
+
+  useEffect(() => {
+    if (!analyticsVirtualStationSourceRef.current || !analyticsConnectionSourceRef.current) {
+      return;
+    }
+
+    analyticsVirtualStationSourceRef.current.clear(true);
+    analyticsConnectionSourceRef.current.clear(true);
+
+    const virtualStationFeature = createAnalyticsVirtualStationFeature(selectedAnalyticsCandidate);
+    const connectionFeature = createAnalyticsConnectionFeature(selectedAnalyticsCandidate);
+
+    if (virtualStationFeature) {
+      analyticsVirtualStationSourceRef.current.addFeature(virtualStationFeature);
+    }
+
+    if (connectionFeature) {
+      analyticsConnectionSourceRef.current.addFeature(connectionFeature);
+    }
+
+    analyticsSettlementsLayerRef.current?.changed();
+  }, [selectedAnalyticsCandidate]);
+
+
+  useEffect(() => {
+    if (!analyticsAlternativesSourceRef.current) {
+      return;
+    }
+
+    const alternatives = routeAlternatives?.alternatives || [];
+    const features = createAnalyticsAlternativeFeatures(alternatives);
+
+    analyticsAlternativesSourceRef.current.clear(true);
+
+    if (features.length > 0) {
+      analyticsAlternativesSourceRef.current.addFeatures(features);
+    }
+
+    analyticsAlternativesLayerRef.current?.changed();
+  }, [routeAlternatives, selectedAlternativeId]);
+
   return (
     <section
       className="map-section"
@@ -3359,6 +3436,7 @@ export default function App() {
 
   const [rzdOriginProfile, setRzdOriginProfile] = useState(null);
   const [rzdOriginCode, setRzdOriginCode] = useState('');
+  const [selectedRzdOrigin, setSelectedRzdOrigin] = useState(null);
 
   const [rzdDestinationQuery, setRzdDestinationQuery] = useState('');
   const [rzdDestinationOptions, setRzdDestinationOptions] = useState([]);
@@ -3381,6 +3459,7 @@ export default function App() {
 
   const [virtualDestinationQuery, setVirtualDestinationQuery] = useState('');
   const [virtualDestinationOptions, setVirtualDestinationOptions] = useState([]);
+  const [selectedVirtualOrigin, setSelectedVirtualOrigin] = useState(null);
   const [selectedVirtualDestination, setSelectedVirtualDestination] = useState(null);
 
   const [virtualRouteLoading, setVirtualRouteLoading] = useState(false);
@@ -3389,6 +3468,21 @@ export default function App() {
 
   const [topologyProgress, setTopologyProgress] = useState(0);
   const [topologyProgressMessage, setTopologyProgressMessage] = useState('');
+
+  const [mapMode, setMapMode] = useState('research');
+  const [analyticsParams, setAnalyticsParams] = useState(DEFAULT_ANALYTICS_PARAMS);
+  const [analyticsResult, setAnalyticsResult] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsError, setAnalyticsError] = useState('');
+  const [selectedAnalyticsCandidate, setSelectedAnalyticsCandidate] = useState(null);
+  const [showAnalyticsHeatmap, setShowAnalyticsHeatmap] = useState(true);
+  const [showAnalyticsPoints, setShowAnalyticsPoints] = useState(true);
+  const [alternativesParams, setAlternativesParams] = useState(DEFAULT_ALTERNATIVES_PARAMS);
+  const [routeAlternatives, setRouteAlternatives] = useState(null);
+  const [alternativesLoading, setAlternativesLoading] = useState(false);
+  const [alternativesError, setAlternativesError] = useState('');
+  const [selectedAlternativeId, setSelectedAlternativeId] = useState(null);
+  const [showAlternatives, setShowAlternatives] = useState(true);
 
   const [updateStates, setUpdateStates] = useState({});
   const [checkingAllUpdates, setCheckingAllUpdates] = useState(false);
@@ -4054,6 +4148,9 @@ export default function App() {
       };
 
       setSelectedRoute(normalizedRoute);
+      setRouteAlternatives(null);
+      setAlternativesError('');
+      setSelectedAlternativeId(null);
       finishRouteLoadingOverlay();
     } catch (err) {
       console.error(err);
@@ -4072,6 +4169,13 @@ export default function App() {
 
   const handleClearRoute = useCallback(() => {
     setSelectedRoute(null);
+    setMapMode('research');
+    setAnalyticsResult(null);
+    setSelectedAnalyticsCandidate(null);
+    setAnalyticsError('');
+    setRouteAlternatives(null);
+    setAlternativesError('');
+    setSelectedAlternativeId(null);
   }, []);
 
   const handleSearchRzdDestination = useCallback(async () => {
@@ -4134,46 +4238,26 @@ export default function App() {
     }
   }, [rzdDestinationQuery]);
 
-  const loadNearbyRoutesForStation = useCallback(async (stationId) => {
-    if (!stationId) {
-      return [];
-    }
-
-    const response = await fetch(
-      `${BACKEND_URL}/api/stations/${stationId}/nearby-routes?radius_km=5&limit=40`
-    );
-
-    if (!response.ok) {
-      throw new Error('Не удалось загрузить маршруты из зоны станции');
-    }
-
-    const data = await response.json();
-    return data.items || [];
-  }, []);
-
-  const handleSelectRzdDestination = useCallback(async (option) => {
-    setSelectedRzdDestination(option);
-    setRzdDestinationQuery(option.name || '');
-    setRzdDestinationOptions([]);
+  const handleSelectRzdOrigin = useCallback((station) => {
+    setSelectedRzdOrigin(station);
+    setSelectedStation(station);
     setRzdTrains([]);
     setRzdError('');
-    setRzdMessage(`Выбрана станция назначения: ${option.name}`);
-    setDestinationNearbyRoutes([]);
+    setRzdMessage(`Выбрана станция отправления: ${station.name || 'без названия'}`);
+  }, []);
 
-    try {
-      setDestinationNearbyRoutesLoading(true);
-      const nearbyRoutes = await loadNearbyRoutesForStation(option.id);
-      setDestinationNearbyRoutes(nearbyRoutes);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setDestinationNearbyRoutesLoading(false);
-    }
-  }, [loadNearbyRoutesForStation]);
+  const handleSelectRzdDestination = useCallback((station) => {
+    setSelectedRzdDestination(station);
+    setSelectedStation(station);
+    setRzdTrains([]);
+    setRzdError('');
+    setRzdMessage(`Выбрана станция назначения: ${station.name || 'без названия'}`);
+    setDestinationNearbyRoutes([]);
+  }, []);
 
   const handleSearchRzdRoutes = useCallback(async () => {
-    if (!selectedStation?.id) {
-      setRzdError('Выберите станцию отправления на карте.');
+    if (!selectedRzdOrigin?.id) {
+      setRzdError('Выберите станцию отправления.');
       return;
     }
 
@@ -4192,7 +4276,7 @@ export default function App() {
       startRzdSearchProgress();
 
       const requestPayload = {
-        origin_station_id: selectedStation.id,
+        origin_station_id: selectedRzdOrigin.id,
         destination_station_id: selectedRzdDestination.id,
         days_ahead: RZD_SEARCH_DAYS_AHEAD,
         check_seats: false,
@@ -4255,7 +4339,7 @@ export default function App() {
       setRzdSearchLoading(false);
     }
   }, [
-    selectedStation,
+    selectedRzdOrigin,
     selectedRzdDestination,
     startRzdSearchProgress,
     finishRzdSearchProgress,
@@ -4312,15 +4396,28 @@ export default function App() {
     }
   }, [virtualDestinationQuery, loadedRegionCodes]);
 
-  const handleSelectVirtualDestination = useCallback((station) => {
-    setSelectedVirtualDestination(station);
-    setVirtualDestinationQuery(station.name || '');
-    setVirtualDestinationOptions([]);
+  const handleSelectVirtualOrigin = useCallback((station) => {
+    setSelectedVirtualOrigin(station);
+    setSelectedStation(station);
     setVirtualRouteError('');
 
     if (!loadedRegionCodes.includes(station.region_code)) {
       setVirtualRouteMessage(
-        'Станция находится в округе, который сейчас не загружен. Загрузите этот округ, чтобы построить виртуальный путь.'
+        'Станция отправления находится в округе, который сейчас не загружен. Загрузите этот округ, чтобы построить виртуальный путь.'
+      );
+    } else {
+      setVirtualRouteMessage(`Выбрана станция отправления: ${station.name}`);
+    }
+  }, [loadedRegionCodes]);
+
+  const handleSelectVirtualDestination = useCallback((station) => {
+    setSelectedVirtualDestination(station);
+    setSelectedStation(station);
+    setVirtualRouteError('');
+
+    if (!loadedRegionCodes.includes(station.region_code)) {
+      setVirtualRouteMessage(
+        'Станция назначения находится в округе, который сейчас не загружен. Загрузите этот округ, чтобы построить виртуальный путь.'
       );
     } else {
       setVirtualRouteMessage(`Выбрана станция назначения: ${station.name}`);
@@ -4450,8 +4547,8 @@ export default function App() {
   }, []);
 
   const handleBuildVirtualRoute = useCallback(async () => {
-    if (!selectedStation?.id) {
-      setVirtualRouteError('Выберите станцию отправления на карте.');
+    if (!selectedVirtualOrigin?.id) {
+      setVirtualRouteError('Выберите станцию отправления.');
       return;
     }
 
@@ -4461,7 +4558,7 @@ export default function App() {
     }
 
     const virtualScopeRegionCodes = buildVirtualScopeRegionCodes(
-      selectedStation,
+      selectedVirtualOrigin,
       selectedVirtualDestination
     );
 
@@ -4480,7 +4577,7 @@ export default function App() {
       setVirtualRouteMessage('Подготавливаем topology graph...');
 
       routeDebug('Virtual route request', {
-        origin_station_id: selectedStation?.id,
+        origin_station_id: selectedVirtualOrigin?.id,
         destination_station_id: selectedVirtualDestination?.id,
         scope_region_codes: virtualScopeRegionCodes,
       });
@@ -4495,7 +4592,7 @@ export default function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          origin_station_id: selectedStation.id,
+          origin_station_id: selectedVirtualOrigin.id,
           destination_station_id: selectedVirtualDestination.id,
           scope_region_codes: virtualScopeRegionCodes,
         }),
@@ -4531,10 +4628,10 @@ export default function App() {
 
       const normalizedVirtualRoute = {
         ...(data.item || {}),
-        id: data.route?.id || `virtual-${selectedStation.id}-${selectedVirtualDestination.id}`,
+        id: data.route?.id || `virtual-${selectedVirtualOrigin.id}-${selectedVirtualDestination.id}`,
         source_system: 'virtual_osm',
         route_name: 'Теоретический путь по OSM',
-        origin_station_name: selectedStation.name,
+        origin_station_name: selectedVirtualOrigin.name,
         destination_station_name: selectedVirtualDestination.name,
         stops: data.stops || data.item?.stops || [],
         geometry: data.geometry || data.item?.geometry || null,
@@ -4559,7 +4656,7 @@ export default function App() {
       setVirtualRouteLoading(false);
     }
   }, [
-    selectedStation,
+    selectedVirtualOrigin,
     selectedVirtualDestination,
     loadedRegionCodes,
     ensureTopologyForRegions,
@@ -4578,7 +4675,7 @@ export default function App() {
 
       routeDebug('RZD train import request', {
         train,
-        selectedStation,
+        selectedRzdOrigin,
         selectedRzdDestination,
       });
 
@@ -4592,7 +4689,7 @@ export default function App() {
           dep_date: train.search_date || rzdDepDate,
           origin_code: train.used_origin_code || null,
           destination_code: train.used_destination_code || null,
-          origin_station_name: selectedStation?.name || train.origin_name || null,
+          origin_station_name: selectedRzdOrigin?.name || train.origin_name || null,
           destination_station_name: selectedRzdDestination?.name || train.destination_name || null,
           route_name: train.brand || `Поезд ${train.train_number}`,
           notes: 'Imported from RZD API via frontend A-B flow',
@@ -4625,10 +4722,178 @@ export default function App() {
     }
   }, [
     rzdDepDate,
+    selectedRzdOrigin,
     selectedRzdDestination,
-    selectedStation,
     handleSelectRoute,
   ]);
+
+  const runRouteAnalytics = useCallback(async () => {
+    if (!selectedRoute) {
+      setAnalyticsError('Сначала выберите маршрут.');
+      return;
+    }
+
+    try {
+      setAnalyticsLoading(true);
+      setAnalyticsError('');
+      setSelectedAnalyticsCandidate(null);
+
+      let result;
+
+      const routeGeometry = selectedRoute.geometry || null;
+
+      if (routeGeometry) {
+        const stopsWithStationIds = (selectedRoute.stops || []).filter(
+          (stop) => stop.station_id
+        );
+
+        const startStationId =
+          selectedRoute.origin_station_id ||
+          stopsWithStationIds[0]?.station_id ||
+          selectedStation?.id ||
+          null;
+
+        const endStationId =
+          selectedRoute.destination_station_id ||
+          stopsWithStationIds[stopsWithStationIds.length - 1]?.station_id ||
+          selectedVirtualDestination?.id ||
+          null;
+
+        result = await analyzeVirtualRouteCorridor({
+          routeGeojson: routeGeometry,
+          startStationId,
+          endStationId,
+          params: analyticsParams,
+        });
+      } else {
+        result = await analyzeRealRouteCorridor(selectedRoute.id, analyticsParams);
+      }
+
+      setAnalyticsResult(result);
+    } catch (err) {
+      console.error(err);
+      setAnalyticsError(err instanceof Error ? err.message : 'Ошибка аналитики маршрута');
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  }, [
+    selectedRoute,
+    selectedStation,
+    selectedVirtualDestination,
+    analyticsParams,
+  ]);
+
+
+  const runRouteAlternatives = useCallback(async () => {
+    if (!selectedRoute) {
+      setAlternativesError('Сначала выберите маршрут.');
+      return;
+    }
+
+    const isVirtualRoute =
+      selectedRoute.source_system === 'virtual_osm' ||
+      selectedRoute.geometry_source === 'virtual_osm_path' ||
+      String(selectedRoute.id || '').startsWith('virtual-');
+
+    try {
+      setAlternativesLoading(true);
+      setAlternativesError('');
+      setSelectedAlternativeId(null);
+
+      let result;
+
+      if (isVirtualRoute) {
+        const originStationId =
+          selectedRoute.origin_station_id ||
+          selectedRoute.originStationId ||
+          selectedRoute.stops?.[0]?.station_id ||
+          selectedStation?.id ||
+          null;
+
+        const destinationStationId =
+          selectedRoute.destination_station_id ||
+          selectedRoute.destinationStationId ||
+          selectedRoute.stops?.[selectedRoute.stops.length - 1]?.station_id ||
+          selectedVirtualDestination?.id ||
+          null;
+
+        if (!originStationId || !destinationStationId) {
+          throw new Error(
+            'Для построения альтернатив виртуального маршрута нужны station_id начальной и конечной станции.'
+          );
+        }
+
+        result = await buildAlternativesByStations(
+          originStationId,
+          destinationStationId,
+          alternativesParams
+        );
+      } else {
+        result = await buildRouteAlternatives(selectedRoute.id, alternativesParams);
+      }
+
+      const alternativesWithoutBase = {
+        ...result,
+        alternatives: (result.alternatives || [])
+          .filter((item) => item.rank !== 1)
+          .map((item, index) => ({
+            ...item,
+            display_rank: index + 1,
+          })),
+      };
+
+      setRouteAlternatives(alternativesWithoutBase);
+
+      const firstAlternative = alternativesWithoutBase.alternatives?.[0] || null;
+      if (firstAlternative) {
+        setSelectedAlternativeId(firstAlternative.id);
+      }
+    } catch (err) {
+      console.error(err);
+      setAlternativesError(
+        err instanceof Error ? err.message : 'Ошибка построения альтернативных маршрутов'
+      );
+    } finally {
+      setAlternativesLoading(false);
+    }
+  }, [
+    selectedRoute,
+    selectedStation,
+    selectedVirtualDestination,
+    alternativesParams,
+  ]);
+
+  const handleEnterAnalyticsMode = useCallback(async () => {
+    if (!selectedRoute) {
+      return;
+    }
+
+    setMapMode('analytics');
+    setSidebarMode('routes');
+    await runRouteAnalytics();
+  }, [selectedRoute, runRouteAnalytics]);
+
+  const handleExitAnalyticsMode = useCallback(() => {
+    setMapMode('research');
+    setAnalyticsResult(null);
+    setSelectedAnalyticsCandidate(null);
+    setAnalyticsError('');
+    setRouteAlternatives(null);
+    setAlternativesError('');
+    setSelectedAlternativeId(null);
+  }, []);
+
+  useEffect(() => {
+    if (mapMode !== 'analytics' || !selectedRoute) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      runRouteAnalytics();
+    }, 450);
+
+    return () => window.clearTimeout(timer);
+  }, [mapMode, selectedRoute, analyticsParams, runRouteAnalytics]);
 
   const handleCheckRegionUpdates = useCallback(async (regionCode) => {
     if (!regionCode) {
@@ -4829,7 +5094,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <Header selectionMode={selectionMode} sidebarMode={sidebarMode} />
+      <Header selectionMode={selectionMode} sidebarMode={sidebarMode} mapMode={mapMode} />
       <main
         className="main"
         style={{
@@ -4838,7 +5103,34 @@ export default function App() {
           minHeight: 0,
         }}
       >
-        {!selectionMode && (
+        {!selectionMode && mapMode === 'analytics' ? (
+          <AnalyticsPanel
+            selectedRoute={selectedRoute}
+            params={analyticsParams}
+            setParams={setAnalyticsParams}
+            analyticsResult={analyticsResult}
+            analyticsLoading={analyticsLoading}
+            analyticsError={analyticsError}
+            onRunAnalysis={runRouteAnalytics}
+            onExitAnalytics={handleExitAnalyticsMode}
+            selectedCandidate={selectedAnalyticsCandidate}
+            onSelectCandidate={setSelectedAnalyticsCandidate}
+            showHeatmap={showAnalyticsHeatmap}
+            setShowHeatmap={setShowAnalyticsHeatmap}
+            showPoints={showAnalyticsPoints}
+            setShowPoints={setShowAnalyticsPoints}
+            alternativesParams={alternativesParams}
+            setAlternativesParams={setAlternativesParams}
+            routeAlternatives={routeAlternatives}
+            alternativesLoading={alternativesLoading}
+            alternativesError={alternativesError}
+            onRunAlternatives={runRouteAlternatives}
+            selectedAlternativeId={selectedAlternativeId}
+            onSelectAlternative={setSelectedAlternativeId}
+            showAlternatives={showAlternatives}
+            setShowAlternatives={setShowAlternatives}
+          />
+        ) : !selectionMode && (
           <LoadedSidebar
             panelMode={sidebarMode}
             setPanelMode={setSidebarMode}
@@ -4874,8 +5166,9 @@ export default function App() {
             rzdDestinationQuery={rzdDestinationQuery}
             setRzdDestinationQuery={setRzdDestinationQuery}
             rzdDestinationOptions={rzdDestinationOptions}
+            rzdOriginStation={selectedRzdOrigin}
             selectedRzdDestination={selectedRzdDestination}
-            onSearchRzdDestination={handleSearchRzdDestination}
+            onSelectRzdOrigin={handleSelectRzdOrigin}
             onSelectRzdDestination={handleSelectRzdDestination}
             rzdDepDate={rzdDepDate}
             setRzdDepDate={setRzdDepDate}
@@ -4895,9 +5188,9 @@ export default function App() {
             rzdSearchProgressMessage={rzdSearchProgressMessage}
             virtualDestinationQuery={virtualDestinationQuery}
             setVirtualDestinationQuery={setVirtualDestinationQuery}
-            virtualDestinationOptions={virtualDestinationOptions}
+            selectedVirtualOrigin={selectedVirtualOrigin}
             selectedVirtualDestination={selectedVirtualDestination}
-            onSearchVirtualDestination={handleSearchVirtualDestination}
+            onSelectVirtualOrigin={handleSelectVirtualOrigin}
             onSelectVirtualDestination={handleSelectVirtualDestination}
             onBuildVirtualRoute={handleBuildVirtualRoute}
             virtualRouteLoading={virtualRouteLoading}
@@ -4905,7 +5198,8 @@ export default function App() {
             virtualRouteMessage={virtualRouteMessage}
             topologyProgress={topologyProgress}
             topologyProgressMessage={topologyProgressMessage}
-          />
+
+            onEnterAnalytics={handleEnterAnalyticsMode}/>
         )}
 
         <div
@@ -4932,7 +5226,40 @@ export default function App() {
             onSelectStation={handleSelectStation}
             selectedRoute={selectedRoute}
             loading={loading}
+
+            mapMode={mapMode}
+            analyticsResult={analyticsResult}
+            analyticsParams={analyticsParams}
+            selectedAnalyticsCandidate={selectedAnalyticsCandidate}
+            onSelectAnalyticsCandidate={setSelectedAnalyticsCandidate}
+            showAnalyticsHeatmap={showAnalyticsHeatmap}
+            showAnalyticsPoints={showAnalyticsPoints}
+            routeAlternatives={routeAlternatives}
+            selectedAlternativeId={selectedAlternativeId}
+            showAlternatives={showAlternatives}
           />
+
+          {!selectionMode && mapMode !== 'analytics' && selectedRoute && (
+            <div
+              style={{
+                position: 'absolute',
+                left: '50%',
+                bottom: 18,
+                transform: 'translateX(-50%)',
+                zIndex: 20,
+                width: 'min(520px, calc(100% - 32px))',
+              }}
+            >
+              <ActionButton
+                variant="primary"
+                onClick={handleEnterAnalyticsMode}
+                fullWidth
+                large
+              >
+                Перейти в режим аналитики
+              </ActionButton>
+            </div>
+          )}
 
           {selectionMode && (
             <RegionSelectionOverlay
