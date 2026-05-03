@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import ReactECharts from "echarts-for-react";
 import type { AnalysisRoute } from "../../utils/analysisRoutes";
 import { RouteDistanceChart } from "./RouteDistanceChart";
@@ -18,6 +18,7 @@ type Props = {
   heatmapRouteId: string | null;
   heatmapLoading: boolean;
   populationStatsByRouteId?: Record<string, PopulationStats>;
+  analysisRunId?: number;
   onSelectRoute: (routeId: string) => void;
   onShowHeatmap: () => void;
   onHideHeatmap: () => void;
@@ -137,6 +138,7 @@ export function AnalyticsRightPanel({
   heatmapRouteId,
   heatmapLoading,
   populationStatsByRouteId = {},
+  analysisRunId = 0,
   onSelectRoute,
   onShowHeatmap,
   onHideHeatmap,
@@ -159,6 +161,20 @@ export function AnalyticsRightPanel({
     () => makeRouteClickEvents(onSelectRoute),
     [onSelectRoute]
   );
+
+  useEffect(() => {
+    console.log("[ANALYTICS CHART ROUTES]", {
+      analysisRunId,
+      chartItemsCount: analysisRouteItems.length,
+      chartItems: analysisRouteItems.map((item) => ({
+        id: item.id,
+        label: item.label,
+        lengthKm: item.length_km,
+      })),
+    });
+  }, [analysisRunId, analysisRouteItems]);
+
+  const chartKeyPrefix = `${analysisRunId}-${analysisRouteItems.map((item) => item.id).join("|")}`;
 
   const travelTimeChartOption = useMemo(
     () => ({
@@ -484,11 +500,15 @@ export function AnalyticsRightPanel({
             <RouteDistanceChart
               routes={routes}
               selectedRouteId={selectedRouteId}
+              analysisRunId={analysisRunId}
               onSelectRoute={onSelectRoute}
             />
 
             <ReactECharts
+              key={`travel-time-${chartKeyPrefix}`}
               option={travelTimeChartOption}
+              notMerge={true}
+              lazyUpdate={false}
               className="analytics-echart"
               style={{ width: "100%", height: 280 }}
               onEvents={chartClickEvents}
@@ -498,7 +518,10 @@ export function AnalyticsRightPanel({
             </p>
 
             <ReactECharts
+              key={`difference-${chartKeyPrefix}`}
               option={differenceChartOption}
+              notMerge={true}
+              lazyUpdate={false}
               className="analytics-echart"
               style={{ width: "100%", height: 260 }}
               onEvents={chartClickEvents}
@@ -507,28 +530,40 @@ export function AnalyticsRightPanel({
             {hasPopulationStats ? (
               <>
                 <ReactECharts
+                  key={`population-total-${chartKeyPrefix}`}
                   option={populationTotalChartOption}
+                  notMerge={true}
+                  lazyUpdate={false}
                   className="analytics-echart"
                   style={{ width: "100%", height: 280 }}
                   onEvents={chartClickEvents}
                 />
 
                 <ReactECharts
+                  key={`population-per-km-${chartKeyPrefix}`}
                   option={populationPerKmChartOption}
+                  notMerge={true}
+                  lazyUpdate={false}
                   className="analytics-echart"
                   style={{ width: "100%", height: 280 }}
                   onEvents={chartClickEvents}
                 />
 
                 <ReactECharts
+                  key={`length-population-${chartKeyPrefix}`}
                   option={lengthPopulationScatterOption}
+                  notMerge={true}
+                  lazyUpdate={false}
                   className="analytics-echart"
                   style={{ width: "100%", height: 280 }}
                   onEvents={chartClickEvents}
                 />
 
                 <ReactECharts
+                  key={`difference-population-${chartKeyPrefix}`}
                   option={differencePopulationScatterOption}
+                  notMerge={true}
+                  lazyUpdate={false}
                   className="analytics-echart"
                   style={{ width: "100%", height: 280 }}
                   onEvents={chartClickEvents}
@@ -574,26 +609,28 @@ export function AnalyticsRightPanel({
               Выбран маршрут: <b>{selectedRoute.label}</b>
             </p>
 
-            <button
-              type="button"
-              className="analytics-primary-button"
-              onClick={onShowHeatmap}
-              disabled={heatmapLoading || !selectedRoute.geometry}
-            >
-              {heatmapLoading
-                ? "Строится..."
-                : "Отобразить тепловую карту населённых пунктов"}
-            </button>
-
-            {heatmapRoute && (
+            <div className="analytics-right-actions">
               <button
                 type="button"
-                className="analytics-secondary-button"
-                onClick={onHideHeatmap}
+                className="analytics-primary-button"
+                onClick={onShowHeatmap}
+                disabled={heatmapLoading || !selectedRoute.geometry}
               >
-                Скрыть тепловую карту
+                {heatmapLoading
+                  ? "Строится..."
+                  : "Отобразить тепловую карту населённых пунктов"}
               </button>
-            )}
+
+              {heatmapRoute && (
+                <button
+                  type="button"
+                  className="analytics-secondary-button"
+                  onClick={onHideHeatmap}
+                >
+                  Скрыть тепловую карту
+                </button>
+              )}
+            </div>
 
             {heatmapRoute && (
               <p className="analytics-muted">

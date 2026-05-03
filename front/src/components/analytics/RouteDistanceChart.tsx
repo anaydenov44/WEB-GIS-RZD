@@ -5,12 +5,14 @@ import type { AnalysisRoute } from "../../utils/analysisRoutes";
 type Props = {
   routes: AnalysisRoute[];
   selectedRouteId: string | null;
+  analysisRunId?: number;
   onSelectRoute: (routeId: string) => void;
 };
 
 export function RouteDistanceChart({
   routes,
   selectedRouteId,
+  analysisRunId = 0,
   onSelectRoute,
 }: Props) {
   const option = useMemo(() => {
@@ -84,7 +86,10 @@ export function RouteDistanceChart({
 
   return (
     <ReactECharts
+      key={`length-chart-${analysisRunId}-${routes.map((route) => route.id).join("|")}`}
       option={option}
+      notMerge={true}
+      lazyUpdate={false}
       className="route-distance-chart"
       style={{ width: "100%", height: 320 }}
       onEvents={{

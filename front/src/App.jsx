@@ -1780,6 +1780,7 @@ export default function App() {
   const [heatmapData, setHeatmapData] = useState(null);
   const [heatmapSettlements, setHeatmapSettlements] = useState([]);
   const [populationStatsByRouteId, setPopulationStatsByRouteId] = useState({});
+  const [analysisRunId, setAnalysisRunId] = useState(() => Date.now());
 
   const [updateStates, setUpdateStates] = useState({});
   const [checkingAllUpdates, setCheckingAllUpdates] = useState(false);
@@ -1808,8 +1809,18 @@ export default function App() {
   const initialLoadCompletedRef = useRef(false);
   const routeLoadingTimerRef = useRef(null);
   const rzdSearchProgressTimerRef = useRef(null);
+  const analysisRunIdRef = useRef(analysisRunId);
+  const selectedAnalysisRouteIdAppRef = useRef(selectedAnalysisRouteId);
 
   const appMode = selectionMode ? 'region_selection' : mapMode === 'analytics' ? 'analytics' : sidebarMode;
+
+  useEffect(() => {
+    analysisRunIdRef.current = analysisRunId;
+  }, [analysisRunId]);
+
+  useEffect(() => {
+    selectedAnalysisRouteIdAppRef.current = selectedAnalysisRouteId;
+  }, [selectedAnalysisRouteId]);
 
   useEffect(() => {
     if (mapMode !== 'analytics' || analysisRoutes.length === 0) {
@@ -1827,6 +1838,7 @@ export default function App() {
     }
 
     let cancelled = false;
+    const currentRunId = analysisRunId;
 
     async function loadPopulationSummary() {
       try {
@@ -1835,7 +1847,7 @@ export default function App() {
           params: analyticsParams,
         });
 
-        if (cancelled) return;
+        if (cancelled || analysisRunIdRef.current !== currentRunId) return;
 
         const nextStats = {};
         for (const item of payload?.items || []) {
@@ -1846,7 +1858,7 @@ export default function App() {
 
         setPopulationStatsByRouteId(nextStats);
       } catch (err) {
-        if (!cancelled) {
+        if (!cancelled && analysisRunIdRef.current === currentRunId) {
           console.warn('Population summary failed:', err);
           setPopulationStatsByRouteId({});
         }
@@ -1858,7 +1870,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [mapMode, analysisRoutes, analyticsParams]);
+  }, [mapMode, analysisRoutes, analyticsParams, analysisRunId]);
 
   useEffect(() => {
     if (analysisRoutes.length === 0) {
@@ -2245,6 +2257,9 @@ export default function App() {
         diagnostics: data.diagnostics || data.item?.diagnostics || null,
       };
       setSelectedRoute(normalizedRoute);
+      const nextRunId = Date.now();
+      analysisRunIdRef.current = nextRunId;
+      setAnalysisRunId(nextRunId);
       setRouteAlternatives(null);
       setAlternativesError('');
       setSelectedAlternativeId(null);
@@ -2277,6 +2292,9 @@ export default function App() {
     setAnalyticsResult(null);
     setSelectedAnalyticsCandidate(null);
     setAnalyticsError('');
+    const nextRunId = Date.now();
+    analysisRunIdRef.current = nextRunId;
+    setAnalysisRunId(nextRunId);
     setRouteAlternatives(null);
     setAlternativesError('');
     setSelectedAlternativeId(null);
@@ -2533,13 +2551,26 @@ export default function App() {
       return;
     }
 
+    const nextRunId = Date.now();
+    analysisRunIdRef.current = nextRunId;
+    setAnalysisRunId(nextRunId);
+
     const isVirtualRoute = selectedRoute.source_system === 'virtual_osm' || selectedRoute.geometry_source === 'virtual_osm_path' || String(selectedRoute.id || '').startsWith('virtual-');
 
     try {
       setAlternativesLoading(true);
       setAlternativesProgress(5);
       setAlternativesError('');
+      setRouteAlternatives(null);
       setSelectedAlternativeId(null);
+      setSelectedAnalysisRouteId('original');
+      setPopulationStatsByRouteId({});
+      setHeatmapData(null);
+      setHeatmapSettlements([]);
+      setHeatmapRouteId(null);
+      setShowAnalyticsHeatmap(false);
+      setShowAnalyticsPoints(false);
+      setSelectedAnalyticsCandidate(null);
 
       let result;
 
@@ -2554,6 +2585,16 @@ export default function App() {
         result = await buildRouteAlternatives(selectedRoute.id, alternativesParams);
       }
 
+      if (analysisRunIdRef.current !== nextRunId) {
+        return;
+      }
+
+      console.log('[ANALYTICS REBUILD]', {
+        analysisRunId: nextRunId,
+        alternativesFromApi: result?.alternatives?.length ?? 0,
+        alternativeIds: result?.alternatives?.map((item) => item.id),
+      });
+
       const alternativesWithoutBase = {
         ...result,
         alternatives: (result.alternatives || [])
@@ -2563,13 +2604,14 @@ export default function App() {
       setRouteAlternatives(alternativesWithoutBase);
       setAlternativesProgress(100);
 
-      const firstAlternative = alternativesWithoutBase.alternatives?.[0] || null;
-      if (firstAlternative) setSelectedAlternativeId(firstAlternative.id);
+      setSelectedAlternativeId(null);
+      setSelectedAnalysisRouteId('original');
     } catch (err) {
       console.error(err);
       setAlternativesError(err instanceof Error ? err.message : 'Ошибка построения альтернативных маршрутов');
     } finally {
       window.setTimeout(() => {
+        if (analysisRunIdRef.current !== nextRunId) return;
         setAlternativesLoading(false);
         setAlternativesProgress(0);
       }, 600);
@@ -2580,6 +2622,9 @@ export default function App() {
     if (!selectedRoute) return;
     setMapMode('analytics');
     setSidebarMode('routes');
+    const nextRunId = Date.now();
+    analysisRunIdRef.current = nextRunId;
+    setAnalysisRunId(nextRunId);
     setHeatmapData(null);
     setHeatmapSettlements([]);
     setPopulationStatsByRouteId({});
@@ -2594,6 +2639,9 @@ export default function App() {
     setAnalyticsResult(null);
     setSelectedAnalyticsCandidate(null);
     setAnalyticsError('');
+    const nextRunId = Date.now();
+    analysisRunIdRef.current = nextRunId;
+    setAnalysisRunId(nextRunId);
     setRouteAlternatives(null);
     setAlternativesError('');
     setSelectedAlternativeId(null);
@@ -2617,23 +2665,30 @@ export default function App() {
       setHeatmapData(null);
       setHeatmapSettlements([]);
 
+      const currentRouteId = selectedAnalysisRoute.id;
+      const currentRunId = analysisRunIdRef.current;
+
       const payload = await buildPopulationHeatmapByGeometry({
         geometry: selectedAnalysisRoute.geometry,
         params: analyticsParams,
       });
 
+      if (analysisRunIdRef.current !== currentRunId || selectedAnalysisRouteIdAppRef.current !== currentRouteId) {
+        return;
+      }
+
       const settlements = extractHeatmapSettlements(payload);
 
       setHeatmapData(payload);
       setHeatmapSettlements(settlements);
-      setHeatmapRouteId(selectedAnalysisRoute.id);
+      setHeatmapRouteId(currentRouteId);
     } catch (err) {
       console.error('Heatmap build failed:', err);
       setAnalyticsError(err instanceof Error ? err.message : 'Ошибка построения тепловой карты');
     } finally {
       setHeatmapLoading(false);
     }
-  }, [selectedAnalysisRoute, analyticsParams]);
+  }, [selectedAnalysisRoute, selectedAnalysisRouteId, analyticsParams]);
 
   const handleHideHeatmap = useCallback(() => {
     setHeatmapData(null);
@@ -2870,6 +2925,7 @@ export default function App() {
               heatmapRouteId={heatmapRouteId}
               heatmapLoading={heatmapLoading}
               populationStatsByRouteId={populationStatsByRouteId}
+              analysisRunId={analysisRunId}
               onSelectRoute={handleSelectAnalysisRoute}
               onShowHeatmap={handleShowHeatmapForSelectedRoute}
               onHideHeatmap={handleHideHeatmap}
