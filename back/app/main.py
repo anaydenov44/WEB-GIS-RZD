@@ -1,3 +1,4 @@
+import json
 import subprocess
 import sys
 import time
@@ -21,6 +22,11 @@ from app.topology_build_jobs import (
     get_topology_status,
     start_topology_build_job,
 )
+
+try:
+    from app import analytics_service
+except ImportError:
+    analytics_service = None
 
 try:
     from app.route_build_jobs import (
@@ -186,6 +192,14 @@ class RzdTrainImportRequest(BaseModel):
     destination_station_name: str | None = None
     route_name: str | None = None
     notes: str | None = None
+
+
+class HeatmapByGeometryRequest(BaseModel):
+    geometry: dict[str, Any]
+    radius_km: float = Field(default=25.0, ge=0.1, le=500.0)
+    min_population: int = Field(default=0, ge=0)
+    max_population: int = Field(default=500000, ge=0)
+    max_objects: int = Field(default=500, ge=1, le=5000)
 
 
 def ensure_route_build_jobs_available() -> None:
@@ -362,6 +376,186 @@ def build_station_rzd_profile(row: dict[str, Any]) -> dict[str, Any]:
         "rzd_search_priority_score": score,
         "recommended_for_rzd_search": bool(is_visible and is_main and has_any_code),
         "code_candidates": code_candidates,
+    }
+
+
+def _table_has_columns(connection, table_name: str, required_columns: list[str]) -> bool:
+    rows = connection.execute(
+        text("""
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = :table_name;
+        """),
+        {"table_name": table_name},
+    ).fetchall()
+
+    existing_columns = {str(row._mapping["column_name"]) for row in rows}
+    return all(column in existing_columns for column in required_columns)
+
+
+def _find_population_table(connection) -> str | None:
+    for table_name in ["settlements", "settlement_points", "osm_settlements", "populated_places"]:
+        exists = connection.execute(
+            text("SELECT to_regclass(:table_name)"),
+            {"table_name": f"public.{table_name}"},
+        ).scalar()
+
+        if not exists:
+            continue
+
+        if _table_has_columns(
+            connection,
+            table_name,
+            ["id", "name", "population", "geom"],
+        ):
+            return table_name
+
+    return None
+
+
+def build_population_heatmap_by_geometry_fallback(
+    *,
+    geometry: dict[str, Any],
+    radius_km: float,
+    min_population: int,
+    max_population: int,
+    max_objects: int,
+) -> dict[str, Any]:
+    geometry_json = json.dumps(geometry, ensure_ascii=False)
+    radius_m = float(radius_km) * 1000.0
+
+    with engine.connect() as connection:
+        table_name = _find_population_table(connection)
+
+        if table_name is None:
+            return {
+                "status": "no_population_table",
+                "message": (
+                    "Не найдена таблица населённых пунктов с колонками "
+                    "id, name, population, geom."
+                ),
+                "items": [],
+                "settlements": [],
+                "geojson": {
+                    "type": "FeatureCollection",
+                    "features": [],
+                },
+            }
+
+        query = text(f"""
+            WITH route_geometry AS (
+                SELECT
+                    ST_SetSRID(
+                        ST_GeomFromGeoJSON(:geometry_json),
+                        4326
+                    ) AS geom
+            ),
+            settlement_base AS (
+                SELECT
+                    s.id,
+                    s.name,
+                    COALESCE(s.population, 0) AS population,
+                    CASE
+                        WHEN ST_SRID(s.geom) = 4326 THEN s.geom
+                        ELSE ST_Transform(s.geom, 4326)
+                    END AS geom_4326
+                FROM {table_name} s
+                WHERE s.geom IS NOT NULL
+                  AND COALESCE(s.population, 0) >= :min_population
+                  AND COALESCE(s.population, 0) <= :max_population
+            )
+            SELECT
+                sb.id,
+                sb.name,
+                sb.population,
+                ST_X(ST_PointOnSurface(sb.geom_4326)) AS lon,
+                ST_Y(ST_PointOnSurface(sb.geom_4326)) AS lat,
+                ST_Distance(
+                    sb.geom_4326::geography,
+                    rg.geom::geography
+                ) / 1000.0 AS distance_to_route_km,
+                ST_AsGeoJSON(sb.geom_4326) AS geometry
+            FROM settlement_base sb
+            CROSS JOIN route_geometry rg
+            WHERE ST_DWithin(
+                sb.geom_4326::geography,
+                rg.geom::geography,
+                :radius_m
+            )
+            ORDER BY
+                sb.population DESC,
+                distance_to_route_km ASC,
+                sb.name NULLS LAST,
+                sb.id
+            LIMIT :max_objects;
+        """)
+
+        rows = connection.execute(
+            query,
+            {
+                "geometry_json": geometry_json,
+                "radius_m": radius_m,
+                "min_population": int(min_population),
+                "max_population": int(max_population),
+                "max_objects": int(max_objects),
+            },
+        ).fetchall()
+
+    items: list[dict[str, Any]] = []
+    features: list[dict[str, Any]] = []
+
+    for row in rows:
+        item = dict(row._mapping)
+        geometry_value = item.pop("geometry", None)
+
+        if isinstance(geometry_value, str):
+            try:
+                parsed_geometry = json.loads(geometry_value)
+            except Exception:
+                parsed_geometry = None
+        elif isinstance(geometry_value, dict):
+            parsed_geometry = geometry_value
+        else:
+            parsed_geometry = None
+
+        item["population"] = int(item.get("population") or 0)
+        item["distance_to_route_km"] = round(
+            float(item.get("distance_to_route_km") or 0.0),
+            3,
+        )
+        item["weight"] = min(1.0, max(0.05, item["population"] / max(max_population, 1)))
+        item["geometry"] = parsed_geometry
+
+        items.append(item)
+
+        if parsed_geometry is not None:
+            features.append(
+                {
+                    "type": "Feature",
+                    "geometry": parsed_geometry,
+                    "properties": {
+                        key: value
+                        for key, value in item.items()
+                        if key != "geometry"
+                    },
+                }
+            )
+
+    return {
+        "status": "ok",
+        "source": "main_py_fallback_population_heatmap_by_geometry",
+        "radius_km": radius_km,
+        "min_population": min_population,
+        "max_population": max_population,
+        "max_objects": max_objects,
+        "items": items,
+        "settlements": items,
+        "total": len(items),
+        "geojson": {
+            "type": "FeatureCollection",
+            "features": features,
+        },
     }
 
 
@@ -549,6 +743,34 @@ def healthcheck():
             status_code=500,
             detail=f"Database connection failed: {exc}",
         )
+
+
+@app.post("/api/analytics/heatmap/by-geometry")
+@app.post("/analytics/heatmap/by-geometry")
+def build_heatmap_by_geometry(payload: HeatmapByGeometryRequest):
+    if analytics_service is not None:
+        service_function = getattr(
+            analytics_service,
+            "build_population_heatmap_by_geometry",
+            None,
+        )
+
+        if callable(service_function):
+            return service_function(
+                geometry=payload.geometry,
+                radius_km=payload.radius_km,
+                min_population=payload.min_population,
+                max_population=payload.max_population,
+                max_objects=payload.max_objects,
+            )
+
+    return build_population_heatmap_by_geometry_fallback(
+        geometry=payload.geometry,
+        radius_km=payload.radius_km,
+        min_population=payload.min_population,
+        max_population=payload.max_population,
+        max_objects=payload.max_objects,
+    )
 
 
 @app.get("/api/regions/summary")

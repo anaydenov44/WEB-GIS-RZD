@@ -72,15 +72,13 @@ export default function AnalyticsPanel({
   onRunAnalysis,
   onExitAnalytics,
   selectedCandidate,
-  onSelectCandidate,
-  showHeatmap,
-  setShowHeatmap,
   showPoints,
   setShowPoints,
   alternativesParams,
   setAlternativesParams,
   routeAlternatives,
   alternativesLoading,
+  alternativesProgress = 0,
   alternativesError,
   onRunAlternatives,
   selectedAlternativeId,
@@ -88,26 +86,7 @@ export default function AnalyticsPanel({
   showAlternatives,
   setShowAlternatives,
 }) {
-  const settlements = analyticsResult?.settlements || [];
   const summary = analyticsResult?.summary || null;
-
-  const visibleSettlements = settlements.filter((item) => {
-    const population = Number(item.population ?? 0);
-    const minPopulation = Number(params.min_population ?? 0);
-    const maxPopulation = Number(params.max_population ?? Number.POSITIVE_INFINITY);
-
-    if (population < minPopulation) {
-      return false;
-    }
-
-    if (population > maxPopulation) {
-      return false;
-    }
-
-    return true;
-  });
-
-  const topSettlements = visibleSettlements.slice(0, 40);
 
   return (
     <aside className="sidebar">
@@ -118,6 +97,7 @@ export default function AnalyticsPanel({
         <h2 style={{ marginTop: 0 }}>Аналитика маршрута</h2>
         <p style={{ marginTop: 0, color: '#475569', lineHeight: 1.45 }}>
           Анализ населённых пунктов в транспортном коридоре выбранного маршрута.
+          Тепловая карта и точки населённых пунктов строятся кнопкой справа для выбранного маршрута или альтернативы.
         </p>
 
         <div
@@ -178,7 +158,7 @@ export default function AnalyticsPanel({
           <RangeControl
             label="Мин. население"
             value={params.min_population}
-            min={3000}
+            min={0}
             max={100000}
             step={1000}
             onChange={(value) => setParams((prev) => ({ ...prev, min_population: value }))}
@@ -201,43 +181,19 @@ export default function AnalyticsPanel({
             step={50}
             onChange={(value) => setParams((prev) => ({ ...prev, max_results: value }))}
           />
-
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={params.exclude_aggregate_like_names}
-              onChange={(event) =>
-                setParams((prev) => ({
-                  ...prev,
-                  exclude_aggregate_like_names: event.target.checked,
-                }))
-              }
-            />
-            <span>Скрыть агрегированные записи</span>
-          </label>
         </div>
       </section>
 
       <section className="card">
         <h2>Слои аналитики</h2>
-        <div style={{ display: 'grid', gap: 10 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={showHeatmap}
-              onChange={(event) => setShowHeatmap(event.target.checked)}
-            />
-            <span>Тепловая карта score</span>
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={showPoints}
-              onChange={(event) => setShowPoints(event.target.checked)}
-            />
-            <span>Точки населённых пунктов</span>
-          </label>
-        </div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={showPoints}
+            onChange={(event) => setShowPoints(event.target.checked)}
+          />
+          <span>Точки населённых пунктов после построения heatmap</span>
+        </label>
       </section>
 
       <section className="card">
@@ -304,13 +260,33 @@ export default function AnalyticsPanel({
               checked={showAlternatives}
               onChange={(event) => setShowAlternatives(event.target.checked)}
             />
-            <span>Показывать альтернативы на карте</span>
+            <span>Показывать маршруты и альтернативы на карте</span>
           </label>
         </div>
 
         <button className="subtle-button" onClick={onRunAlternatives} disabled={alternativesLoading}>
           {alternativesLoading ? 'Строим альтернативы...' : 'Построить альтернативы'}
         </button>
+
+        {alternativesLoading && (
+          <div className="alternatives-progress-card">
+            <div className="alternatives-progress-header">
+              <span>Построение альтернатив</span>
+              <span>{Math.round(alternativesProgress)}%</span>
+            </div>
+
+            <div className="alternatives-progress-track">
+              <div
+                className="alternatives-progress-fill"
+                style={{ width: `${Math.max(0, Math.min(100, alternativesProgress))}%` }}
+              />
+            </div>
+
+            <div className="alternatives-progress-caption">
+              Анализируется topology graph и подбираются отличающиеся маршруты...
+            </div>
+          </div>
+        )}
 
         {alternativesError && (
           <div
@@ -344,7 +320,7 @@ export default function AnalyticsPanel({
                   Альтернатива {alternative.display_rank || alternative.rank - 1} · {formatKm(alternative.length_km)}
                 </div>
                 <div className="station-list-meta">
-                  Удлинение {alternative.length_ratio.toFixed(2)}× • отличие {formatPercent(alternative.difference_ratio)} • совпадение {formatPercent(alternative.overlap_ratio)} • рёбер {formatNumber(alternative.edges_count)}
+                  Удлинение {alternative.length_ratio?.toFixed?.(2) ?? '—'}× • отличие {formatPercent(alternative.difference_ratio)} • совпадение {formatPercent(alternative.overlap_ratio)} • рёбер {formatNumber(alternative.edges_count)}
                 </div>
               </button>
             ))}
@@ -369,7 +345,7 @@ export default function AnalyticsPanel({
               <strong>{formatNumber(summary.underserved_population)}</strong>
             </div>
             <div className="route-chip">
-              <span>Max score</span>
+              <span>Макс. приоритет</span>
               <strong>{summary.max_attention_score}</strong>
             </div>
           </div>
@@ -385,42 +361,12 @@ export default function AnalyticsPanel({
             <div>Население: {formatNumber(selectedCandidate.population)}</div>
             <div>До маршрута: {formatKm(selectedCandidate.distance_to_route_km)}</div>
             <div>До станции маршрута: {formatKm(selectedCandidate.distance_to_nearest_route_station_km)}</div>
-            <div>Score: <strong>{selectedCandidate.score}</strong> ({attentionLabel(selectedCandidate.attention_level)})</div>
+            <div>Приоритет анализа: <strong>{selectedCandidate.score}</strong> ({attentionLabel(selectedCandidate.attention_level)})</div>
             <div>Оценка подключения: {formatMoney(selectedCandidate.estimated_connection_cost)}</div>
             <div>Стоимость на 1000 жителей: {formatMoney(selectedCandidate.cost_per_1000_people)}</div>
           </div>
         </section>
       )}
-
-      <section className="card">
-        <h2>Кандидаты</h2>
-        {analyticsLoading ? (
-          <p>Идёт расчёт...</p>
-        ) : topSettlements.length === 0 ? (
-          <p>Нет населённых пунктов под заданные параметры.</p>
-        ) : (
-          <div style={{ display: 'grid', gap: 8, maxHeight: 420, overflowY: 'auto', paddingRight: 4 }}>
-            {topSettlements.map((item) => (
-              <button
-                key={item.id}
-                className={
-                  selectedCandidate?.id === item.id
-                    ? 'station-list-item active'
-                    : 'station-list-item'
-                }
-                onClick={() => onSelectCandidate(item)}
-              >
-                <div className="station-list-name">
-                  {item.name} · score {item.score}
-                </div>
-                <div className="station-list-meta">
-                  {formatNumber(item.population)} чел. • до маршрута {formatKm(item.distance_to_route_km)} • {attentionLabel(item.attention_level)}
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-      </section>
     </aside>
   );
 }

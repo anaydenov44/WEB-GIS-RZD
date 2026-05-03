@@ -10,6 +10,9 @@ from app.analytics_schemas import (
     AnalyticsSummary,
     CorridorAnalysisParams,
     CorridorAnalysisResponse,
+    PopulationSummaryItem,
+    PopulationSummaryRequest,
+    PopulationSummaryResponse,
     RouteInfo,
     SettlementCandidate,
     VirtualStationInfo,
@@ -86,6 +89,139 @@ class AnalyticsService:
             params=params,
             summary=summary,
             settlements=settlements,
+        )
+
+    def build_population_heatmap_by_geometry(
+        self,
+        route_geojson: dict[str, Any],
+        params: CorridorAnalysisParams,
+    ) -> CorridorAnalysisResponse:
+        """
+        Строит данные для тепловой карты по произвольной геометрии маршрута.
+
+        Важно: max_population здесь используется именно как фильтр отбора
+        населённых пунктов, а не как ограничение/обрезка веса точки.
+        """
+
+        length_km = self._get_geojson_length_km(route_geojson)
+
+        settlements = self._analyze_corridor(
+            route_geojson=route_geojson,
+            params=params,
+            route_id=None,
+            station_ids=[],
+        )
+
+        summary = self._build_summary(settlements)
+
+        return CorridorAnalysisResponse(
+            route=RouteInfo(
+                id=None,
+                source="heatmap_geometry",
+                length_km=length_km,
+                stations_count=0,
+            ),
+            params=params,
+            summary=summary,
+            settlements=settlements,
+        )
+
+    def build_population_summary_for_routes(
+        self,
+        request: PopulationSummaryRequest,
+    ) -> PopulationSummaryResponse:
+        items: list[PopulationSummaryItem] = []
+
+        for route in request.routes:
+            items.append(
+                self._build_population_summary_for_geometry(
+                    route_id=route.id,
+                    route_geojson=route.geometry,
+                    radius_km=request.effective_radius_km,
+                    min_population=request.min_population,
+                    max_population=request.max_population,
+                    exclude_aggregate_like_names=request.exclude_aggregate_like_names,
+                )
+            )
+
+        return PopulationSummaryResponse(items=items)
+
+    def _build_population_summary_for_geometry(
+        self,
+        *,
+        route_id: str,
+        route_geojson: dict[str, Any],
+        radius_km: float,
+        min_population: int,
+        max_population: int | None,
+        exclude_aggregate_like_names: bool,
+    ) -> PopulationSummaryItem:
+        length_km = self._get_geojson_length_km(route_geojson)
+
+        sql = text(
+            """
+            WITH route AS (
+                SELECT ST_SetSRID(ST_GeomFromGeoJSON(:route_geojson), 4326) AS geom
+            ),
+            nearby_settlements AS (
+                SELECT
+                    s.id,
+                    s.population
+                FROM settlements s
+                CROSS JOIN route
+                WHERE s.population IS NOT NULL
+                  AND s.geom IS NOT NULL
+                  AND s.population >= :min_population
+                  AND (:max_population IS NULL OR s.population <= :max_population)
+                  AND ST_DWithin(
+                    s.geom::geography,
+                    route.geom::geography,
+                    :radius_meters
+                  )
+                  AND (
+                    :exclude_aggregate_like_names = FALSE
+                    OR (
+                        s.canonical_name NOT ILIKE '%%прочие сельские населенные пункты%%'
+                        AND s.canonical_name NOT ILIKE '%%прочие сельские населённые пункты%%'
+                        AND s.canonical_name NOT ILIKE '%%прочие городские населенные пункты%%'
+                        AND s.canonical_name NOT ILIKE '%%сельское поселение%%'
+                        AND s.canonical_name NOT ILIKE '%%городское поселение%%'
+                        AND s.canonical_name NOT ILIKE '%%сельсовет%%'
+                    )
+                  )
+            )
+            SELECT
+                COUNT(*) AS settlements_count,
+                COALESCE(SUM(population), 0) AS population_total
+            FROM nearby_settlements
+            """
+        )
+
+        row = self.db.execute(
+            sql,
+            {
+                "route_geojson": json.dumps(route_geojson),
+                "radius_meters": radius_km * 1000.0,
+                "min_population": min_population,
+                "max_population": max_population,
+                "exclude_aggregate_like_names": exclude_aggregate_like_names,
+            },
+        ).mappings().first()
+
+        settlements_count = int(row["settlements_count"] or 0) if row else 0
+        population_total = int(row["population_total"] or 0) if row else 0
+        density = (
+            float(population_total) / float(length_km)
+            if length_km is not None and length_km > 0
+            else 0.0
+        )
+
+        return PopulationSummaryItem(
+            route_id=str(route_id),
+            population_total=population_total,
+            settlements_count=settlements_count,
+            population_density_per_km=round(density, 2),
+            length_km=length_km,
         )
 
     def _get_route_geometry(self, route_id: int) -> dict[str, Any]:
@@ -168,6 +304,7 @@ class AnalyticsService:
                         SELECT rs.station_id
                         FROM route_stops rs
                         WHERE rs.route_id = :route_id
+                          AND rs.station_id IS NOT NULL
                     ))
                     OR
                     (:route_id IS NULL AND st.id = ANY(:station_ids))

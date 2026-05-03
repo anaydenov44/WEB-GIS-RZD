@@ -9,12 +9,31 @@ export const REGION_LABELS = {
   far_eastern_fd: 'Дальневосточный федеральный округ',
 };
 
+export const REGION_SHORT_LABELS = {
+  central_fd: 'Центральный ФО',
+  northwestern_fd: 'Северо-Западный ФО',
+  south_fd: 'Южный ФО',
+  north_caucasus_fd: 'СКФО',
+  volga_fd: 'Приволжский ФО',
+  ural_fd: 'Уральский ФО',
+  siberian_fd: 'Сибирский ФО',
+  far_eastern_fd: 'Дальневосточный ФО',
+};
+
 export function formatRegionCode(value) {
   if (!value) {
     return 'не указан';
   }
 
   return REGION_LABELS[value] ?? value;
+}
+
+export function formatRegionShortCode(value) {
+  if (!value) {
+    return 'не указан';
+  }
+
+  return REGION_SHORT_LABELS[value] ?? REGION_LABELS[value] ?? value;
 }
 
 export const STATION_TYPE_LABELS = {
@@ -39,7 +58,7 @@ export function formatStationType(value) {
 export const MODE_LABELS = {
   infrastructure: 'Режим инфраструктуры',
   analytics: 'Режим аналитики',
-  routes: 'Режим маршрутов',
+  routes: 'Режим РЖД',
   virtual: 'Виртуальный маршрут по OSM',
   virtual_route: 'Виртуальный маршрут по OSM',
   rzd_route: 'Поиск поезда РЖД',

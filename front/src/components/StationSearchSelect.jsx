@@ -1,27 +1,5 @@
 import { useEffect, useState } from 'react';
 
-export type StationSearchItem = {
-  id: number;
-  name: string;
-  region_code?: string | null;
-  type?: string | null;
-  station_type?: string | null;
-  lon?: number | null;
-  lat?: number | null;
-  uic_ref?: string | null;
-  esr_user?: string | null;
-  is_main_rail_station?: boolean | null;
-};
-
-type StationSearchSelectProps = {
-  label?: string;
-  placeholder?: string;
-  selectedStation?: StationSearchItem | null;
-  onSelect: (station: StationSearchItem) => void;
-  disabled?: boolean;
-  apiBaseUrl?: string;
-};
-
 export function StationSearchSelect({
   label,
   placeholder = 'Введите название станции',
@@ -29,12 +7,12 @@ export function StationSearchSelect({
   onSelect,
   disabled = false,
   apiBaseUrl = 'http://127.0.0.1:8000',
-}: StationSearchSelectProps) {
+}) {
   const [query, setQuery] = useState(selectedStation?.name ?? '');
-  const [items, setItems] = useState<StationSearchItem[]>([]);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [opened, setOpened] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setQuery(selectedStation?.name ?? '');
@@ -67,10 +45,7 @@ export function StationSearchSelect({
       }
 
       const payload = await response.json();
-
-      const nextItems: StationSearchItem[] = Array.isArray(payload)
-        ? payload
-        : payload.items ?? payload.stations ?? [];
+      const nextItems = Array.isArray(payload) ? payload : payload.items ?? payload.stations ?? [];
 
       setItems(nextItems);
       setOpened(true);
@@ -88,7 +63,7 @@ export function StationSearchSelect({
     }
   }
 
-  function handleSelect(station: StationSearchItem) {
+  function handleSelect(station) {
     setQuery(station.name || '');
     setItems([]);
     setOpened(false);
