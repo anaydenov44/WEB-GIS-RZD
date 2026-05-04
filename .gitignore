@@ -33,3 +33,5 @@ back/data/routes/test_*.json
 # frontend
 front/node_modules/
 front/dist/
+
+back/debug_rzd
