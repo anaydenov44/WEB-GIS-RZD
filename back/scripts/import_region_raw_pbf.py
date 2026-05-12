@@ -5,8 +5,11 @@ import osmium
 from psycopg2.extras import execute_values
 from shapely.geometry import LineString, Polygon
 
-from pipeline_utils import get_db_connection, get_pbf_path
-
+from pipeline_utils import (
+    get_db_connection,
+    get_region_sources,
+    get_source_pbf_path,
+)
 
 BATCH_SIZE = 1000
 
@@ -40,7 +43,6 @@ class StageRailwayImporter(osmium.SimpleHandler):
             )
             VALUES %s;
         """
-
         template = """
             (%s, %s, %s, %s, %s, %s::jsonb, ST_SetSRID(ST_GeomFromText(%s), 4326))
         """
@@ -67,7 +69,6 @@ class StageRailwayImporter(osmium.SimpleHandler):
             )
             VALUES %s;
         """
-
         template = """
             (%s, %s, %s, %s, %s, %s::jsonb, ST_SetSRID(ST_GeomFromText(%s), 4326))
         """
@@ -129,7 +130,6 @@ class StageRailwayImporter(osmium.SimpleHandler):
                 return
 
             tags_json = json.dumps(dict(w.tags), ensure_ascii=False)
-
             self.station_rows.append(
                 (
                     self.region_code,
@@ -158,7 +158,6 @@ class StageRailwayImporter(osmium.SimpleHandler):
                 return
 
             tags_json = json.dumps(dict(w.tags), ensure_ascii=False)
-
             self.line_rows.append(
                 (
                     self.region_code,
@@ -197,27 +196,48 @@ def main():
         raise SystemExit("Использование: python import_region_raw_pbf.py <region_code>")
 
     region_code = sys.argv[1]
-    pbf_path = get_pbf_path(region_code)
-
-    if not pbf_path.exists():
-        raise FileNotFoundError(f"Не найден PBF: {pbf_path}")
+    sources = get_region_sources(region_code)
 
     conn = get_db_connection()
+    total_station_count = 0
+    total_line_count = 0
+    total_skipped_station_ways = 0
+    total_skipped_line_ways = 0
+    total_skipped_relations = 0
+
     try:
         print(f"[{region_code}] Очищаю staging только для этого округа...")
         delete_region_stage(conn, region_code)
 
-        print(f"[{region_code}] Импортирую railway-объекты из PBF в staging...")
-        importer = StageRailwayImporter(conn, region_code)
-        importer.apply_file(str(pbf_path), locations=True)
-        importer.finish()
+        for source in sources:
+            source_key = source["source_key"]
+            pbf_path = get_source_pbf_path(region_code, source_key)
 
-        print(f"[{region_code}] Stage import завершён.")
-        print(f"[{region_code}] stations_stage: {importer.station_count}")
-        print(f"[{region_code}] lines_stage: {importer.line_count}")
-        print(f"[{region_code}] skipped station/halt ways: {importer.skipped_station_ways}")
-        print(f"[{region_code}] skipped rail ways: {importer.skipped_line_ways}")
-        print(f"[{region_code}] skipped relations: {importer.skipped_relations}")
+            if not pbf_path.exists():
+                raise FileNotFoundError(f"Не найден PBF: {pbf_path}")
+
+            print(f"[{region_code}:{source_key}] Импортирую railway-объекты из PBF в staging...")
+            importer = StageRailwayImporter(conn, region_code)
+            importer.apply_file(str(pbf_path), locations=True)
+            importer.finish()
+
+            total_station_count += importer.station_count
+            total_line_count += importer.line_count
+            total_skipped_station_ways += importer.skipped_station_ways
+            total_skipped_line_ways += importer.skipped_line_ways
+            total_skipped_relations += importer.skipped_relations
+
+            print(f"[{region_code}:{source_key}] Stage import завершён.")
+            print(f"[{region_code}:{source_key}] stations_stage: {importer.station_count}")
+            print(f"[{region_code}:{source_key}] lines_stage: {importer.line_count}")
+
+        print(f"[{region_code}] Общий импорт завершён.")
+        print(f"[{region_code}] total stations_stage: {total_station_count}")
+        print(f"[{region_code}] total lines_stage: {total_line_count}")
+        print(f"[{region_code}] total skipped station/halt ways: {total_skipped_station_ways}")
+        print(f"[{region_code}] total skipped rail ways: {total_skipped_line_ways}")
+        print(f"[{region_code}] total skipped relations: {total_skipped_relations}")
+
     finally:
         conn.close()
 

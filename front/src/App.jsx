@@ -20,9 +20,9 @@ import { Style, Stroke, Fill, Circle as CircleStyle, Text } from 'ol/style.js';
 import { getCenter } from 'ol/extent.js';
 
 import AnalyticsPanel from './components/AnalyticsPanel.jsx';
-import { StationSearchSelect } from './components/StationSearchSelect';
-import { AnalyticsRightPanel } from './components/analytics/AnalyticsRightPanel';
-import { buildAnalysisRoutes } from './utils/analysisRoutes';
+import { StationSearchSelect } from './components/StationSearchSelect.js';
+import { AnalyticsRightPanel } from './components/analytics/AnalyticsRightPanel.js';
+import { buildAnalysisRoutes } from './utils/analysisRoutes.js';
 import {
   formatModeLabel,
   formatRegionCode,
@@ -39,6 +39,11 @@ import {
   buildRouteAlternatives,
   buildAlternativesByStations,
 } from './api/analyticsApi.js';
+import {
+  measureAsync,
+  exportMetricsCsv,
+  clearMetrics,
+} from './utils/gisTimings.js';
 
 const BACKEND_URL = 'http://127.0.0.1:8000';
 const RZD_SEARCH_DAYS_AHEAD = 2;
@@ -1815,6 +1820,16 @@ export default function App() {
   const appMode = selectionMode ? 'region_selection' : mapMode === 'analytics' ? 'analytics' : sidebarMode;
 
   useEffect(() => {
+    window.exportGisMetrics = exportMetricsCsv;
+    window.clearGisMetrics = clearMetrics;
+
+    return () => {
+      delete window.exportGisMetrics;
+      delete window.clearGisMetrics;
+    };
+  }, []);
+
+  useEffect(() => {
     analysisRunIdRef.current = analysisRunId;
   }, [analysisRunId]);
 
@@ -1842,10 +1857,18 @@ export default function App() {
 
     async function loadPopulationSummary() {
       try {
-        const payload = await buildPopulationSummaryForRoutes({
-          routes: routesForSummary,
-          params: analyticsParams,
-        });
+        const payload = await measureAsync(
+          'Сводка населения по маршрутам аналитики',
+          async () => await buildPopulationSummaryForRoutes({
+            routes: routesForSummary,
+            params: analyticsParams,
+          }),
+          {
+            endpoint: '/analytics/routes/population-summary',
+            routes_count: routesForSummary.length,
+            analysis_run_id: currentRunId,
+          }
+        );
 
         if (cancelled || analysisRunIdRef.current !== currentRunId) return;
 
@@ -1901,9 +1924,22 @@ export default function App() {
 
   const loadRegionSummaries = useCallback(async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/regions/summary`);
-      if (!response.ok) throw new Error('Не удалось загрузить сводку по округам');
-      const data = await response.json();
+      const data = await measureAsync(
+        'Получение сводки по округам',
+        async () => {
+          const response = await fetch(`${BACKEND_URL}/api/regions/summary`);
+
+          if (!response.ok) {
+            throw new Error('Не удалось загрузить сводку по округам');
+          }
+
+          return await response.json();
+        },
+        {
+          endpoint: '/api/regions/summary',
+        }
+      );
+
       const summariesByCode = Object.fromEntries((data.items || []).map((item) => [item.code, item]));
       setRegionSummaries(summariesByCode);
     } catch (err) {
@@ -2068,14 +2104,43 @@ export default function App() {
       const linesUrl = `${BACKEND_URL}/api/lines?region_codes=${encodeURIComponent(regionCodesParam)}&limit=400000&include_service=${includeServiceLines ? 'true' : 'false'}`;
       setLoadingProgress(18);
       setLoadingMessage('Загружаем станции выбранных округов...');
-      const stationsResponse = await fetch(stationsUrl);
-      if (!stationsResponse.ok) throw new Error('Не удалось загрузить станции');
-      const stationsData = await stationsResponse.json();
+      const stationsData = await measureAsync(
+        'Загрузка станций выбранного округа',
+        async () => {
+          const stationsResponse = await fetch(stationsUrl);
+
+          if (!stationsResponse.ok) {
+            throw new Error('Не удалось загрузить станции');
+          }
+
+          return await stationsResponse.json();
+        },
+        {
+          endpoint: '/api/stations',
+          region_codes: regionCodesParam,
+        }
+      );
+
       setLoadingProgress(52);
       setLoadingMessage('Загружаем линии выбранных округов...');
-      const linesResponse = await fetch(linesUrl);
-      if (!linesResponse.ok) throw new Error('Не удалось загрузить линии');
-      const linesData = await linesResponse.json();
+
+      const linesData = await measureAsync(
+        'Загрузка железнодорожных линий',
+        async () => {
+          const linesResponse = await fetch(linesUrl);
+
+          if (!linesResponse.ok) {
+            throw new Error('Не удалось загрузить линии');
+          }
+
+          return await linesResponse.json();
+        },
+        {
+          endpoint: '/api/lines',
+          region_codes: regionCodesParam,
+          include_service: includeServiceLines,
+        }
+      );
       setLoadingProgress(86);
       setLoadingMessage('Подготавливаем данные для отображения...');
       const stationsItems = stationsData.items || [];
@@ -2090,6 +2155,18 @@ export default function App() {
       setLoadedRegionCodes(regionCodes);
       setSidebarMode('infrastructure');
       initialLoadCompletedRef.current = true;
+
+      await measureAsync(
+        'Подготовка данных станций и линий для отображения на карте',
+        async () => {
+          await new Promise((resolve) => window.requestAnimationFrame(() => resolve()));
+        },
+        {
+          stations_count: stationsItems.length,
+          lines_count: linesItems.length,
+        }
+      );
+
       setLoadingProgress(100);
       setLoadingMessage('Готово');
       setTimeout(() => { setLoading(false); setLoadingProgress(0); setLoadingMessage(''); }, 180);
@@ -2188,9 +2265,22 @@ export default function App() {
     if (!stationId) return;
     try {
       setError('');
-      const stationResponse = await fetch(`${BACKEND_URL}/api/stations/${stationId}?include_hidden=true`);
-      if (!stationResponse.ok) throw new Error('Не удалось загрузить станцию');
-      const stationData = await stationResponse.json();
+      const stationData = await measureAsync(
+        'Открытие карточки станции',
+        async () => {
+          const stationResponse = await fetch(`${BACKEND_URL}/api/stations/${stationId}?include_hidden=true`);
+
+          if (!stationResponse.ok) {
+            throw new Error('Не удалось загрузить станцию');
+          }
+
+          return await stationResponse.json();
+        },
+        {
+          endpoint: '/api/stations/{id}',
+          station_id: stationId,
+        }
+      );
       setSelectedStation(stationData);
     } catch (err) {
       console.error(err);
@@ -2243,9 +2333,22 @@ export default function App() {
       setRoutesError('');
       startRouteLoadingOverlay();
       routeDebug('Route select request', { routeId });
-      const response = await fetch(`${BACKEND_URL}/api/routes/${routeId}`);
-      if (!response.ok) throw new Error('Не удалось загрузить маршрут');
-      const data = await response.json();
+      const data = await measureAsync(
+        'Загрузка маршрута на карту',
+        async () => {
+          const response = await fetch(`${BACKEND_URL}/api/routes/${routeId}`);
+
+          if (!response.ok) {
+            throw new Error('Не удалось загрузить маршрут');
+          }
+
+          return await response.json();
+        },
+        {
+          endpoint: '/api/routes/{id}',
+          route_id: routeId,
+        }
+      );
       routeDebug('Route select response', { routeId, geometry_source: data.geometry_source || data.item?.geometry_source, geometry_ready: Boolean(data.geometry || data.item?.geometry), network_segments_count: (data.network_segments || data.item?.network_segments || []).length, summary: data.summary, diagnostics: data.diagnostics || data.item?.diagnostics });
       const normalizedRoute = {
         ...(data.item || data.route || {}),
@@ -2334,9 +2437,27 @@ export default function App() {
         max_code_pair_attempts: 10,
       };
       routeDebug('RZD A-B search request', requestPayload);
-      const response = await fetch(`${BACKEND_URL}/api/rzd/routes/search-calendar-by-stations`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestPayload) });
-      if (!response.ok) throw new Error(await readApiError(response, 'Не удалось найти поезда через РЖД API'));
-      const data = await response.json();
+      const data = await measureAsync(
+        'Построение поездного маршрута — поиск вариантов',
+        async () => {
+          const response = await fetch(`${BACKEND_URL}/api/rzd/routes/search-calendar-by-stations`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestPayload),
+          });
+
+          if (!response.ok) {
+            throw new Error(await readApiError(response, 'Не удалось найти поезда через РЖД API'));
+          }
+
+          return await response.json();
+        },
+        {
+          endpoint: '/api/rzd/routes/search-calendar-by-stations',
+          origin_station_id: rzdOriginStation.id,
+          destination_station_id: rzdDestinationStation.id,
+        }
+      );
       routeDebug('RZD A-B search response', { status: data.status, total: data.total, message: data.message, exact_found: data.exact_found, similar_used: data.similar_used, code_attempts_count: data.code_attempts?.length, dates_checked: data.dates_checked, dates_with_trains: data.dates_with_trains, items_preview: (data.items || []).slice(0, 5) });
       setRzdCalendarDebug(data);
       const items = data.items || [];
@@ -2436,11 +2557,35 @@ export default function App() {
       setVirtualRouteError('');
       setVirtualRouteMessage('Подготавливаем topology graph...');
       routeDebug('Virtual route request', { origin_station_id: virtualOriginStation?.id, destination_station_id: virtualDestinationStation?.id, scope_region_codes: virtualScopeRegionCodes });
-      await ensureTopologyForRegions(virtualScopeRegionCodes);
-      setVirtualRouteMessage('Строим виртуальный путь по OSM...');
-      const response = await fetch(`${BACKEND_URL}/api/virtual-routes/path`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origin_station_id: virtualOriginStation.id, destination_station_id: virtualDestinationStation.id, scope_region_codes: virtualScopeRegionCodes }) });
-      if (!response.ok) throw new Error(await readApiError(response, 'Не удалось построить виртуальный OSM-маршрут'));
-      const data = await response.json();
+      const data = await measureAsync(
+        'Построение виртуального маршрута',
+        async () => {
+          await ensureTopologyForRegions(virtualScopeRegionCodes);
+          setVirtualRouteMessage('Строим виртуальный путь по OSM...');
+
+          const response = await fetch(`${BACKEND_URL}/api/virtual-routes/path`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              origin_station_id: virtualOriginStation.id,
+              destination_station_id: virtualDestinationStation.id,
+              scope_region_codes: virtualScopeRegionCodes,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(await readApiError(response, 'Не удалось построить виртуальный OSM-маршрут'));
+          }
+
+          return await response.json();
+        },
+        {
+          endpoint: '/api/virtual-routes/path',
+          origin_station_id: virtualOriginStation.id,
+          destination_station_id: virtualDestinationStation.id,
+          scope_region_codes: virtualScopeRegionCodes.join(','),
+        }
+      );
       routeDebug('Virtual route response', { status: data.status, message: data.message, geometry_ready: Boolean(data.geometry || data.item?.geometry), network_segments_count: (data.network_segments || data.item?.network_segments || []).length, summary: data.summary, diagnostics: data.diagnostics || data.item?.diagnostics });
       if (data.status !== 'ok') {
         setVirtualRouteMessage(data.message || 'Виртуальный путь не построен.');
@@ -2487,22 +2632,35 @@ export default function App() {
       setRzdImportLoading(true);
       setRzdError('');
       setRzdMessage('Импортируем выбранный поезд...');
-      const response = await fetch(`${BACKEND_URL}/api/rzd/trains/import`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const data = await measureAsync(
+        'Построение поездного маршрута — импорт выбранного маршрута',
+        async () => {
+          const response = await fetch(`${BACKEND_URL}/api/rzd/trains/import`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              train_number: train.train_number,
+              dep_date: train.search_date || rzdDepDate,
+              origin_code: train.used_origin_code || null,
+              destination_code: train.used_destination_code || null,
+              origin_station_name: rzdOriginStation?.name || train.origin_name || null,
+              destination_station_name: rzdDestinationStation?.name || train.destination_name || null,
+              route_name: train.brand || `Поезд ${train.train_number}`,
+              notes: 'Imported from RZD API via frontend A-B flow',
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(await readApiError(response, 'Не удалось импортировать выбранный поезд'));
+          }
+
+          return await response.json();
+        },
+        {
+          endpoint: '/api/rzd/trains/import',
           train_number: train.train_number,
-          dep_date: train.search_date || rzdDepDate,
-          origin_code: train.used_origin_code || null,
-          destination_code: train.used_destination_code || null,
-          origin_station_name: rzdOriginStation?.name || train.origin_name || null,
-          destination_station_name: rzdDestinationStation?.name || train.destination_name || null,
-          route_name: train.brand || `Поезд ${train.train_number}`,
-          notes: 'Imported from RZD API via frontend A-B flow',
-        }),
-      });
-      if (!response.ok) throw new Error(await readApiError(response, 'Не удалось импортировать выбранный поезд'));
-      const data = await response.json();
+        }
+      );
       routeDebug('RZD train import response', data);
       const routeId = data.route_id || data.item?.id || data.route?.id;
       if (!routeId) throw new Error('Импорт выполнен, но backend не вернул route_id');
@@ -2526,16 +2684,31 @@ export default function App() {
       setAnalyticsLoading(true);
       setAnalyticsError('');
       setSelectedAnalyticsCandidate(null);
-      let result;
       const routeGeometry = selectedRoute.geometry || null;
-      if (routeGeometry) {
-        const stopsWithStationIds = (selectedRoute.stops || []).filter((stop) => stop.station_id);
-        const startStationId = selectedRoute.origin_station_id || stopsWithStationIds[0]?.station_id || virtualOriginStation?.id || rzdOriginStation?.id || null;
-        const endStationId = selectedRoute.destination_station_id || stopsWithStationIds[stopsWithStationIds.length - 1]?.station_id || virtualDestinationStation?.id || rzdDestinationStation?.id || null;
-        result = await analyzeVirtualRouteCorridor({ routeGeojson: routeGeometry, startStationId, endStationId, params: analyticsParams });
-      } else {
-        result = await analyzeRealRouteCorridor(selectedRoute.id, analyticsParams);
-      }
+      const stopsWithStationIds = (selectedRoute.stops || []).filter((stop) => stop.station_id);
+      const startStationId = selectedRoute.origin_station_id || stopsWithStationIds[0]?.station_id || virtualOriginStation?.id || rzdOriginStation?.id || null;
+      const endStationId = selectedRoute.destination_station_id || stopsWithStationIds[stopsWithStationIds.length - 1]?.station_id || virtualDestinationStation?.id || rzdDestinationStation?.id || null;
+
+      const result = await measureAsync(
+        'Анализ маршрута',
+        async () => {
+          if (routeGeometry) {
+            return await analyzeVirtualRouteCorridor({
+              routeGeojson: routeGeometry,
+              startStationId,
+              endStationId,
+              params: analyticsParams,
+            });
+          }
+
+          return await analyzeRealRouteCorridor(selectedRoute.id, analyticsParams);
+        },
+        {
+          route_id: selectedRoute.id,
+          mode: routeGeometry ? 'virtual_geometry' : 'real_route',
+        }
+      );
+
       setAnalyticsResult(result);
     } catch (err) {
       console.error(err);
@@ -2574,16 +2747,28 @@ export default function App() {
 
       let result;
 
-      if (isVirtualRoute) {
-        const originStationId = selectedRoute.origin_station_id || selectedRoute.originStationId || selectedRoute.stops?.[0]?.station_id || virtualOriginStation?.id || rzdOriginStation?.id || null;
-        const destinationStationId = selectedRoute.destination_station_id || selectedRoute.destinationStationId || selectedRoute.stops?.[selectedRoute.stops.length - 1]?.station_id || virtualDestinationStation?.id || rzdDestinationStation?.id || null;
+      const originStationId = selectedRoute.origin_station_id || selectedRoute.originStationId || selectedRoute.stops?.[0]?.station_id || virtualOriginStation?.id || rzdOriginStation?.id || null;
+      const destinationStationId = selectedRoute.destination_station_id || selectedRoute.destinationStationId || selectedRoute.stops?.[selectedRoute.stops.length - 1]?.station_id || virtualDestinationStation?.id || rzdDestinationStation?.id || null;
 
-        if (!originStationId || !destinationStationId) throw new Error('Для построения альтернатив виртуального маршрута нужны station_id начальной и конечной станции.');
-
-        result = await buildAlternativesByStations(originStationId, destinationStationId, alternativesParams);
-      } else {
-        result = await buildRouteAlternatives(selectedRoute.id, alternativesParams);
+      if (isVirtualRoute && (!originStationId || !destinationStationId)) {
+        throw new Error('Для построения альтернатив виртуального маршрута нужны station_id начальной и конечной станции.');
       }
+
+      result = await measureAsync(
+        'Построение альтернатив',
+        async () => {
+          if (isVirtualRoute) {
+            return await buildAlternativesByStations(originStationId, destinationStationId, alternativesParams);
+          }
+
+          return await buildRouteAlternatives(selectedRoute.id, alternativesParams);
+        },
+        {
+          route_id: selectedRoute.id,
+          mode: isVirtualRoute ? 'virtual_route' : 'real_route',
+          max_alternatives: alternativesParams.max_alternatives,
+        }
+      );
 
       if (analysisRunIdRef.current !== nextRunId) {
         return;
@@ -2668,10 +2853,18 @@ export default function App() {
       const currentRouteId = selectedAnalysisRoute.id;
       const currentRunId = analysisRunIdRef.current;
 
-      const payload = await buildPopulationHeatmapByGeometry({
-        geometry: selectedAnalysisRoute.geometry,
-        params: analyticsParams,
-      });
+      const payload = await measureAsync(
+        'Построение тепловой карты населённых пунктов',
+        async () => await buildPopulationHeatmapByGeometry({
+          geometry: selectedAnalysisRoute.geometry,
+          params: analyticsParams,
+        }),
+        {
+          endpoint: '/analytics/heatmap/by-geometry',
+          route_id: currentRouteId,
+          analysis_run_id: currentRunId,
+        }
+      );
 
       if (analysisRunIdRef.current !== currentRunId || selectedAnalysisRouteIdAppRef.current !== currentRouteId) {
         return;

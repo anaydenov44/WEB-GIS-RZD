@@ -5,7 +5,13 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from pipeline_utils import get_md5_path, get_pbf_path, get_region_meta, md5sum
+from pipeline_utils import (
+    get_region_meta,
+    get_region_sources,
+    get_source_md5_path,
+    get_source_pbf_path,
+    md5sum,
+)
 
 
 def build_session() -> requests.Session:
@@ -17,21 +23,18 @@ def build_session() -> requests.Session:
         status_forcelist=[429, 500, 502, 503, 504],
         allowed_methods=["GET"],
     )
-
     adapter = HTTPAdapter(max_retries=retry)
 
     session = requests.Session()
-    session.headers.update(
-        {
-            "User-Agent": "railway-gis-diploma/1.0",
-        }
-    )
+    session.headers.update({"User-Agent": "railway-gis-diploma/1.0"})
     session.mount("http://", adapter)
     session.mount("https://", adapter)
     return session
 
 
 def download_file(session: requests.Session, url: str, target: Path) -> None:
+    target.parent.mkdir(parents=True, exist_ok=True)
+
     with session.get(url, stream=True, timeout=300) as response:
         response.raise_for_status()
         with target.open("wb") as f:
@@ -48,7 +51,79 @@ def read_cached_md5(md5_path: Path) -> str | None:
     if not content:
         return None
 
-    return content.split()[0].strip()
+    return content.split()[0].strip() or None
+
+
+def download_one_source(
+    session: requests.Session,
+    *,
+    region_code: str,
+    source: dict,
+) -> dict:
+    source_key = source["source_key"]
+    pbf_path = get_source_pbf_path(region_code, source_key)
+    md5_path = get_source_md5_path(region_code, source_key)
+
+    expected_md5 = None
+    md5_download_error = None
+
+    print(f"[{region_code}:{source_key}] Скачиваю md5...")
+    try:
+        download_file(session, source["md5_url"], md5_path)
+        expected_md5 = read_cached_md5(md5_path)
+        if not expected_md5:
+            raise RuntimeError("Не удалось прочитать скачанный md5 файл")
+    except Exception as exc:
+        md5_download_error = str(exc)
+        expected_md5 = read_cached_md5(md5_path)
+        if expected_md5 is None:
+            raise RuntimeError(
+                f"[{region_code}:{source_key}] Не удалось получить md5 ни удалённо, ни из локального кэша. "
+                f"Причина: {md5_download_error}"
+            ) from exc
+
+    if md5_download_error:
+        print(f"[{region_code}:{source_key}] Remote md5 недоступен, использую локальный cached md5.")
+        print(f"[{region_code}:{source_key}] Причина remote md5 error: {md5_download_error}")
+
+    if pbf_path.exists():
+        actual_md5 = md5sum(pbf_path)
+        if actual_md5 == expected_md5:
+            print(f"[{region_code}:{source_key}] PBF уже актуален: {pbf_path}")
+            return {
+                "source_key": source_key,
+                "pbf_path": str(pbf_path),
+                "md5_path": str(md5_path),
+                "expected_md5": expected_md5,
+                "actual_md5": actual_md5,
+                "downloaded": False,
+            }
+
+    if md5_download_error and not pbf_path.exists():
+        raise RuntimeError(
+            f"[{region_code}:{source_key}] Remote md5 недоступен и локальный PBF отсутствует. "
+            f"Безопасное обновление невозможно. Причина: {md5_download_error}"
+        )
+
+    print(f"[{region_code}:{source_key}] Скачиваю PBF...")
+    download_file(session, source["url"], pbf_path)
+
+    actual_md5 = md5sum(pbf_path)
+    print(f"[{region_code}:{source_key}] expected md5 = {expected_md5}")
+    print(f"[{region_code}:{source_key}] actual md5   = {actual_md5}")
+
+    if actual_md5 != expected_md5:
+        raise RuntimeError(f"[{region_code}:{source_key}] MD5 не совпал")
+
+    print(f"[{region_code}:{source_key}] Готово: {pbf_path}")
+    return {
+        "source_key": source_key,
+        "pbf_path": str(pbf_path),
+        "md5_path": str(md5_path),
+        "expected_md5": expected_md5,
+        "actual_md5": actual_md5,
+        "downloaded": True,
+    }
 
 
 def main() -> None:
@@ -57,58 +132,28 @@ def main() -> None:
 
     region_code = sys.argv[1]
     meta = get_region_meta(region_code)
+    sources = get_region_sources(region_code)
 
-    pbf_path = get_pbf_path(region_code)
-    md5_path = get_md5_path(region_code)
+    print(f"[{region_code}] Регион: {meta['label']}")
+    print(f"[{region_code}] Источников для скачивания: {len(sources)}")
 
     session = build_session()
+    results = []
 
-    expected_md5 = None
-    md5_download_error = None
-
-    print(f"[{region_code}] Скачиваю md5...")
-    try:
-        download_file(session, meta["md5_url"], md5_path)
-        expected_md5 = read_cached_md5(md5_path)
-        if not expected_md5:
-            raise RuntimeError("Не удалось прочитать скачанный md5 файл")
-    except Exception as exc:
-        md5_download_error = str(exc)
-        expected_md5 = read_cached_md5(md5_path)
-
-    if expected_md5 is None:
-        raise RuntimeError(
-            f"[{region_code}] Не удалось получить md5 ни удалённо, ни из локального кэша. "
-            f"Причина: {md5_download_error}"
+    for source in sources:
+        result = download_one_source(
+            session,
+            region_code=region_code,
+            source=source,
         )
+        results.append(result)
 
-    if md5_download_error:
-        print(f"[{region_code}] Remote md5 недоступен, использую локальный cached md5.")
-        print(f"[{region_code}] Причина remote md5 error: {md5_download_error}")
-
-    if pbf_path.exists():
-        actual_md5 = md5sum(pbf_path)
-        if actual_md5 == expected_md5:
-            print(f"[{region_code}] PBF уже актуален: {pbf_path}")
-            return
-
-    if md5_download_error and not pbf_path.exists():
-        raise RuntimeError(
-            f"[{region_code}] Remote md5 недоступен и локальный PBF отсутствует. "
-            f"Безопасное обновление невозможно. Причина: {md5_download_error}"
+    print(f"[{region_code}] Загрузка завершена. Источники:")
+    for item in results:
+        print(
+            f" - {item['source_key']}: downloaded={item['downloaded']}, "
+            f"expected_md5={item['expected_md5']}, path={item['pbf_path']}"
         )
-
-    print(f"[{region_code}] Скачиваю PBF...")
-    download_file(session, meta["url"], pbf_path)
-
-    actual_md5 = md5sum(pbf_path)
-    print(f"[{region_code}] expected md5 = {expected_md5}")
-    print(f"[{region_code}] actual   md5 = {actual_md5}")
-
-    if actual_md5 != expected_md5:
-        raise RuntimeError(f"[{region_code}] MD5 не совпал")
-
-    print(f"[{region_code}] Готово: {pbf_path}")
 
 
 if __name__ == "__main__":

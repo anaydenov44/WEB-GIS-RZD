@@ -1,3 +1,4 @@
+import json
 import subprocess
 import sys
 
@@ -5,10 +6,12 @@ import requests
 
 from pipeline_utils import (
     BASE_DIR,
+    build_aggregate_md5,
     cleanup_region_files,
     get_db_connection,
-    get_md5_path,
     get_region_meta,
+    get_region_sources,
+    get_source_md5_path,
 )
 
 # При запуске скрипта как `python scripts/run_region_pipeline.py`
@@ -26,35 +29,45 @@ def run_step(script_name: str, region_code: str):
     subprocess.run(cmd, check=True)
 
 
-def try_fetch_remote_md5(region_code: str) -> tuple[str | None, str | None]:
-    meta = get_region_meta(region_code)
+def try_fetch_remote_md5(region_code: str) -> tuple[str | None, dict[str, str | None], str | None]:
+    sources = get_region_sources(region_code)
+    remote_md5_by_source: dict[str, str | None] = {}
+    errors: list[str] = []
 
-    try:
-        response = requests.get(
-            meta["md5_url"],
-            timeout=60,
-            headers={
-                "User-Agent": "railway-gis-diploma/1.0",
-            },
-        )
-        response.raise_for_status()
+    for source in sources:
+        source_key = source["source_key"]
+        try:
+            response = requests.get(
+                source["md5_url"],
+                timeout=60,
+                headers={"User-Agent": "railway-gis-diploma/1.0"},
+            )
+            response.raise_for_status()
 
-        content = response.text.strip()
-        if not content:
-            return None, "remote md5 response is empty"
+            content = response.text.strip()
+            if not content:
+                raise RuntimeError("remote md5 response is empty")
 
-        remote_md5 = content.split()[0].strip()
-        if not remote_md5:
-            return None, "remote md5 is empty after parsing"
+            remote_md5 = content.split()[0].strip()
+            if not remote_md5:
+                raise RuntimeError("remote md5 is empty after parsing")
 
-        return remote_md5, None
+            remote_md5_by_source[source_key] = remote_md5
 
-    except Exception as exc:
-        return None, str(exc)
+        except Exception as exc:
+            remote_md5_by_source[source_key] = None
+            errors.append(f"{source_key}: {exc}")
+
+    aggregate_md5 = build_aggregate_md5(remote_md5_by_source)
+
+    if errors:
+        return aggregate_md5, remote_md5_by_source, "; ".join(errors)
+
+    return aggregate_md5, remote_md5_by_source, None
 
 
-def read_local_md5_file(region_code: str) -> str | None:
-    md5_path = get_md5_path(region_code)
+def read_local_md5_file(region_code: str, source_key: str) -> str | None:
+    md5_path = get_source_md5_path(region_code, source_key)
     if not md5_path.exists():
         return None
 
@@ -62,7 +75,34 @@ def read_local_md5_file(region_code: str) -> str | None:
     if not content:
         return None
 
-    return content.split()[0].strip()
+    return content.split()[0].strip() or None
+
+
+def read_local_md5_files(region_code: str) -> tuple[str | None, dict[str, str | None]]:
+    local_md5_by_source: dict[str, str | None] = {}
+
+    for source in get_region_sources(region_code):
+        source_key = source["source_key"]
+        local_md5_by_source[source_key] = read_local_md5_file(region_code, source_key)
+
+    aggregate_md5 = build_aggregate_md5(local_md5_by_source)
+    return aggregate_md5, local_md5_by_source
+
+
+def build_source_url_payload(region_code: str) -> str:
+    payload = {
+        "region_code": region_code,
+        "sources": [
+            {
+                "source_key": source["source_key"],
+                "label": source.get("label"),
+                "url": source["url"],
+                "md5_url": source["md5_url"],
+            }
+            for source in get_region_sources(region_code)
+        ],
+    }
+    return json.dumps(payload, ensure_ascii=False, sort_keys=True)
 
 
 def create_dataset_run(region_code: str, region_label: str, source_url: str, source_md5: str | None) -> int:
@@ -208,11 +248,9 @@ def get_latest_successful_md5(region_code: str) -> str | None:
                 (region_code,),
             )
             row = cur.fetchone()
-
-        if not row:
-            return None
-
-        return row[0]
+            if not row:
+                return None
+            return row[0]
     finally:
         conn.close()
 
@@ -224,62 +262,78 @@ def main():
     region_code = sys.argv[1]
     meta = get_region_meta(region_code)
 
-    print(f"[{region_code}] Проверяю remote md5...")
-    remote_md5, remote_md5_error = try_fetch_remote_md5(region_code)
+    print(f"[{region_code}] Проверяю remote md5 по всем источникам...")
+    remote_aggregate_md5, remote_md5_by_source, remote_md5_error = try_fetch_remote_md5(region_code)
     latest_successful_md5 = get_latest_successful_md5(region_code)
-    local_cached_md5 = read_local_md5_file(region_code)
+    local_cached_aggregate_md5, local_md5_by_source = read_local_md5_files(region_code)
 
-    initial_source_md5 = remote_md5 or local_cached_md5 or latest_successful_md5
+    initial_source_md5 = remote_aggregate_md5 or local_cached_aggregate_md5 or latest_successful_md5
 
     run_id = create_dataset_run(
         region_code=meta["code"],
         region_label=meta["label"],
-        source_url=meta["url"],
+        source_url=build_source_url_payload(region_code),
         source_md5=initial_source_md5,
     )
 
     try:
-        if remote_md5 and latest_successful_md5 and latest_successful_md5 == remote_md5:
+        if remote_aggregate_md5 and latest_successful_md5 and latest_successful_md5 == remote_aggregate_md5:
             note = (
-                "Обновление пропущено: remote md5 совпадает с последним успешным запуском.\n"
-                f"remote_md5={remote_md5}"
+                "Обновление пропущено: aggregated remote md5 совпадает с последним успешным запуском.\n"
+                f"remote_md5_by_source={json.dumps(remote_md5_by_source, ensure_ascii=False, sort_keys=True)}\n"
+                f"remote_aggregate_md5={remote_aggregate_md5}"
             )
             finish_dataset_run(run_id, "skipped", note)
             print(f"[{region_code}] Пропуск обновления: данные уже актуальны.")
             return
 
         if (
-            remote_md5 is None
+            remote_aggregate_md5 is None
             and remote_md5_error
-            and local_cached_md5
+            and local_cached_aggregate_md5
             and latest_successful_md5
-            and local_cached_md5 == latest_successful_md5
+            and local_cached_aggregate_md5 == latest_successful_md5
         ):
             note = (
-                "Обновление пропущено: remote md5 недоступен, использован локальный cached md5, "
+                "Обновление пропущено: remote md5 недоступен, использован локальный cached aggregated md5, "
                 "совпадающий с последним успешным запуском. Свежесть удалённого источника не подтверждена.\n"
-                f"cached_md5={local_cached_md5}\n"
+                f"local_md5_by_source={json.dumps(local_md5_by_source, ensure_ascii=False, sort_keys=True)}\n"
+                f"cached_aggregate_md5={local_cached_aggregate_md5}\n"
                 f"remote_md5_error={remote_md5_error}"
             )
             finish_dataset_run(run_id, "skipped", note)
-            print(f"[{region_code}] Пропуск обновления: remote md5 недоступен, но локальный кэш совпадает с последним успешным запуском.")
+            print(
+                f"[{region_code}] Пропуск обновления: remote md5 недоступен, "
+                f"но локальный кэш совпадает с последним успешным запуском."
+            )
             return
 
         if remote_md5_error:
             append_dataset_run_note(
                 run_id,
-                "Precheck remote md5 не сработал, запускаю обычный pipeline без раннего skip.\n"
+                "Precheck remote md5 не сработал по части источников или полностью, "
+                "запускаю обычный pipeline без раннего skip.\n"
+                f"remote_md5_by_source={json.dumps(remote_md5_by_source, ensure_ascii=False, sort_keys=True)}\n"
                 f"Причина: {remote_md5_error}",
             )
-            print(f"[{region_code}] Remote md5 precheck недоступен, продолжаю обычный pipeline...")
+            print(f"[{region_code}] Remote md5 precheck частично/полностью недоступен, продолжаю pipeline...")
         else:
-            print(f"[{region_code}] Remote md5 получен, требуется обновление.")
+            print(f"[{region_code}] Remote md5 по всем источникам получен, требуется обновление.")
 
         print(f"[{region_code}] Шаг 1/4: download")
         run_step("download_region_extract.py", region_code)
 
-        local_md5_after_download = read_local_md5_file(region_code)
-        update_dataset_run_source_md5(run_id, local_md5_after_download or remote_md5 or initial_source_md5)
+        local_md5_after_download, local_md5_by_source_after_download = read_local_md5_files(region_code)
+        update_dataset_run_source_md5(
+            run_id,
+            local_md5_after_download or remote_aggregate_md5 or initial_source_md5,
+        )
+
+        append_dataset_run_note(
+            run_id,
+            "MD5 после download:\n"
+            + json.dumps(local_md5_by_source_after_download, ensure_ascii=False, sort_keys=True),
+        )
 
         print(f"[{region_code}] Шаг 2/4: import to staging")
         run_step("import_region_raw_pbf.py", region_code)
@@ -309,7 +363,7 @@ def main():
             )
             print(f"[{region_code}] Удалены временные файлы:")
             for item in deleted_files:
-                print(f"  - {item}")
+                print(f" - {item}")
         else:
             print(f"[{region_code}] Временные файлы не удалялись.")
 

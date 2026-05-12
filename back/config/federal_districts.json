@@ -15,8 +15,20 @@
     {
       "code": "south_fd",
       "label": "Южный федеральный округ",
-      "url": "https://download.geofabrik.de/russia/south-fed-district-latest.osm.pbf",
-      "md5_url": "https://download.geofabrik.de/russia/south-fed-district-latest.osm.pbf.md5"
+      "sources": [
+        {
+          "source_key": "south_main",
+          "label": "South Federal District",
+          "url": "https://download.geofabrik.de/russia/south-fed-district-latest.osm.pbf",
+          "md5_url": "https://download.geofabrik.de/russia/south-fed-district-latest.osm.pbf.md5"
+        },
+        {
+          "source_key": "crimea",
+          "label": "Crimean Federal District",
+          "url": "https://download.geofabrik.de/russia/crimean-fed-district-latest.osm.pbf",
+          "md5_url": "https://download.geofabrik.de/russia/crimean-fed-district-latest.osm.pbf.md5"
+        }
+      ]
     },
     {
       "code": "north_caucasus_fd",
